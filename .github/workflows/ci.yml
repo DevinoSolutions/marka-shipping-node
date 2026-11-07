@@ -17,6 +17,7 @@ jobs:
   gate:
     name: Gate (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     strategy:
       fail-fast: false # run 24.x even if 22.x fails, so you see both
       matrix:
@@ -85,6 +86,7 @@ jobs:
   ci-passed:
     name: CI passed
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: always()
     needs: [gate]
     steps:
