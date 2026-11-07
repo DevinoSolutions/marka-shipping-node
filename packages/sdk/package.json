@@ -1,0 +1,61 @@
+{
+  "name": "@devino-solutions/canadapost-sdk",
+  "version": "0.1.0",
+  "description": "Community TypeScript SDK for the Canada Post Developer Program REST APIs: rating, shipping (contract and non-contract), manifests, labels and tracking.",
+  "license": "MIT",
+  "author": "Devino Solutions",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "keywords": [
+    "canada-post",
+    "canadapost",
+    "shipping",
+    "rating",
+    "tracking",
+    "labels",
+    "sdk",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevinoSolutions/canadapost-sdk-node-js.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://github.com/DevinoSolutions/canadapost-sdk-node-js#readme",
+  "bugs": {
+    "url": "https://github.com/DevinoSolutions/canadapost-sdk-node-js/issues"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./testing": {
+      "types": "./dist/testing/index.d.ts",
+      "default": "./dist/testing/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^5.12.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

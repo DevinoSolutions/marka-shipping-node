@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# One in-flight run per ref; newer pushes cancel superseded runs.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Gate (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # run 24.x even if 22.x fails, so you see both
+      matrix:
+        node-version: [22.x, 24.x]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - name: Install
+        run: |
+          set -o pipefail
+          npm ci
+      - name: Lint
+        run: |
+          set -o pipefail
+          npm run lint
+      - name: Format check
+        run: |
+          set -o pipefail
+          npm run format:check
+      - name: Typecheck
+        run: |
+          set -o pipefail
+          npm run typecheck
+      - name: Test (mocked; live tests never run in CI)
+        run: |
+          set -o pipefail
+          npm test
+        env:
+          CANADAPOST_LIVE_TESTS: "false"
+      - name: Build
+        run: |
+          set -o pipefail
+          npm run build
+      - name: Verify exports (loads the built ESM entry points)
+        run: |
+          set -o pipefail
+          npm run verify:exports
+      - name: Secret scan (working tree)
+        run: |
+          set -o pipefail
+          npm run check:secrets
+      - name: Live-suite read-only guard
+        run: |
+          set -o pipefail
+          npm run check:live-readonly
+      - name: Dead code (knip)
+        run: |
+          set -o pipefail
+          npm run check:deadcode
+      - name: API docs (typedoc, warnings are errors)
+        run: |
+          set -o pipefail
+          npm run docs:api
+      - name: npm pack (dry run)
+        run: |
+          set -o pipefail
+          npm pack --dry-run -w @devino-solutions/canadapost-sdk
+
+  # Single required status for branch protection.
+  ci-passed:
+    name: CI passed
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [gate]
+    steps:
+      - name: Fail if any job did not succeed
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          echo "One or more CI jobs failed or were cancelled."
+          exit 1
+      - run: echo "All CI jobs passed."
