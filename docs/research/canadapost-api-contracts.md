@@ -119,6 +119,25 @@ Request id: **ASSUMPTION** — Canada Post documents no request-id header. The S
 `x-request-id`, `x-correlation-id` or `x-correlationid` if a gateway returns one and otherwise
 leaves `requestId` undefined.
 
+### Address element types (XSD, verified 2026-11-07 and live in the sandbox)
+
+The address-details element is a DIFFERENT XSD type depending on where it appears. All are
+`xsd:all`, so a child that a type does not declare (for example `country-code` in a
+`DomesticAddressDetailsType`) is rejected with HTTP 400 "country-code may not appear here".
+
+| Where                                     | XSD type                        | Required children                                         | `country-code`                       |
+| ----------------------------------------- | ------------------------------- | --------------------------------------------------------- | ------------------------------------ |
+| Non-contract `sender` (ncshipment-v4)     | `DomesticAddressDetailsType`    | `address-line-1`, `city`, `prov-state`, `postal-zip-code` | **not allowed**                      |
+| Non-contract `destination`                | `DestinationAddressDetailsType` | `address-line-1`, `country-code`                          | required                             |
+| Contract `sender` (shipment-v8)           | `AddressDetailsType`            | `address-line-1`, `city`, `prov-state`, `country-code`    | required (confirmed live)            |
+| Contract `destination`                    | `DestinationAddressDetailsType` | `country-code`                                            | required                             |
+| Contract `return-spec/return-recipient`   | `DomesticAddressDetailsType`    | as above                                                  | not allowed (not mapped by this SDK) |
+| Details responses `recipient`             | `DestinationAddressDetailsType` |                                                           |                                      |
+| Transmit `manifest-address` (manifest-v8) | `AddressDetailsType`            | `address-line-1`, `city`, `prov-state`, `postal-zip-code` | optional (CA or US)                  |
+
+The SDK builds each form from the right rule (`buildSender(s, "domestic" | "full")`,
+`buildDestination`) and validates the required children before sending anything.
+
 ### Path variables
 
 `{customer}` = mailed-by customer number, `{mobo}` = mailed-on-behalf-of customer number, or the
@@ -218,8 +237,8 @@ Request root `non-contract-shipment` (ns `…/ws/ncshipment-v4`), XSD `all`:
 - `requested-shipping-point` (opt, `ANANAN`): required when the parcel is not picked up at the sender postal code.
 - `delivery-spec` (req):
   - `service-code` (req) `DOM.RP|DOM.EP|DOM.XP|DOM.PC|USA.XP|USA.EP|USA.SP.AIR|USA.TP|USA.TP.LVM|INT.IP.AIR|INT.IP.SURF|INT.XP|INT.SP.AIR|INT.SP.SURF|INT.TP`
-  - `sender` (req): `name?`, `company` (≤44), `contact-phone` (≤25), `address-details{address-line-1, address-line-2?, city, prov-state, country-code, postal-zip-code}` — sender must be domestic.
-  - `destination` (req): `name?`, `company?`, `additional-address-info?`, `client-voice-number?` (required for USA.EP/XP/TP, INT.XP/TP and D2PO), `address-details{address-line-1, address-line-2?, city?, prov-state?, country-code, postal-zip-code?}`; at least one of name/company when shipping abroad.
+  - `sender` (req): `name?`, `company` (≤44), `contact-phone` (≤25), `address-details{address-line-1, address-line-2?, city, prov-state, postal-zip-code}` — sender must be domestic and its address is a `DomesticAddressDetailsType`: **no `country-code`** (see the address table in section 1).
+  - `destination` (req): `name?`, `company?`, `additional-address-info?`, `client-voice-number?` (required for USA.EP/XP/TP, INT.XP/TP and D2PO), `address-details{address-line-1, address-line-2?, city?, prov-state?, country-code, postal-zip-code?}` (`DestinationAddressDetailsType`); at least one of name/company when shipping abroad.
   - `options/option*` (≤20): `option-code`, `option-amount?`, `option-qualifier-1?` (bool), `option-qualifier-2?` (≤12). Codes `SO COV COD PA18 PA19 HFP DNS LAD D2PO` + non-delivery `RASE RTS ABAN`.
   - `parcel-characteristics` (req): `weight` (kg, 3.3), `dimensions{length,width,height}` (cm, 3.1; required unless `document`), `document?`, `unpackaged?`, `mailing-tube?`.
   - `notification?`: `email`, `on-shipment`, `on-exception`, `on-delivery` (all required when present).
@@ -301,7 +320,7 @@ Sources: `…/services/shippingmanifest/createshipment.jsf`, `shipment.jsf`, `sh
 - `customer-request-id?` (≤35, unique — duplicates rejected with `7314`; use it so a lost create can be found again).
 - exactly one of `group-id` (≤32) **or** `transmit-shipment` (`true`; charges immediately, cannot be voided, no transmit needed).
 - `quickship-label-requested?`, `cpc-pickup-indicator?`, `requested-shipping-point?` (`ANANAN`), `shipping-point-id?` (4 chars; mutually exclusive with `requested-shipping-point`, one required), `expected-mailing-date?`, `provide-pricing-info?`, `provide-receipt-info?`, `create-public-key?`, `create-qr-code?`.
-- `delivery-spec` (req): `service-code`, `sender` (company, contact-phone required), `destination`, `options?`, `parcel-characteristics` (`weight`, `dimensions?`, `unpackaged?`, `mailing-tube?`, `oversized?`), `notification?`, `print-preferences?{output-format (8.5x11|4x6), encoding (PDF|ZPL; ZPL needs 4x6)}`, `preferences` (`show-packing-instructions` req), `references?`, `customs?`, `settlement-info` (req: `paid-by-customer?`, `contract-id?`, `cif-shipment?`, `intended-method-of-payment` req = `CreditCard|Account|SupplierAccount`, `promo-code?`).
+- `delivery-spec` (req): `service-code`, `sender` (company, contact-phone required; address is `AddressDetailsType`, so `country-code` is required), `destination`, `options?`, `parcel-characteristics` (`weight`, `dimensions?`, `unpackaged?`, `mailing-tube?`, `oversized?`), `notification?`, `print-preferences?{output-format (8.5x11|4x6), encoding (PDF|ZPL; ZPL needs 4x6)}`, `preferences` (`show-packing-instructions` req), `references?`, `customs?`, `settlement-info` (req: `paid-by-customer?`, `contract-id?`, `cif-shipment?`, `intended-method-of-payment` req = `CreditCard|Account|SupplierAccount`, `promo-code?`).
 - not mapped by this SDK: `return-spec`, `pre-authorized-payment`, COD remittance.
 
 Response root `shipment-info{customer-request-id?, shipment-id, shipment-status (created|transmitted|suspended), tracking-pin?, return-tracking-pin?, po-number?, shipment-price?, shipment-receipt?, links}`. Links: `self`, `details`, `group`, `price`, `receipt`, `refund` (no-manifest shipments), `label` (`index`), `returnLabel`, `commercialInvoice`, COD links, `publicLabel`, `publicKeyInfo`.

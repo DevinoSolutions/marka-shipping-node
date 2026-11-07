@@ -18,7 +18,7 @@ import {
 } from "../xml/parse.js";
 import { normalizePostalCode, resolveTarget, type ApiContext, type LinkOrId } from "./context.js";
 import type { DimensionsInput, ShipmentOptionInput } from "./shipping-common.js";
-import { buildDimensions, buildWeight } from "./shipping-common.js";
+import { buildDimensions, buildWeight, requireRecord, requireText } from "./shipping-common.js";
 
 // ---------------------------------------------------------------------------------------------
 // Types
@@ -193,23 +193,47 @@ export interface OptionDetails {
 // Implementation
 // ---------------------------------------------------------------------------------------------
 
-function buildDestination(d: RatingDestination): string {
-  switch (d.type) {
+function buildDestination(input: unknown): string {
+  const d = requireRecord<Record<string, unknown>>(input, "destination");
+  switch (d["type"]) {
     case "domestic":
       return wrap(
         "destination",
-        wrap("domestic", leaf("postal-code", normalizePostalCode(d.postalCode))),
+        wrap(
+          "domestic",
+          leaf(
+            "postal-code",
+            normalizePostalCode(requireText(d["postalCode"], "destination.postalCode")),
+          ),
+        ),
       );
     case "united-states":
-      return wrap("destination", wrap("united-states", leaf("zip-code", d.zipCode.trim())));
+      return wrap(
+        "destination",
+        wrap(
+          "united-states",
+          leaf("zip-code", requireText(d["zipCode"], "destination.zipCode").trim()),
+        ),
+      );
     case "international":
       return wrap(
         "destination",
         wrap(
           "international",
-          leaf("country-code", d.countryCode.toUpperCase()),
-          leaf("postal-code", d.postalCode === undefined ? undefined : d.postalCode.trim()),
+          leaf(
+            "country-code",
+            requireText(d["countryCode"], "destination.countryCode").toUpperCase(),
+          ),
+          leaf(
+            "postal-code",
+            typeof d["postalCode"] === "string" ? d["postalCode"].trim() : undefined,
+          ),
         ),
+      );
+    default:
+      throw new CanadaPostValidationError(
+        `destination.type must be "domestic", "united-states" or "international" (got ${JSON.stringify(d["type"])}); ` +
+          'for example { type: "domestic", postalCode: "K1A0B1" }',
       );
   }
 }
@@ -219,6 +243,12 @@ function buildMailingScenario(
   input: GetRatesInput,
   defaults: { customerNumber: string; contractId: string | undefined },
 ): string {
+  requireRecord(input, "getRates input");
+  requireText(input.originPostalCode, "originPostalCode");
+  const parcel = requireRecord<Record<string, unknown>>(input.parcel, "parcel");
+  if (typeof parcel["weightKg"] !== "number") {
+    throw new CanadaPostValidationError("parcel.weightKg is required (a number, in kg)");
+  }
   const counter = input.quoteType === "counter";
   const services = input.serviceCodes ?? [];
   const options = input.options ?? [];

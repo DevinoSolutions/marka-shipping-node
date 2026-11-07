@@ -21,6 +21,7 @@ import {
   buildReferences,
   buildSender,
   buildWeight,
+  validateShipmentCore,
   mapCreditCardReceipt,
   mapDeliverySpec,
   mapPricing,
@@ -142,6 +143,7 @@ function mapInfo(root: XmlNode): NcShipmentInfo {
 
 /** Builds the `non-contract-shipment` body. */
 function buildNcShipment(input: NcShipmentInput): string {
+  validateShipmentCore(input, "ncShipment");
   return document(
     "non-contract-shipment",
     NAMESPACES.ncShipment,
@@ -154,7 +156,7 @@ function buildNcShipment(input: NcShipmentInput): string {
     wrap(
       "delivery-spec",
       leaf("service-code", input.serviceCode),
-      buildSender(input.sender),
+      buildSender(input.sender, "domestic"),
       buildDestination(input.destination),
       buildOptions(input.options),
       wrap(

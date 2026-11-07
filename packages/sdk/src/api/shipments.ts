@@ -23,6 +23,7 @@ import {
   buildReferences,
   buildSender,
   buildWeight,
+  validateShipmentCore,
   mapCreditCardReceipt,
   mapDeliverySpec,
   mapPricing,
@@ -303,6 +304,7 @@ function buildShipment(
   input: ShipmentInput,
   defaults: { contractId: string | undefined; method: MethodOfPayment },
 ): string {
+  validateShipmentCore(input, "shipment");
   const hasGroup = input.groupId !== undefined && input.groupId !== "";
   const transmit = input.transmitShipment === true;
   if (hasGroup === transmit) {

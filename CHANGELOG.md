@@ -6,6 +6,14 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 
 ## [Unreleased]
 
+### Fixed
+
+- `ncShipments.create` no longer sends `country-code` in the sender address: the ncshipment-v4 schema types the sender as a domestic address, and the sandbox rejected it with HTTP 400. Every address type was re-checked against the XSDs (see the contracts doc).
+
+### Changed
+
+- `rating.getRates`, `ncShipments.create` and `shipments.create` validate their required fields and `destination.type` at runtime and throw `CanadaPostValidationError` before sending, instead of sending an incomplete request.
+
 ## [0.1.0] - 2026-11-07
 
 ### Added

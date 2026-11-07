@@ -111,8 +111,8 @@ export interface CustomsInput {
 // Request builders
 // ---------------------------------------------------------------------------------------------
 
-function required(value: string | undefined, field: string): string {
-  if (value === undefined || value.trim() === "") {
+function required(value: unknown, field: string): string {
+  if (typeof value !== "string" || value.trim() === "") {
     throw new CanadaPostValidationError(`${field} is required`);
   }
   return value;
@@ -125,45 +125,106 @@ function positive(value: number, field: string): number {
   return value;
 }
 
-function buildAddressDetails(a: AddressInput, label: string): string {
-  const country = (a.countryCode ?? "CA").toUpperCase();
+/** Throws unless the value is a non-null object (guards JS callers and bad casts). */
+export function requireRecord<T extends object>(value: unknown, field: string): T {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new CanadaPostValidationError(`${field} is required and must be an object`);
+  }
+  return value as T;
+}
+
+/** Required text field (non-empty string). */
+export function requireText(value: unknown, field: string): string {
+  return required(value, field);
+}
+
+/**
+ * Checks the fields every shipment create input needs, with clear messages, before any XML is
+ * built (a JS caller can omit them, and Canada Post answers with an opaque schema 400).
+ */
+export function validateShipmentCore(input: object, label: string): void {
+  const i = input as Record<string, unknown>;
+  required(i["serviceCode"], `${label}.serviceCode`);
+  requireRecord(i["sender"], `${label}.sender`);
+  requireRecord(i["destination"], `${label}.destination`);
+  const parcel = requireRecord<Record<string, unknown>>(i["parcel"], `${label}.parcel`);
+  if (typeof parcel["weightKg"] !== "number") {
+    throw new CanadaPostValidationError(`${label}.parcel.weightKg is required (a number, in kg)`);
+  }
+  const prefs = requireRecord<Record<string, unknown>>(i["preferences"], `${label}.preferences`);
+  if (typeof prefs["showPackingInstructions"] !== "boolean") {
+    throw new CanadaPostValidationError(
+      `${label}.preferences.showPackingInstructions is required (true or false)`,
+    );
+  }
+}
+
+/**
+ * Which XSD address type applies (see docs/research/canadapost-api-contracts.md section 1):
+ *
+ * - `domestic`: DomesticAddressDetailsType - city, prov-state and postal-zip-code required and
+ *   NO country-code element (non-contract sender, return-recipient).
+ * - `full`: AddressDetailsType - country-code required (contract sender).
+ * - `destination`: DestinationAddressDetailsType - country-code required, city / province /
+ *   postal code optional (destination of both services).
+ */
+type AddressKind = "domestic" | "full" | "destination";
+
+function buildAddressDetails(a: AddressInput, label: string, kind: AddressKind): string {
+  const address = requireRecord<AddressInput>(a, `${label}.address`);
+  const country = (address.countryCode ?? "CA").toUpperCase();
+  if (kind === "domestic" && country !== "CA") {
+    throw new CanadaPostValidationError(`${label} address must be in Canada (countryCode CA)`);
+  }
+  if (kind !== "destination") {
+    required(address.city, `${label}.address.city`);
+    required(address.provState, `${label}.address.provState`);
+  }
+  if (kind === "domestic") {
+    required(address.postalZipCode, `${label}.address.postalZipCode`);
+  }
   const postal =
-    a.postalZipCode === undefined
+    address.postalZipCode === undefined
       ? undefined
       : country === "CA"
-        ? normalizePostalCode(a.postalZipCode)
-        : a.postalZipCode.trim();
+        ? normalizePostalCode(address.postalZipCode)
+        : address.postalZipCode.trim();
   return wrap(
     "address-details",
-    leaf("address-line-1", required(a.addressLine1, `${label}.address.addressLine1`)),
-    leaf("address-line-2", a.addressLine2),
-    leaf("city", a.city),
-    leaf("prov-state", a.provState),
-    leaf("country-code", country),
+    leaf("address-line-1", required(address.addressLine1, `${label}.address.addressLine1`)),
+    leaf("address-line-2", address.addressLine2),
+    leaf("city", address.city),
+    leaf("prov-state", address.provState),
+    kind === "domestic" ? "" : leaf("country-code", country),
     leaf("postal-zip-code", postal),
   );
 }
 
-/** `<sender>` */
-export function buildSender(s: SenderInput): string {
+/**
+ * `<sender>`. `domestic` omits country-code (non-contract shipping); the default includes it
+ * (contract shipping).
+ */
+export function buildSender(s: SenderInput, kind: "domestic" | "full" = "full"): string {
+  const sender = requireRecord<SenderInput>(s, "sender");
   return wrap(
     "sender",
-    leaf("name", s.name),
-    leaf("company", required(s.company, "sender.company")),
-    leaf("contact-phone", required(s.contactPhone, "sender.contactPhone")),
-    buildAddressDetails(s.address, "sender"),
+    leaf("name", sender.name),
+    leaf("company", required(sender.company, "sender.company")),
+    leaf("contact-phone", required(sender.contactPhone, "sender.contactPhone")),
+    buildAddressDetails(sender.address, "sender", kind),
   );
 }
 
-/** `<destination>` */
+/** `<destination>` (same type in both services; country-code is required). */
 export function buildDestination(d: DestinationInput): string {
+  const dest = requireRecord<DestinationInput>(d, "destination");
   return wrap(
     "destination",
-    leaf("name", d.name),
-    leaf("company", d.company),
-    leaf("additional-address-info", d.additionalAddressInfo),
-    leaf("client-voice-number", d.clientVoiceNumber),
-    buildAddressDetails(d.address, "destination"),
+    leaf("name", dest.name),
+    leaf("company", dest.company),
+    leaf("additional-address-info", dest.additionalAddressInfo),
+    leaf("client-voice-number", dest.clientVoiceNumber),
+    buildAddressDetails(dest.address, "destination", "destination"),
   );
 }
 
