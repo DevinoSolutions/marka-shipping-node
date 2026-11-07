@@ -1,6 +1,8 @@
 # CLAUDE.md — agent instructions for this repo
 
-TypeScript monorepo: `packages/sdk` (`@joinmarka/shipping`), npm workspaces,
+TypeScript monorepo: `packages/canada-post` (`@joinmarka/canada-post`, the SDK) and
+`packages/shipping` (`@joinmarka/shipping`, the Marka Shipping umbrella that re-exports every carrier;
+no logic of its own). Each package has its own release tag (`canada-post-vX.Y.Z`, `shipping-vX.Y.Z`). npm workspaces,
 ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Program REST APIs
 (XML with versioned vendor media types). Not affiliated with Canada Post.
 
@@ -10,11 +12,11 @@ ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Progr
    probe script, example) without the owner explicitly authorizing that specific action in the
    current session. In production `shipments.create`, `shipments.transmit` and
    `ncShipments.create` charge real postage. Sandbox (`environment: "development"`) is fine.
-2. **The live test suite is READ-ONLY and SANDBOX-ONLY.** Files in `packages/sdk/test/live/`
+2. **The live test suite is READ-ONLY and SANDBOX-ONLY.** Files in `packages/canada-post/test/live/`
    use real sandbox credentials. Never add a mutating call (`create`, `void`, `transmit`,
    `requestRefund`, any raw POST/DELETE) and never reference the production environment there.
    `npm run check:live-readonly` enforces this and derives its forbidden list from
-   `packages/sdk/src/operations.ts` — to extend it, add the operation to that table with
+   `packages/canada-post/src/operations.ts` — to extend it, add the operation to that table with
    `access: "write"`; do not weaken the guard to make a test pass. `test/operations.test.ts`
    fails if a public method is missing from the table.
 3. **Secrets stay in `.env`.** Never print, log, commit or hardcode credentials or values

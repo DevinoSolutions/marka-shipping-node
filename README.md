@@ -1,6 +1,13 @@
 # Marka Shipping
 
-Marka Shipping (`@joinmarka/shipping` on npm) is an unofficial TypeScript SDK for the [Canada Post Developer Program](https://www.canadapost-postescanada.ca/information/app/drc/home) REST APIs: rating, non-contract and contract shipping, manifests, labels (PDF and ZPL) and tracking.
+Shipping SDKs from [Marka](https://joinmarka.com). Each carrier ships as its own focused npm package, and `@joinmarka/shipping` bundles every carrier in one install.
+
+| Package                                                                                                           | What it is                                                                   |
+| ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`@joinmarka/canada-post`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/canada-post) | Canada Post REST APIs: rates, shipments, PDF/ZPL labels, manifests, tracking |
+| [`@joinmarka/shipping`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/shipping)       | Every Marka carrier SDK in one package (currently Canada Post)               |
+
+`@joinmarka/canada-post` is an unofficial TypeScript SDK for the [Canada Post Developer Program](https://www.canadapost-postescanada.ca/information/app/drc/home) REST APIs: rating, non-contract and contract shipping, manifests, labels (PDF and ZPL) and tracking.
 
 > **Not affiliated with Canada Post.** This is an independent, community-maintained SDK. "Canada Post" and related marks belong to Canada Post Corporation. Always check the [official documentation](https://www.canadapost-postescanada.ca/info/mc/business/productsservices/developers/services/default.jsf) for the authoritative behaviour of the API.
 
@@ -13,7 +20,7 @@ Marka Shipping (`@joinmarka/shipping` on npm) is an unofficial TypeScript SDK fo
 ## Install
 
 ```bash
-npm install @joinmarka/shipping
+npm install @joinmarka/canada-post
 ```
 
 ## Environments and money (read this first)
@@ -30,7 +37,7 @@ npm install @joinmarka/shipping
 ## Quick start
 
 ```ts
-import { createCanadaPostClient } from "@joinmarka/shipping";
+import { createCanadaPostClient } from "@joinmarka/canada-post";
 
 const canadaPost = createCanadaPostClient({
   username: process.env.CANADAPOST_USERNAME!,
@@ -63,7 +70,7 @@ Other rating calls: `rating.discoverServices({ country })`, `rating.getService("
 Non-contract shipping is for customers without a commercial contract; the credit card saved on your Canada Post profile is charged (in production).
 
 ```ts
-import { findLink } from "@joinmarka/shipping";
+import { findLink } from "@joinmarka/canada-post";
 
 const shipment = await canadaPost.ncShipments.create({
   serviceCode: "DOM.EP",
@@ -169,7 +176,7 @@ import {
   CanadaPostIndeterminateError,
   CanadaPostNetworkError,
   CanadaPostTimeoutError,
-} from "@joinmarka/shipping";
+} from "@joinmarka/canada-post";
 
 try {
   await canadaPost.rating.getRates(input);
@@ -219,7 +226,7 @@ Always set `customerRequestId` on contract shipments (Canada Post rejects duplic
 ## Testing your own code
 
 ```ts
-import { createMockFetch } from "@joinmarka/shipping/testing";
+import { createMockFetch } from "@joinmarka/canada-post/testing";
 
 const mock = createMockFetch({ status: 200, body: "<price-quotes/>" });
 const client = createCanadaPostClient({ /* ... */ fetch: mock.fetch });

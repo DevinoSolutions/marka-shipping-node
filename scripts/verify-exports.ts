@@ -19,8 +19,8 @@ interface PackageSpec {
 
 const packages: PackageSpec[] = [
   {
-    dir: "packages/sdk",
-    name: "@joinmarka/shipping",
+    dir: "packages/canada-post",
+    name: "@joinmarka/canada-post",
     entries: {
       ".": [
         "createCanadaPostClient",
@@ -41,6 +41,14 @@ const packages: PackageSpec[] = [
         "OPERATIONS",
         "SDK_VERSION",
       ],
+      "./testing": ["createMockFetch"],
+    },
+  },
+  {
+    dir: "packages/shipping",
+    name: "@joinmarka/shipping",
+    entries: {
+      ".": ["canadaPost", "createCanadaPostClient", "CanadaPostApiError", "findLink"],
       "./testing": ["createMockFetch"],
     },
   },

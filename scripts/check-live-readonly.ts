@@ -1,23 +1,23 @@
 // Enforces the repository rule that the live test suite is READ-ONLY and SANDBOX-ONLY.
 //
-// The live tests in packages/sdk/test/live/ use real Canada Post sandbox credentials; they must
+// The live tests in packages/canada-post/test/live/ use real Canada Post sandbox credentials; they must
 // never create, void, transmit or refund anything, and they must never target production.
 // This guard fails CI when a live file gains a mutating SDK call, a raw write-shaped request,
 // a production environment, an ungated describe block, or when the guard itself would pass
 // vacuously (no files found).
 //
-// The forbidden list is DERIVED, not hand-maintained: it loads packages/sdk/src/operations.ts
+// The forbidden list is DERIVED, not hand-maintained: it loads packages/canada-post/src/operations.ts
 // and turns every `access: "write"` entry into a forbidden token. Adding a mutating operation
 // to the SDK therefore extends this guard automatically (and test/operations.test.ts fails if a
 // public method is missing from that table).
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import type { OperationSpec } from "../packages/sdk/src/operations.js";
+import type { OperationSpec } from "../packages/canada-post/src/operations.js";
 
 const root = resolve(import.meta.dirname, "..");
-const liveDir = join(root, "packages", "sdk", "test", "live");
-const operationsFile = join(root, "packages", "sdk", "src", "operations.ts");
+const liveDir = join(root, "packages", "canada-post", "test", "live");
+const operationsFile = join(root, "packages", "canada-post", "src", "operations.ts");
 
 let failures = 0;
 const fail = (msg: string): void => {

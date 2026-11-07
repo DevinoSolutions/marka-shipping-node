@@ -1,7 +1,7 @@
 {
   "name": "@joinmarka/shipping",
-  "version": "0.1.0",
-  "description": "Marka Shipping: unofficial TypeScript SDK for the Canada Post Developer Program REST APIs: rating, shipping (contract and non-contract), manifests, labels and tracking.",
+  "version": "0.2.0",
+  "description": "Marka Shipping: every Marka carrier SDK in one package. Currently Canada Post (rates, shipments, PDF/ZPL labels, manifests, tracking).",
   "license": "MIT",
   "author": "Devino Solutions",
   "type": "module",
@@ -9,20 +9,19 @@
     "node": ">=22.12.0"
   },
   "keywords": [
+    "shipping",
+    "shipping-labels",
+    "carriers",
     "canada-post",
     "canadapost",
-    "shipping",
-    "rating",
-    "tracking",
-    "labels",
+    "marka",
     "sdk",
-    "typescript",
-    "marka"
+    "typescript"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DevinoSolutions/marka-shipping-node.git",
-    "directory": "packages/sdk"
+    "directory": "packages/shipping"
   },
   "homepage": "https://github.com/DevinoSolutions/marka-shipping-node#readme",
   "bugs": {
@@ -49,11 +48,10 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit -p tsconfig.build.json"
   },
   "dependencies": {
-    "fast-xml-parser": "^5.12.0"
+    "@joinmarka/canada-post": "^0.1.0"
   },
   "publishConfig": {
     "access": "public",
