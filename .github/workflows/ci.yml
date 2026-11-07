@@ -79,7 +79,7 @@ jobs:
       - name: npm pack (dry run)
         run: |
           set -o pipefail
-          npm pack --dry-run -w @joinmarka/shipping
+          npm run pack:dry
 
   # Single required status for branch protection.
   ci-passed:

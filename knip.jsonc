@@ -7,9 +7,13 @@
   // Test files are entry points so test-only scaffolding is counted as used rather than
   // false-flagged. Non-test source is still fully policed for dead code.
   "workspaces": {
-    "packages/sdk": {
+    "packages/canada-post": {
       "entry": ["src/index.ts", "src/testing/index.ts", "test/**/*.ts"],
       "project": ["src/**/*.ts", "test/**/*.ts"],
+    },
+    "packages/shipping": {
+      "entry": ["src/index.ts", "src/testing/index.ts"],
+      "project": ["src/**/*.ts"],
     },
   },
 }

@@ -1,6 +1,6 @@
 # Canada Post REST API contracts (verified wire shapes)
 
-Binding contract for `packages/sdk`. The code follows this document. Every section cites the
+Binding contract for `packages/canada-post`. The code follows this document. Every section cites the
 official page it was transcribed from and the date it was read (**2026-11-07**). Anything that
 could not be confirmed from the official pages is marked **ASSUMPTION**.
 

@@ -1,14 +1,18 @@
 name: Release
 
-# Publishes @joinmarka/shipping to npm when a version tag is pushed (vX.Y.Z).
+# One release pipeline per package, picked by the tag prefix:
+#   canada-post-vX.Y.Z  -> publishes @joinmarka/canada-post (packages/canada-post)
+#   shipping-vX.Y.Z     -> publishes @joinmarka/shipping    (packages/shipping)
+# Publish @joinmarka/canada-post first when @joinmarka/shipping needs its new version.
 #
-# Authentication: npm trusted publishing (OIDC). Configure the package on npmjs.com under
+# Authentication: npm trusted publishing (OIDC). Configure each package on npmjs.com under
 # Settings -> Trusted Publisher -> GitHub Actions (repository DevinoSolutions/marka-shipping-node,
 # workflow release.yml). If the repository secret NPM_TOKEN is set, it is used instead.
 on:
   push:
     tags:
-      - "v*"
+      - "canada-post-v*"
+      - "shipping-v*"
 
 permissions:
   id-token: write # OIDC token for npm trusted publishing and provenance
@@ -39,14 +43,23 @@ jobs:
           set -o pipefail
           npm install -g npm@latest
           npm --version
-      - name: Check the tag matches the package version
+      - name: Resolve the package from the tag
+        id: pkg
         run: |
           set -o pipefail
-          PKG_VERSION="$(node -p "require('./packages/sdk/package.json').version")"
-          if [ "v${PKG_VERSION}" != "${GITHUB_REF_NAME}" ]; then
-            echo "Tag ${GITHUB_REF_NAME} does not match packages/sdk/package.json version v${PKG_VERSION}"
+          case "${GITHUB_REF_NAME}" in
+            canada-post-v*) DIR=packages/canada-post; PREFIX=canada-post-v ;;
+            shipping-v*) DIR=packages/shipping; PREFIX=shipping-v ;;
+            *) echo "Unknown release tag ${GITHUB_REF_NAME}"; exit 1 ;;
+          esac
+          NAME="$(node -p "require('./${DIR}/package.json').name")"
+          VERSION="$(node -p "require('./${DIR}/package.json').version")"
+          if [ "${PREFIX}${VERSION}" != "${GITHUB_REF_NAME}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match ${DIR}/package.json version ${VERSION}"
             exit 1
           fi
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
       - name: Install
         run: |
           set -o pipefail
@@ -96,14 +109,14 @@ jobs:
       - name: npm pack (dry run)
         run: |
           set -o pipefail
-          npm pack --dry-run -w @joinmarka/shipping
+          npm pack --dry-run -w "${{ steps.pkg.outputs.name }}"
       - name: Skip versions that are already on npm
         id: published
         run: |
           set -o pipefail
-          PKG_VERSION="$(node -p "require('./packages/sdk/package.json').version")"
-          if npm view "@joinmarka/shipping@${PKG_VERSION}" version >/dev/null 2>&1; then
-            echo "v${PKG_VERSION} is already on npm; nothing to publish."
+          SPEC="${{ steps.pkg.outputs.name }}@${{ steps.pkg.outputs.version }}"
+          if npm view "${SPEC}" version >/dev/null 2>&1; then
+            echo "${SPEC} is already on npm; nothing to publish."
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
@@ -112,7 +125,7 @@ jobs:
         if: ${{ env.NPM_TOKEN != '' && steps.published.outputs.exists != 'true' }}
         run: |
           set -o pipefail
-          npm publish --provenance --access public -w @joinmarka/shipping
+          npm publish --provenance --access public -w "${{ steps.pkg.outputs.name }}"
         env:
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
       - name: Publish with npm trusted publishing (OIDC)
@@ -120,4 +133,4 @@ jobs:
         run: |
           set -o pipefail
           # No token configured: npm exchanges the GitHub OIDC identity for a short-lived publish credential.
-          npm publish --provenance --access public -w @joinmarka/shipping
+          npm publish --provenance --access public -w "${{ steps.pkg.outputs.name }}"

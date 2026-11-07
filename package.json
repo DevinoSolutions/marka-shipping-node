@@ -2,7 +2,7 @@
   "name": "marka-shipping-monorepo",
   "version": "0.1.0",
   "private": true,
-  "description": "Monorepo for the community Canada Post Developer Program REST SDK",
+  "description": "Marka Shipping monorepo: @joinmarka/canada-post and the @joinmarka/shipping umbrella",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -12,21 +12,21 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @joinmarka/shipping",
-    "typecheck": "tsc -p tsconfig.scripts.json && npm run typecheck --workspaces --if-present",
+    "build": "npm run build -w @joinmarka/canada-post && npm run build -w @joinmarka/shipping",
+    "typecheck": "tsc -p tsconfig.scripts.json && npm run build -w @joinmarka/canada-post && npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:live": "vitest run --config packages/sdk/vitest.live.config.ts",
+    "test:live": "vitest run --config packages/canada-post/vitest.live.config.ts",
     "docs:api": "typedoc",
     "verify:exports": "tsx scripts/verify-exports.ts",
     "check:secrets": "tsx scripts/check-secrets.ts",
     "check:live-readonly": "tsx scripts/check-live-readonly.ts",
     "check:deadcode": "knip",
-    "pack:dry": "npm pack --dry-run -w @joinmarka/shipping"
+    "pack:dry": "npm pack --dry-run -w @joinmarka/canada-post -w @joinmarka/shipping"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

@@ -1,6 +1,6 @@
 /**
  * Test helpers for code that uses the SDK: a scripted `fetch` that records requests.
- * Import from `@joinmarka/shipping/testing`.
+ * Import from `@joinmarka/canada-post/testing`.
  *
  * @packageDocumentation
  */

@@ -7,9 +7,9 @@ Non-negotiables (duplicated here so no tool misses them):
 1. Never create, void, transmit or refund anything against **production** without the owner
    explicitly authorizing that specific action in the current session. Production shipment
    creation charges real postage.
-2. `packages/sdk/test/live/` is READ-ONLY and SANDBOX-ONLY — never add writes or a production
+2. `packages/canada-post/test/live/` is READ-ONLY and SANDBOX-ONLY — never add writes or a production
    environment there. `npm run check:live-readonly` enforces this and derives its forbidden
-   list from `packages/sdk/src/operations.ts`; extend the table, never weaken the guard.
+   list from `packages/canada-post/src/operations.ts`; extend the table, never weaken the guard.
 3. Secrets stay in `.env`. Never print, log, commit or hardcode credentials or values derived
    from them (including `base64(username:password)`). `npm run check:secrets` scans the working
    tree and must stay that way.

@@ -1,10 +1,14 @@
 # Changelog
 
-All notable changes to `@joinmarka/shipping` are documented here. The format
+All notable changes to `@joinmarka/canada-post` are documented here. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+### Changed
+
+- The Canada Post SDK is now published on its own as `@joinmarka/canada-post` (0.1.0). `@joinmarka/shipping` (0.2.0) is the Marka Shipping umbrella: it re-exports every carrier (`canadaPost` namespace plus the Canada Post API at the top level). Each package has its own release tag (`canada-post-vX.Y.Z`, `shipping-vX.Y.Z`).
 
 ### Fixed
 
@@ -33,5 +37,5 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 - Typed errors: `CanadaPostApiError`, `CanadaPostTimeoutError`, `CanadaPostNetworkError`,
   `CanadaPostIndeterminateError`, `CanadaPostParseError`, `CanadaPostValidationError`,
   `CanadaPostConfigurationError`.
-- `@joinmarka/shipping/testing` with `createMockFetch`.
+- `@joinmarka/canada-post/testing` with `createMockFetch`.
 - Verified wire-shape contracts in `docs/research/canadapost-api-contracts.md`.
