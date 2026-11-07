@@ -124,7 +124,7 @@ export class HttpTransport {
       Authorization: `Basic ${Buffer.from(`${config.username}:${config.password}`, "utf8").toString("base64")}`,
       Accept: spec.accept,
       "Accept-Language": config.language,
-      "User-Agent": `canadapost-sdk-node/${SDK_VERSION}`,
+      "User-Agent": `marka-shipping-node/${SDK_VERSION}`,
       ...spec.headers,
     };
     if (spec.contentType !== undefined) headers["Content-Type"] = spec.contentType;

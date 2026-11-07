@@ -1,6 +1,6 @@
 /**
  * Test helpers for code that uses the SDK: a scripted `fetch` that records requests.
- * Import from `@devino-solutions/canadapost-sdk/testing`.
+ * Import from `@joinmarka/shipping/testing`.
  *
  * @packageDocumentation
  */

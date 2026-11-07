@@ -1,6 +1,6 @@
 # CLAUDE.md — agent instructions for this repo
 
-TypeScript monorepo: `packages/sdk` (`@devino-solutions/canadapost-sdk`), npm workspaces,
+TypeScript monorepo: `packages/sdk` (`@joinmarka/shipping`), npm workspaces,
 ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Program REST APIs
 (XML with versioned vendor media types). Not affiliated with Canada Post.
 

@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please report suspected vulnerabilities privately through GitHub's
-[private vulnerability reporting](https://github.com/DevinoSolutions/canadapost-sdk-node-js/security/advisories/new)
+[private vulnerability reporting](https://github.com/DevinoSolutions/marka-shipping-node/security/advisories/new)
 for this repository. Do not open a public issue for a security problem. You will get an
 acknowledgement within a few business days.
 

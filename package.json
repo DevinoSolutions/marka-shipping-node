@@ -1,5 +1,5 @@
 {
-  "name": "canadapost-sdk-monorepo",
+  "name": "marka-shipping-monorepo",
   "version": "0.1.0",
   "private": true,
   "description": "Monorepo for the community Canada Post Developer Program REST SDK",
@@ -12,7 +12,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @devino-solutions/canadapost-sdk",
+    "build": "npm run build -w @joinmarka/shipping",
     "typecheck": "tsc -p tsconfig.scripts.json && npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -26,7 +26,7 @@
     "check:secrets": "tsx scripts/check-secrets.ts",
     "check:live-readonly": "tsx scripts/check-live-readonly.ts",
     "check:deadcode": "knip",
-    "pack:dry": "npm pack --dry-run -w @devino-solutions/canadapost-sdk"
+    "pack:dry": "npm pack --dry-run -w @joinmarka/shipping"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

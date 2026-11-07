@@ -20,7 +20,7 @@ interface PackageSpec {
 const packages: PackageSpec[] = [
   {
     dir: "packages/sdk",
-    name: "@devino-solutions/canadapost-sdk",
+    name: "@joinmarka/shipping",
     entries: {
       ".": [
         "createCanadaPostClient",

@@ -5,8 +5,8 @@ Thanks for helping. This is a community SDK; it is not affiliated with Canada Po
 ## Setup
 
 ```bash
-git clone https://github.com/DevinoSolutions/canadapost-sdk-node-js.git
-cd canadapost-sdk-node-js
+git clone https://github.com/DevinoSolutions/marka-shipping-node.git
+cd marka-shipping-node
 npm install            # Node >= 22.12
 npm run build && npm test
 ```

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `@devino-solutions/canadapost-sdk` are documented here. The format
+All notable changes to `@joinmarka/shipping` are documented here. The format
 follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
@@ -33,5 +33,5 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 - Typed errors: `CanadaPostApiError`, `CanadaPostTimeoutError`, `CanadaPostNetworkError`,
   `CanadaPostIndeterminateError`, `CanadaPostParseError`, `CanadaPostValidationError`,
   `CanadaPostConfigurationError`.
-- `@devino-solutions/canadapost-sdk/testing` with `createMockFetch`.
+- `@joinmarka/shipping/testing` with `createMockFetch`.
 - Verified wire-shape contracts in `docs/research/canadapost-api-contracts.md`.

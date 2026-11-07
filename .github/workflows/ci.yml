@@ -79,7 +79,7 @@ jobs:
       - name: npm pack (dry run)
         run: |
           set -o pipefail
-          npm pack --dry-run -w @devino-solutions/canadapost-sdk
+          npm pack --dry-run -w @joinmarka/shipping
 
   # Single required status for branch protection.
   ci-passed:

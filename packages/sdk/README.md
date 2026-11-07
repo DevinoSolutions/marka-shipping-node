@@ -1,6 +1,6 @@
-# @devino-solutions/canadapost-sdk
+# Marka Shipping
 
-A community TypeScript SDK for the [Canada Post Developer Program](https://www.canadapost-postescanada.ca/information/app/drc/home) REST APIs: rating, non-contract and contract shipping, manifests, labels (PDF and ZPL) and tracking.
+Marka Shipping (`@joinmarka/shipping` on npm) is an unofficial TypeScript SDK for the [Canada Post Developer Program](https://www.canadapost-postescanada.ca/information/app/drc/home) REST APIs: rating, non-contract and contract shipping, manifests, labels (PDF and ZPL) and tracking.
 
 > **Not affiliated with Canada Post.** This is an independent, community-maintained SDK. "Canada Post" and related marks belong to Canada Post Corporation. Always check the [official documentation](https://www.canadapost-postescanada.ca/info/mc/business/productsservices/developers/services/default.jsf) for the authoritative behaviour of the API.
 
@@ -13,7 +13,7 @@ A community TypeScript SDK for the [Canada Post Developer Program](https://www.c
 ## Install
 
 ```bash
-npm install @devino-solutions/canadapost-sdk
+npm install @joinmarka/shipping
 ```
 
 ## Environments and money (read this first)
@@ -30,7 +30,7 @@ npm install @devino-solutions/canadapost-sdk
 ## Quick start
 
 ```ts
-import { createCanadaPostClient } from "@devino-solutions/canadapost-sdk";
+import { createCanadaPostClient } from "@joinmarka/shipping";
 
 const canadaPost = createCanadaPostClient({
   username: process.env.CANADAPOST_USERNAME!,
@@ -63,7 +63,7 @@ Other rating calls: `rating.discoverServices({ country })`, `rating.getService("
 Non-contract shipping is for customers without a commercial contract; the credit card saved on your Canada Post profile is charged (in production).
 
 ```ts
-import { findLink } from "@devino-solutions/canadapost-sdk";
+import { findLink } from "@joinmarka/shipping";
 
 const shipment = await canadaPost.ncShipments.create({
   serviceCode: "DOM.EP",
@@ -157,7 +157,7 @@ Versioned media types: rating `application/vnd.cpc.ship.rate-v4+xml`, non-contra
 
 Client options: `username`, `password`, `customerNumber`, `mobo?`, `contractId?`, `environment?`, `fetch?`, `timeoutMs?` (30 s), `retries?` (2), `retryDelayMs?` (250), `language?` (`en-CA`/`fr-CA`), `onDebug?`.
 
-Not covered yet: reference-number tracking, signatures and delivery certificates, Find a Post Office, Pickup, Returns, merchant registration, SOAP. See [docs/research/canadapost-api-contracts.md](https://github.com/DevinoSolutions/canadapost-sdk-node-js/blob/main/docs/research/canadapost-api-contracts.md) for the verified wire shapes and every assumption.
+Not covered yet: reference-number tracking, signatures and delivery certificates, Find a Post Office, Pickup, Returns, merchant registration, SOAP. See [docs/research/canadapost-api-contracts.md](https://github.com/DevinoSolutions/marka-shipping-node/blob/main/docs/research/canadapost-api-contracts.md) for the verified wire shapes and every assumption.
 
 ## Error handling
 
@@ -169,7 +169,7 @@ import {
   CanadaPostIndeterminateError,
   CanadaPostNetworkError,
   CanadaPostTimeoutError,
-} from "@devino-solutions/canadapost-sdk";
+} from "@joinmarka/shipping";
 
 try {
   await canadaPost.rating.getRates(input);
@@ -219,7 +219,7 @@ Always set `customerRequestId` on contract shipments (Canada Post rejects duplic
 ## Testing your own code
 
 ```ts
-import { createMockFetch } from "@devino-solutions/canadapost-sdk/testing";
+import { createMockFetch } from "@joinmarka/shipping/testing";
 
 const mock = createMockFetch({ status: 200, body: "<price-quotes/>" });
 const client = createCanadaPostClient({ /* ... */ fetch: mock.fetch });
@@ -232,7 +232,7 @@ npm install
 npm run build && npm test
 ```
 
-Live sandbox smoke tests are opt-in and strictly read-only (quotes, discovery, tracking): copy `.env.example` to `.env`, then `CANADAPOST_LIVE_TESTS=true npm run test:live`. The suite refuses to run unless the environment is `development`. See [CONTRIBUTING.md](https://github.com/DevinoSolutions/canadapost-sdk-node-js/blob/main/CONTRIBUTING.md).
+Live sandbox smoke tests are opt-in and strictly read-only (quotes, discovery, tracking): copy `.env.example` to `.env`, then `CANADAPOST_LIVE_TESTS=true npm run test:live`. The suite refuses to run unless the environment is `development`. See [CONTRIBUTING.md](https://github.com/DevinoSolutions/marka-shipping-node/blob/main/CONTRIBUTING.md).
 
 ## Official Canada Post documentation
 
