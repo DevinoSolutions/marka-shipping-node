@@ -1,0 +1,2031 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Rating",
+    "description": "Rating",
+    "x-ibm-languages": {
+      "title": {
+        "fr": "Tarification"
+      },
+      "description": {
+        "fr": "Tarification"
+      }
+    },
+    "version": "3.0.0",
+    "x-ibm-name": "rating-service-v4",
+    "x-pathalias": "rating-api-1.0.0",
+    "x-ibm-summary": "Rating Service"
+  },
+  "paths": {
+    "/prices": {
+      "post": {
+        "tags": ["Rating"],
+        "summary": "Get Rates",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          }
+        ],
+        "description": "Uses the destination address and package information to return a complete list of available shipping services, price and transit time.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir les tarifs"
+          },
+          "description": {
+            "fr": "Utilise l'adresse de destination et des renseignements sur le colis pour proposer une liste exhaustive des services d'expédition offerts, ainsi que des frais et des temps de transit connexes."
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/mailingScenario"
+              },
+              "example": {
+                "customerNumber": "0007271592",
+                "contractId": "0041596528",
+                "quoteType": "commercial",
+                "options": [
+                  {
+                    "optionCode": "DC"
+                  },
+                  {
+                    "optionCode": "COD",
+                    "optionAmount": 100
+                  },
+                  {
+                    "optionCode": "COV",
+                    "optionAmount": 123
+                  },
+                  {
+                    "optionCode": "PA18"
+                  },
+                  {
+                    "optionCode": "SO"
+                  }
+                ],
+                "parcelCharacteristics": {
+                  "weight": 0.5,
+                  "dimensions": {
+                    "length": 12,
+                    "width": 11,
+                    "height": 10
+                  },
+                  "unpackaged": false,
+                  "mailingTube": false,
+                  "oversized": false
+                },
+                "services": ["DOM.RP"],
+                "originPostalCode": "T5L3B0",
+                "destination": {
+                  "domestic": {
+                    "postalCode": "K1K1K1"
+                  }
+                }
+              }
+            }
+          },
+          "required": true,
+          "description": "<p><strong>Request &ndash; Fields</strong></p>\n<table>\n  <thead>\n    <tr>\n      <th>Field Name</th>\n      <th>Type</th>\n      <th>Required / Optional</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>customerNumber</td>\n      <td>String</td>\n      <td>Conditionally Required</td>\n      <td>\n        <p>The customer number of the owner of the mail (mailed on behalf of customer).</p>\n        <p>(numeric &ndash; up to 10 digits)</p>\n        <p>This field is required to obtain discounted rates for commercial customers and Solutions for Small Business members. It must be omitted to obtain counter (i.e., consumer) rates.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>expectedMailingDate</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>The expected mailing date for the parcel.</p>\n        <p>The date is used in calculations of the expected delivery date, however all rate quotes are based on the current system date.</p>\n        <p>(YYYY-MM-DD date format)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>quoteType</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>Either commercial or counter.<br>\n        <ul>\n          <li>\"commercial\" will return the discounted price for the commercial customer or Solutions for Small Business member.</li>\n          <li>\"counter\" will return the regular price paid by consumers.</li>\n        </ul> Defaults to \"commercial\" if not specified.\n      </td>\n    </tr>\n    <tr>\n      <td>contractId</td>\n      <td>String</td>\n      <td>Conditionally Required</td>\n      <td>\n        <p>This field is required to obtain discounted rates for commercial customers when the customerNumber field is provided.</p>\n        <p>(numeric &ndash; up to 10 digits)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>options</td>\n      <td>Array of Objects</td>\n      <td>Optional</td>\n      <td>Structure containing the list of options desired for the shipment.</td>\n    </tr>\n    <tr>\n      <td>optionCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(10 alphanumeric)</p>\n        <p>Holds the Canada Post-specific option code.</p>\n        <p>Valid values:</p>\n        <ul>\n          <li>SO - Signature</li>\n          <li>COV - Coverage (requires qualifier)</li>\n          <li>COD - COD (requires qualifier)</li>\n          <li>PA18 - Proof of Age Required - 18</li>\n          <li>PA19 - Proof of Age Required - 19</li>\n          <li>PA21 - Proof of Age Required - 21</li>\n          <li>HFP - Card for pickup</li>\n          <li>DNS - Do not safe drop</li>\n          <li>LAD - Leave at door - do not card.</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>optionAmount</td>\n      <td>Number</td>\n      <td>Required depending on optionCode</td>\n      <td>\n        <p>Required for COV &ndash; the amount of insurance to be purchased.</p>\n        <p>5.2 digits&nbsp;e.g. 99999.99</p>\n      </td>\n    </tr>\n    <tr>\n      <td>parcelCharacteristics</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>Details of the parcel such as weight, dimensions, and appearance.</td>\n    </tr>\n    <tr>\n      <td>weight</td>\n      <td>Number</td>\n      <td>Required</td>\n      <td>\n        <p>The weight of the parcel in kilograms.</p>\n        <p>(99.999)</p>\n        <p>Contained within parcelCharacteristics.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>dimensions</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>Details of the parcel dimensions in centimeters.</td>\n    </tr>\n    <tr>\n      <td>length</td>\n      <td>Number</td>\n      <td>Required</td>\n      <td>\n        <p>Longest dimension.</p>\n        <p>(3.1 digits&nbsp;e.g. 999.9 pattern)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>width</td>\n      <td>Number</td>\n      <td>Required</td>\n      <td>\n        <p>Second longest dimension.</p>\n        <p>(3.1 digits&nbsp;e.g. 999.9 pattern)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>height</td>\n      <td>Number</td>\n      <td>Required</td>\n      <td>\n        <p>Shortest dimension.</p>\n        <p>(3.1 digits&nbsp;e.g. 999.9 pattern)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>unpackaged</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>true | <strong>false</strong> <br>\n        <ul>\n          <li>(defaults to \"false\").</li>\n          <li>true indicates that the parcel will be unpackaged (e.g. tires)</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>mailingTube</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>true | <strong>false</strong><br>\n        <ul>\n          <li>(defaults to \"false\").</li>\n          <li>true indicates that the object will be shipped in a mailing tube</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>oversized</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>true | <strong>false</strong><br>\n        <ul>\n          <li>(defaults to \"false\").</li>\n          <li>true indicates that the object has oversized dimensions.</li>\n          <li>Automatically set correctly if dimensions are provided</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>services</td>\n      <td>Array of Strings</td>\n      <td>Optional</td>\n      <td>Specifies the services to rate for this mailing scenario.</td>\n    </tr>\n    <tr>\n      <td>serviceCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>May occur 1 &hellip; 20 times.</p>\n        <p>A specific service to be rated. If no instances of serviceCode are included in the request, all services applicable to the shipment and destination will be rated and returned.</p>\n        <table border=\"1\">\n          <thead>\n            <tr>\n              <th>Service Code</th>\n              <th>Description</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>DOM.RP</td>\n              <td>Regular Parcel</td>\n            </tr>\n            <tr>\n              <td>DOM.EP</td>\n              <td>Expedited Parcel</td>\n            </tr>\n            <tr>\n              <td>DOM.XP</td>\n              <td>Xpresspost</td>\n            </tr>\n            <tr>\n              <td>DOM.XP.CERT</td>\n              <td>Xpresspost Certified</td>\n            </tr>\n            <tr>\n              <td>DOM.PC</td>\n              <td>Priority</td>\n            </tr>\n            <tr>\n              <td>DOM.LIB</td>\n              <td>Library Materials</td>\n            </tr>\n            <tr>\n              <td>USA.EP</td>\n              <td>Expedited Parcel USA</td>\n            </tr>\n            <tr>\n              <td>USA.SP.AIR</td>\n              <td>Small Packet USA Air</td>\n            </tr>\n            <tr>\n              <td>USA.TP</td>\n              <td>Tracked Packet &ndash; USA</td>\n            </tr>\n            <tr>\n              <td>USA.TP.LVM</td>\n              <td>Tracked Packet &ndash; USA (LVM)</td>\n            </tr>\n            <tr>\n              <td>USA.XP</td>\n              <td>Xpresspost USA</td>\n            </tr>\n            <tr>\n              <td>INT.XP</td>\n              <td>Xpresspost International</td>\n            </tr>\n            <tr>\n              <td>INT.IP.AIR</td>\n              <td>International Parcel Air</td>\n            </tr>\n            <tr>\n              <td>INT.IP.SURF</td>\n              <td>International Parcel Surface</td>\n            </tr>\n            <tr>\n              <td>INT.SP.AIR</td>\n              <td>Small Packet International Air</td>\n            </tr>\n            <tr>\n              <td>INT.SP.SURF</td>\n              <td>Small Packet International Surface</td>\n            </tr>\n            <tr>\n              <td>INT.TP</td>\n              <td>Tracked Packet &ndash; International</td>\n            </tr>\n          </tbody>\n        </table>\n      </td>\n    </tr>\n    <tr>\n      <td>originPostalCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>Postal Code from which the parcel will be sent.</p>\n        <p>Format&nbsp;ANANAN (only accepted with uppercase)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>destination</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>Defines the destination of the parcel.</td>\n    </tr>\n    <tr>\n      <td>domestic</td>\n      <td>Object</td>\n      <td>Choice</td>\n      <td>Defines the destination in Canada.</td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>The destination Postal Code.</p>\n        <p>Format&nbsp;ANANAN (only accepted with uppercase)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>unitedStates</td>\n      <td>Object</td>\n      <td>Choice</td>\n      <td>Defines the destination in the United States. Only one of international, unitedStates or domestic can be specified.</td>\n    </tr>\n    <tr>\n      <td>zipCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>Used when the country code is \"US\". Format is 5 digits or 5-4 (for extended Zip Codes). E.g., 12345 or 12345-6789.</td>\n    </tr>\n    <tr>\n      <td>international</td>\n      <td>Object</td>\n      <td>Choice</td>\n      <td>Defines an international destination. Only one of international, unitedStates, or domestic can be specified.</td>\n    </tr>\n    <tr>\n      <td>countryCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>The destination country code. (Standard 2-character country code other than CA or US).</td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>The Postal Code field can be provided for a KPG country to receive a Guaranteed date.</td>\n    </tr>\n  </tbody>\n</table>",
+          "x-ibm-languages": {
+            "description": {
+              "fr": "<p><strong>Demande &ndash; Champs</strong></p>\n<table>\n  <thead>\n    <tr>\n      <th>Nom du champ</th>\n      <th>Type</th>\n      <th>Requis/Facultatif</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>customerNumber</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis sous condition</td>\n      <td>\n        <p>Num&eacute;ro de client du propri&eacute;taire du courrier (Exp&eacute;di&eacute; au nom de)</p>\n        <p>(Format num&eacute;rique &ndash; Jusqu'&agrave; 10 chiffres)</p>\n        <p>Ce champ&nbsp;est exig&eacute; pour obtenir des tarifs r&eacute;duits pour les clients commerciaux et les clients du programme Solutions pour petites entreprises. Il faut l'omettre pour obtenir les tarifs au comptoir (c.-&agrave;-d. tarifs des particuliers).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>expectedMailingDate</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>Date d'exp&eacute;dition pr&eacute;vue pour le colis</p>\n        <p>Cette date est utilis&eacute;e pour calculer la date de livraison pr&eacute;vue. Cependant, toutes les propositions tarifaires sont fonction de la date actuelle du syst&egrave;me.</p>\n        <p>(Format de la date : AAAA-MM-JJ)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>quoteType</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>Option &laquo; Commercial &raquo; ou &laquo; Counter &raquo;</p>\n        <ul>\n          <li>L&rsquo;option &laquo; Commercial &raquo; remettra le tarif r&eacute;duit en place pour le client commercial ou le client du programme Solutions pour petites entreprises.</li>\n          <li>Si l'option &laquo; Counter &raquo; est s&eacute;lectionn&eacute;e, le prix courant pay&eacute; par les consommateurs s'affiche.</li>\n        </ul>\n        <p>L'option &laquo; Commercial &raquo; s'affiche par d&eacute;faut si aucune option n'est s&eacute;lectionn&eacute;e.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>contractId</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis sous condition</td>\n      <td>\n        <p>Ce champ&nbsp;est exig&eacute; pour obtenir des tarifs r&eacute;duits pour les clients commerciaux lorsque le num&eacute;ro de client n'est pas fourni. Il faut omettre le num&eacute;ro d'identification de la convention pour les clients du programme Solutions pour petites entreprises ou les utilisateurs commerciaux g&eacute;n&eacute;raux.</p>\n        <p>(Format num&eacute;rique &ndash; Jusqu'&agrave; 10 chiffres)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>options</td>\n      <td>Tableau d'objets</td>\n      <td>Requis</td>\n      <td>Structure contenant la liste d'options voulues pour l'envoi</td>\n    </tr>\n    <tr>\n      <td>optionCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(10 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Comprend le code d'option propre &agrave; Postes Canada.</p>\n        <p>Valeurs valides :</p>\n        <ul>\n          <li>SO &ndash; Signature</li>\n          <li>COV &ndash; Couverture (qualificatif requis)</li>\n          <li>COD &ndash; CR (qualificatif requis)</li>\n          <li>PA18 &ndash; Preuve d'&acirc;ge requise (18 ans)</li>\n          <li>PA19 &ndash; Preuve d'&acirc;ge requise (19 ans)</li>\n          <li>PA21 &ndash; Preuve d'&acirc;ge requise (21 ans)</li>\n          <li>HFP &ndash; Annoncer par carte</li>\n          <li>DNS &ndash; Ne pas laisser en lieu s&ucirc;r</li>\n          <li>LAD &ndash; Laisser &agrave; la porte &ndash; Pas d'avis</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>optionAmount</td>\n      <td>Nombre</td>\n      <td>Requis (selon le code d'option)</td>\n      <td>\n        <p>Requis pour COV &ndash; Montant de l'assurance &agrave; acheter</p>\n        <p>Cinq chiffres, suivis de deux d&eacute;cimales (p. ex. 99999.99)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>parcelCharacteristics</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>D&eacute;tails li&eacute;s au colis (p. ex. poids, dimensions et apparence)</td>\n    </tr>\n    <tr>\n      <td>weight</td>\n      <td>Nombre</td>\n      <td>Requis</td>\n      <td>\n        <p>Poids du colis en kilogrammes</p>\n        <p>(99.999)</p>\n        <p>Fait partie des parcelCharacteristics.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>dimensions</td>\n      <td>Object</td>\n      <td>Facultatif</td>\n      <td>D&eacute;tails li&eacute;s aux dimensions du colis en centim&egrave;tres.</td>\n    </tr>\n    <tr>\n      <td>length</td>\n      <td>Nombre</td>\n      <td>Requis</td>\n      <td>\n        <p>Dimension la plus longue</p>\n        <p>(Trois chiffres, suivis d'une d&eacute;cimale [p. ex. format 999.9])</p>\n      </td>\n    </tr>\n    <tr>\n      <td>width</td>\n      <td>Nombre</td>\n      <td>Requis</td>\n      <td>\n        <p>Deuxi&egrave;me plus longue dimension</p>\n        <p>(Trois chiffres, suivis d'une d&eacute;cimale [p. ex. format 999.9])</p>\n      </td>\n    </tr>\n    <tr>\n      <td>height</td>\n      <td>Nombre</td>\n      <td>Requis</td>\n      <td>\n        <p>Dimension la plus courte</p>\n        <p>(Trois chiffres, suivis d'une d&eacute;cimale [p. ex. format 999.9])</p>\n      </td>\n    </tr>\n    <tr>\n      <td>unpackaged</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>vrai | <strong>faux</strong></p>\n        <ul>\n          <li>La valeur par d&eacute;faut est &laquo; faux &raquo;.</li>\n          <li>La mention &laquo; vrai &raquo; signifie que le colis ne sera pas emball&eacute; (p. ex. pneus).</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>mailingTube</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>vrai | <strong>faux</strong></p>\n        <ul>\n          <li>La valeur par d&eacute;faut est &laquo; faux &raquo;.</li>\n          <li>La mention &laquo; vrai &raquo; signifie que l'objet sera exp&eacute;di&eacute; dans un tube d'exp&eacute;dition.</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>oversized</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>vrai | <strong>faux</strong></p>\n        <ul>\n          <li>La valeur par d&eacute;faut est &laquo; faux &raquo;.</li>\n          <li>La mention &laquo; vrai &raquo; signifie que l'objet est surdimensionn&eacute;.</li>\n          <li>La valeur est d&eacute;finie correctement si les dimensions sont fournies.</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>services</td>\n      <td>Tableau de cha&icirc;nes de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>Pr&eacute;cise les services pour lesquels il faut d&eacute;terminer le tarif pour ce sc&eacute;nario d'exp&eacute;dition.</td>\n    </tr>\n    <tr>\n      <td>serviceCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>Occurrence (1 &agrave; 20 fois)</p>\n        <p>Le tarif doit &ecirc;tre d&eacute;termin&eacute; pour un service pr&eacute;cis. Si aucun serviceCode n'est inclus dans la demande, le tarif sera d&eacute;termin&eacute; pour tous les services li&eacute;s &agrave; l'envoi et &agrave; la destination, puis l'envoi sera retourn&eacute;.</p>\n        <table>\n          <thead>\n            <tr>\n              <th>Code</th>\n              <th>Description</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>DOM.RP</td>\n              <td>Colis standard</td>\n            </tr>\n            <tr>\n              <td>DOM.EP</td>\n              <td>Colis acc&eacute;l&eacute;r&eacute;s</td>\n            </tr>\n            <tr>\n              <td>DOM.XP</td>\n              <td>Xpresspost</td>\n            </tr>\n            <tr>\n              <td>DOM.XP.CERT</td>\n              <td>Xpresspost certifi&eacute;</td>\n            </tr>\n            <tr>\n              <td>DOM.PC</td>\n              <td>Priorit&eacute;</td>\n            </tr>\n            <tr>\n              <td>DOM.LIB</td>\n              <td>Documents de biblioth&egrave;que</td>\n            </tr>\n            <tr>\n              <td>USA.EP</td>\n              <td>Colis acc&eacute;l&eacute;r&eacute;s &Eacute;.-U.</td>\n            </tr>\n            <tr>\n              <td>USA.SP.AIR</td>\n              <td>Petits paquets-avion &agrave; destination des &Eacute;.-U.</td>\n            </tr>\n            <tr>\n              <td>USA.TP</td>\n              <td>Paquet rep&eacute;rable &ndash; &Eacute;.-U.</td>\n            </tr>\n            <tr>\n              <td>USA.TP.LVM</td>\n              <td>Paquet rep&eacute;rable &ndash; &Eacute;.-U. (GEC)<br>(gros exp&eacute;diteur de courrier)</td>\n            </tr>\n            <tr>\n              <td>USA.XP</td>\n              <td>Xpresspost &Eacute;.-U.</td>\n            </tr>\n            <tr>\n              <td>INT.XP</td>\n              <td>Xpresspost International</td>\n            </tr>\n            <tr>\n              <td>INT.IP.AIR</td>\n              <td>Colis-avion du r&eacute;gime international</td>\n            </tr>\n            <tr>\n              <td>INT.IP.SURF</td>\n              <td>Colis de surface du r&eacute;gime international</td>\n            </tr>\n            <tr>\n              <td>INT.SP.AIR</td>\n              <td>Petits paquets-avion du r&eacute;gime international</td>\n            </tr>\n            <tr>\n              <td>INT.SP.SURF</td>\n              <td>Petits paquets de surface du r&eacute;gime international</td>\n            </tr>\n            <tr>\n              <td>INT.TP</td>\n              <td>Paquet rep&eacute;rable &ndash; International</td>\n            </tr>\n          </tbody>\n        </table>\n      </td>\n    </tr>\n    <tr>\n      <td>originPostalCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>Code postal &agrave; partir duquel le colis sera envoy&eacute;.</p>\n        <p>Format ANANAN (seulement accept&eacute; avec majuscules)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>destination</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>D&eacute;finit la destination du colis.</td>\n    </tr>\n    <tr>\n      <td>domestic</td>\n      <td>Objet</td>\n      <td>Choix</td>\n      <td>D&eacute;finit la destination au Canada.</td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>Code postal de destination.</p>\n        <p>Format ANANAN (seulement accept&eacute; avec majuscules)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>unitedStates</td>\n      <td>Objet</td>\n      <td>Choix</td>\n      <td>D&eacute;finit la destination aux &Eacute;tats-Unis.</td>\n    </tr>\n    <tr>\n      <td>zipCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>Il est utilis&eacute; lorsque le code de pays est &laquo; US &raquo;. Le format est de cinq chiffres ou de cinq chiffres suivis de quatre autres chiffres (pour les codes ZIP prolong&eacute;s).</p>\n        <p>Exemple : 12345 ou 12345-6789</p>\n      </td>\n    </tr>\n    <tr>\n      <td>international</td>\n      <td>Objet</td>\n      <td>Choix</td>\n      <td>Il s'agit de la destination internationale (destination autre que les &Eacute;tats-Unis ou le Canada). Seule une destination (internationale, &Eacute;tats-Unis ou r&eacute;gime int&eacute;rieur) peut &ecirc;tre pr&eacute;cis&eacute;e.</td>\n    </tr>\n    <tr>\n      <td>countryCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>Code de pays de destination &ndash; Code de pays standard &agrave; deux caract&egrave;res (code de pays valide autre que CA ou US).</td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>Le champ relatif au code postal peut &ecirc;tre fourni si le client aimerait recevoir une garantie de date de livraison pour un pays membre du Kahala Post Group (KPG).</td>\n    </tr>\n  </tbody>\n</table>"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/priceQuotes"
+                },
+                "example": [
+                  {
+                    "serviceCode": "DOM.RP",
+                    "serviceLink": {
+                      "rel": "service",
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.RP?contract=0040662509&country=CA",
+                      "mediaType": "application/json"
+                    },
+                    "serviceName": "pricequoteservicename",
+                    "priceDetails": {
+                      "base": 10,
+                      "taxes": {
+                        "gst": {
+                          "amt": 10,
+                          "percent": 10
+                        },
+                        "pst": {
+                          "amt": 10,
+                          "percent": 10
+                        },
+                        "hst": {
+                          "amt": 10,
+                          "percent": 10
+                        }
+                      },
+                      "due": 10,
+                      "options": [
+                        {
+                          "optionCode": "optionCode",
+                          "optionName": "optionName",
+                          "optionPrice": 1
+                        }
+                      ],
+                      "adjustments": [
+                        {
+                          "adjustmentCode": "adjustmentCode",
+                          "adjustmentName": "adjustmentName",
+                          "adjustmentCost": 1
+                        }
+                      ]
+                    },
+                    "weightDetails": {
+                      "cubedWeight": 1
+                    },
+                    "serviceStandard": {
+                      "amDelivery": false,
+                      "guaranteedDelivery": true,
+                      "expectedTransitTime": 2,
+                      "expectedDeliveryDate": "2011-12-20T00:00:00.000Z"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                },
+                "examples": {
+                  "English": {
+                    "value": {
+                      "title": "Validation failed",
+                      "detail": "Errors occurred while processing the request.",
+                      "errors": [
+                        {
+                          "errorCode": "1622",
+                          "message": "The expectedMailingDate must not be in the past."
+                        },
+                        {
+                          "errorCode": "9111",
+                          "message": "No services are appropriate for the shipment of the defined parcel. Validate the parcel criteria against product specifications."
+                        },
+                        {
+                          "errorCode": "7050",
+                          "message": "The {0} option requires the {1} option. Please add the prerequisite or remove the option."
+                        },
+                        {
+                          "errorCode": "9112",
+                          "message": "The service {0} is not available for the specified country or customer/contract."
+                        }
+                      ]
+                    }
+                  },
+                  "Français": {
+                    "value": {
+                      "title": "Validation échouée",
+                      "detail": "Une erreur est survenue lors du traitement de la demande.",
+                      "errors": [
+                        {
+                          "errorCode": "1622",
+                          "message": "La date d'expédition prévue ne doit pas se trouver dans le passé."
+                        },
+                        {
+                          "errorCode": "9111",
+                          "message": "Aucun service n'est approprié pour l'expédition du colis désigné. Il faut donc comparer les critères du colis aux spécifications du produit."
+                        },
+                        {
+                          "errorCode": "7050",
+                          "message": "L'option {0} nécessite l'option {1}; veuillez ajouter la condition préalable ou supprimer l'option."
+                        },
+                        {
+                          "errorCode": "9112",
+                          "message": "Le service {0} n'est pas disponible pour le pays précisé ou le client ou la convention."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "x-codegen-request-body-name": "mailingScenario",
+        "operationId": "price"
+      }
+    },
+    "/services": {
+      "get": {
+        "tags": ["Rating"],
+        "summary": "Discover Services",
+        "description": "Returns the list of postal services available given the origin, destination, customer and or contract.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Découvrez les services"
+          },
+          "description": {
+            "fr": "Renvoie la liste des services postaux disponibles en fonction de l'origine, de la destination, du client et/ou du contrat."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "If the country is provided, only services suitable for sending items to the provided country will be returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Si le paramètre «country» est fourni, seuls les services qui conviennent à l'expédition des articles au pays indiqué s'afficheront."
+              }
+            },
+            "schema": {
+              "type": "string"
+            },
+            "example": "CA"
+          },
+          {
+            "name": "contract",
+            "in": "query",
+            "description": "If the contract-id is provided, the response will also include restricted services accessible with that contract.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Si l'élément «contrat-id» est fourni, la réponse comprendra également les services restreints accessibles grâce à cette convention."
+              }
+            },
+            "schema": {
+              "type": "string"
+            },
+            "example": 40662509
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/services"
+                },
+                "examples": {
+                  "English": {
+                    "value": [
+                      {
+                        "serviceCode": "DOM.EP",
+                        "serviceName": "Expedited Parcel",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.EP?country=CA",
+                          "rel": "service",
+                          "media-type": "application/json"
+                        }
+                      },
+                      {
+                        "serviceCode": "DOM.RP",
+                        "serviceName": "Regular Parcel",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.RP?country=CA",
+                          "rel": "service",
+                          "media-type": "application/json"
+                        }
+                      },
+                      {
+                        "serviceCode": "DOM.PC",
+                        "serviceName": "Priority",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.PC?country=CA",
+                          "rel": "service",
+                          "media-type": "application/json"
+                        }
+                      },
+                      {
+                        "serviceCode": "DOM.XP",
+                        "serviceName": "Xpresspost",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.XP?country=CA",
+                          "rel": "service",
+                          "mediaType": "application/json"
+                        }
+                      }
+                    ]
+                  },
+                  "Français": {
+                    "value": [
+                      {
+                        "serviceCode": "DOM.EP",
+                        "serviceName": "Colis accélérés",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.EP?country=CA",
+                          "rel": "service",
+                          "media-type": "application/json"
+                        }
+                      },
+                      {
+                        "serviceCode": "DOM.RP",
+                        "serviceName": "Colis standard",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.RP?country=CA",
+                          "rel": "service",
+                          "media-type": "application/json"
+                        }
+                      },
+                      {
+                        "serviceCode": "DOM.PC",
+                        "serviceName": "Priorité",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.PC?country=CA",
+                          "rel": "service",
+                          "media-type": "application/json"
+                        }
+                      },
+                      {
+                        "serviceCode": "DOM.XP",
+                        "serviceName": "Xpresspost",
+                        "link": {
+                          "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/services/DOM.XP?country=CA",
+                          "rel": "service",
+                          "mediaType": "application/json"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                },
+                "examples": {
+                  "English": {
+                    "value": {
+                      "title": "Validation failed",
+                      "detail": "Errors occurred while processing the request.",
+                      "errors": [
+                        {
+                          "errorCode": "8534",
+                          "message": "A valid destination country must be supplied."
+                        },
+                        {
+                          "errorCode": "2550",
+                          "message": "The contract number is not valid."
+                        },
+                        {
+                          "errorCode": "7266",
+                          "message": "Postal Code must be in format A9A or A9A9A9."
+                        },
+                        {
+                          "errorCode": "9194",
+                          "message": "originPostalCode must also be provided when destinationPostalCode is provided."
+                        }
+                      ]
+                    }
+                  },
+                  "Français": {
+                    "value": {
+                      "title": "Validation échouée",
+                      "detail": "Une erreur est survenue lors du traitement de la demande.",
+                      "errors": [
+                        {
+                          "errorCode": "8534",
+                          "message": "Un pays de destination valide doit être indiqué."
+                        },
+                        {
+                          "errorCode": "2550",
+                          "message": "Le numéro de convention n'est pas valide."
+                        },
+                        {
+                          "errorCode": "7266",
+                          "message": "Le code postal doit respecter le format «A9A» ou «A9A9A9»."
+                        },
+                        {
+                          "errorCode": "9194",
+                          "message": "L'élément «originPostalCode» doit également être fourni lorsque l'élément «destinationPostalCode» est fourni.         "
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "service"
+      }
+    },
+    "/services/{serviceCode}": {
+      "get": {
+        "tags": ["Rating"],
+        "summary": "Get Service",
+        "description": "Returns the minimum and maximum weight and dimensions for each available postal service as well as any add-on options available.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir le service"
+          },
+          "description": {
+            "fr": "Renvoie le poids et les dimensions minimum et maximum pour chaque service postal disponible ainsi que toutes les options complémentaires disponibles."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "name": "serviceCode",
+            "in": "path",
+            "description": "Service identifier.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Identificateur de service"
+              }
+            },
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/serviceCode"
+            },
+            "example": "DOM.XP"
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "This parameter will fine tune the options if provided.\n\nFor example, some countries support the signature option for Xpresspost International and some do not.\n\n**Note**: we do not validate whether the shipping service you specified is a valid service for the country you provide. Therefore, even if the service is not offered for the country you specify, a list of the default options will still be returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Ce paramètre précisera les options si elles ont été fournies. Par ex  emple, certains pays acceptent l'option Signature pour le service Xpresspost International, tandis que d'autres ne l'acceptent pas.\n**Nota** : Nous ne validons pas si le service d'expédition que vous avez précisé est un service valide pour le pays que vous avez indiqué. Par conséquent, même si le service n'est pas offert pour le pays que vous avez indiqué, une liste d'options par défaut sera tout de même produite."
+              }
+            },
+            "schema": {
+              "type": "string"
+            },
+            "example": "CA"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/service"
+                },
+                "examples": {
+                  "English": {
+                    "value": {
+                      "serviceCode": "DOM.EP",
+                      "serviceName": "Expedited Parcel",
+                      "options": [
+                        {
+                          "optionCode": "DNS",
+                          "optionName": "Do not safe drop",
+                          "link": {
+                            "rel": "option",
+                            "href": "\"https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/DNS",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "COV",
+                          "optionName": "Coverage",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/COV",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": true,
+                          "qualifierMax": 5000
+                        },
+                        {
+                          "optionCode": "LAD",
+                          "optionName": "Leave at door - do not card",
+                          "link": {
+                            "rel": "option",
+                            "href": "\"https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/LAD",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "D2PO",
+                          "optionName": "Deliver to Post Office",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/D2PO",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "HFP",
+                          "optionName": "Card for pick-up",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/HFP",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "PA21",
+                          "optionName": "Proof of age required (21 years)",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/PA21",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "COD",
+                          "optionName": "Collect on delivery",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/COD",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": true
+                        },
+                        {
+                          "optionCode": "PA19",
+                          "optionName": "Proof of age required (19 years)",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/PA19",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "SO",
+                          "optionName": "Signature option",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/SO",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "PA18",
+                          "optionName": "Proof of age required (18 years)",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/PA18",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "DC",
+                          "optionName": "Delivery confirmation",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/DC",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": true,
+                          "qualifierRequired": false
+                        }
+                      ],
+                      "restrictions": {
+                        "weightRestriction": {
+                          "max": 30000
+                        },
+                        "dimensionalRestrictions": {
+                          "length": {
+                            "min": 0.1,
+                            "max": 200
+                          },
+                          "width": {
+                            "min": 0.1,
+                            "max": 200
+                          },
+                          "height": {
+                            "min": 0.1,
+                            "max": 200
+                          },
+                          "lengthPlusGirthMax": 300,
+                          "oversizeLimit": 100
+                        },
+                        "densityFactor": 5000,
+                        "canShipInMailingTube": true,
+                        "canShipUnpackaged": true,
+                        "allowedAsReturnService": true
+                      }
+                    }
+                  },
+                  "Français": {
+                    "value": {
+                      "serviceCode": "DOM.EP",
+                      "serviceName": "Colis accélérés",
+                      "options": [
+                        {
+                          "optionCode": "DNS",
+                          "optionName": "Ne pas laisser en lieu sûr",
+                          "link": {
+                            "rel": "option",
+                            "href": "\"https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/DNS",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "COV",
+                          "optionName": "Couverture",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/COV",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": true,
+                          "qualifierMax": 5000
+                        },
+                        {
+                          "optionCode": "LAD",
+                          "optionName": "Laisser à la porte – Pas d'avis",
+                          "link": {
+                            "rel": "option",
+                            "href": "\"https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/LAD",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "D2PO",
+                          "optionName": "Livrer au bureau de poste",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/D2PO",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "HFP",
+                          "optionName": "Annoncer par carte",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/HFP",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "PA21",
+                          "optionName": "Preuve d'âge requise (21ans)",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/PA21",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "COD",
+                          "optionName": "Contre remboursement",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/COD",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": true
+                        },
+                        {
+                          "optionCode": "PA19",
+                          "optionName": "Preuve d'âge requise (19ans)",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/PA19",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "SO",
+                          "optionName": "Option Signature",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/SO",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "PA18",
+                          "optionName": "Preuve d'âge requise (18ans)",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/PA18",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": false,
+                          "qualifierRequired": false
+                        },
+                        {
+                          "optionCode": "DC",
+                          "optionName": "Confirmation de livraison",
+                          "link": {
+                            "rel": "option",
+                            "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1/options/DC",
+                            "mediaType": "application/json"
+                          },
+                          "mandatory": true,
+                          "qualifierRequired": false
+                        }
+                      ],
+                      "restrictions": {
+                        "weightRestriction": {
+                          "max": 30000
+                        },
+                        "dimensionalRestrictions": {
+                          "length": {
+                            "min": 0.1,
+                            "max": 200
+                          },
+                          "width": {
+                            "min": 0.1,
+                            "max": 200
+                          },
+                          "height": {
+                            "min": 0.1,
+                            "max": 200
+                          },
+                          "lengthPlusGirthMax": 300,
+                          "oversizeLimit": 100
+                        },
+                        "densityFactor": 5000,
+                        "canShipInMailingTube": true,
+                        "canShipUnpackaged": true,
+                        "allowedAsReturnService": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                },
+                "examples": {
+                  "English": {
+                    "value": {
+                      "title": "Validation failed",
+                      "detail": "Errors occurred while processing the request.",
+                      "errors": [
+                        {
+                          "errorCode": "8534",
+                          "message": "A valid destination country must be supplied"
+                        }
+                      ]
+                    }
+                  },
+                  "Français": {
+                    "value": {
+                      "title": "Validation échouée",
+                      "detail": "Une erreur est survenue lors du traitement de la demande.",
+                      "errors": [
+                        {
+                          "errorCode": "8534",
+                          "message": "Un pays de destination valide doit être indiqué."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "serviceCode"
+      }
+    },
+    "/options/{optionCode}": {
+      "get": {
+        "tags": ["Rating"],
+        "summary": "Get Option",
+        "description": "Returns information about each available add-on option, including how it can be used and whether it requires or conflicts with other options.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir l'option"
+          },
+          "description": {
+            "fr": "Renvoie des informations sur chaque option complémentaire disponible, y compris la manière dont elle peut être utilisée et si elle nécessite ou entre en conflit avec d'autres options."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "name": "optionCode",
+            "in": "path",
+            "description": "The code of service to retrieve details for.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code du service pour récupérer les détails pour."
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "COD"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/option"
+                },
+                "examples": {
+                  "English": {
+                    "value": {
+                      "optionCode": "PA19",
+                      "optionName": "Proof of age required (19 years)",
+                      "optionClass": "DI",
+                      "printsOnLabel": false,
+                      "qualifierRequired": false,
+                      "conflictingOptions": ["PA21", "DNS", "PA18", "LAD"],
+                      "prerequisite-options": ["SO"]
+                    }
+                  },
+                  "Français": {
+                    "value": {
+                      "optionCode": "PA19",
+                      "optionName": "Preuve d'âge requise (19ans)",
+                      "optionClass": "DI",
+                      "printsOnLabel": false,
+                      "qualifierRequired": false,
+                      "conflictingOptions": ["PA21", "DNS", "PA18", "LAD"],
+                      "prerequisite-options": ["SO"]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "optionCode"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "platformID": {
+        "name": "platform-id",
+        "in": "header",
+        "description": "ID associated with the platform.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Identifiant associé à la plateforme."
+          }
+        },
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/customerNumber"
+        }
+      },
+      "language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Indicates your language preference for receiving error messages.\n\n- en-CA = English\n- fr-CA = French",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Indique votre langue de préférence pour recevoir les messages d'erreur.\n- en-CA = Anglais - fr-CA = Français"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "enum": ["en-CA", "fr-CA"],
+          "example": "en-CA",
+          "default": "en-CA"
+        }
+      }
+    },
+    "responses": {
+      "401": {
+        "description": "The 401 (Unauthorized) status code indicates that the server understood the request but refuses to fulfill it.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 401 (Non autorisé) indique que le serveur a compris la requête mais refuse de la satisfaire."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorizedError"
+            },
+            "example": [
+              {
+                "httpCode": 401,
+                "httpMessage": "Unauthorized",
+                "moreInformation": "Cannot pass the security checks that are required by the target API or operation, Enable debug headers for more details."
+              }
+            ]
+          }
+        }
+      },
+      "403": {
+        "description": "The HTTP 403 (Forbidden) error means the web server received your request but denies you access to the requested resource because you don't have permission.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "L'erreur HTTP 403 (Interdit) signifie que le serveur Web a reçu votre requête mais vous refuse l'accès à la ressource demandée car vous n'en avez pas l'autorisation."
+          }
+        }
+      },
+      "404": {
+        "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "412": {
+        "description": "The 412 (Precondition Failed) status code indicates that one or more conditions given in the request header fields evaluated to false when tested on the server (Section 13).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 412 (Échec de la condition préalable) indique qu'une ou plusieurs conditions données dans les champs d'en-tête de la requête ont été évaluées à faux lors du test sur le serveur (Section 13)."
+          }
+        }
+      },
+      "500": {
+        "description": "The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 500 (Erreur interne du serveur) indique que le serveur a rencontré une condition inattendue l'empêchant de traiter la requête. Transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "503": {
+        "description": "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 503 (Service indisponible) indique que le serveur est actuellement indisponible en raison d'une surcharge temporaire ou d'une maintenance planifiée, qui devrait être résolue après un certain délai. Message transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "504": {
+        "description": "The 504 (Gateway Timeout) status code indicates that the server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. May be passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 504 (Délai d'attente de la passerelle) indique que le serveur, agissant comme passerelle ou proxy, n'a pas reçu de réponse dans un délai raisonnable d'un serveur en amont auquel il devait accéder pour traiter la requête. Ce code peut provenir du serveur principal."
+          }
+        }
+      }
+    },
+    "schemas": {
+      "customerNumber": {
+        "description": "The customer number of the owner of the mail (mailed on behalf of customer).\n\nThis field is required to obtain discounted rates for commercial customers and Solutions for Small Business members. It must be omitted to obtain counter (i.e., consumer) rates.\n\n---\n\nNuméro de client du propriétaire du courrier (Expédié au nom de).\n\nCe champ est exigé pour obtenir des tarifs réduits pour les clients commerciaux et les clients du programme Solutions pour petites entreprises. Il faut l'omettre pour obtenir les tarifs au comptoir (c.-à-d. tarifs des particuliers).",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10,
+        "pattern": "^\\d{1,10}$"
+      },
+      "contractID": {
+        "description": "This field is required to obtain discounted rates for commercial customers when the customerNumber field is provided. The contractId field must be omitted for Solutions for Small Business members or general businesss users.\n\n---\n\nCe champ est exigé pour obtenir des tarifs réduits pour les clients commerciaux lorsque le numéro de client n'est pas fourni. Il faut omettre le numéro d'identification de la convention pour les clients du programme Solutions pour petites entreprises ou les utilisateurs commerciaux généraux.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10,
+        "pattern": "^\\d{1,10}$"
+      },
+      "serviceCode": {
+        "description": "A specific service to be rated. If no instances of serviceCode are included in the request, all services applicable to the shipment and destination will be rated and returned.\n\nService-Code  | Description\n--------------|------------\nDOM.RP        | Regular Parcel\nDOM.EP        | Expedited Parcel\nDOM.XP        | Xpresspost\nDOM.PC        | Priority\nDOM.LIB       | Library Books\nUSA.EP        | Expedited Parcel USA\nUSA.SP.AIR    | Small Packet USA Air\nUSA.TP        | Tracked Packet – USA\nUSA.TP.LVM    | Tracked Packet – USA (LVM)<br>(large volume mailers)<br><br>Note: To use this option, it must be specified in your contract.\nUSA.XP        | Xpresspost USA\nINT.XP        | Xpresspost International\nINT.IP.AIR    | International Parcel Air\nINT.IP.SURF   | International Parcel Surface\nINT.SP.AIR    | Small Packet International Air\nINT.SP.SURF   | Small Packet International Surface\nINT.TP        | Tracked Packet – International\n\n---\n\nLe tarif doit être déterminé pour un service précis. Si aucun serviceCode n'est inclus dans la demande, le tarif sera déterminé pour tous les services liés à l'envoi et à la destination, puis l'envoi sera retourné.\n\nCode de service | Description\n----------------|------------\nDOM.RP          | Colis standard\nDOM.EP          | Colis accélérés\nDOM.XP          | Xpresspost\nDOM.PC          | Priorité\nDOM.LIB         | Livres de bibliothèque\nUSA.EP          | Colis accélérés É.-U.\nUSA.SP.AIR      | Petits paquets-avion à destination des É.-U.\nUSA.TP          | Paquet repérable – É.-U.\nUSA.TP.LVM      | Paquet repérable – É.-U. (GEC)<br>(gros expéditeur de courrier)<br><br>Nota : Cette option doit figurer dans votre convention pour pouvoir être utilisée.\nUSA.XP          | Xpresspost É.-U.\nINT.XP          | Xpresspost – International\nINT.IP.AIR      | Colis-avion du régime international\nINT.IP.SURF     | Colis de surface du régime international\nINT.SP.AIR      | Petits paquets-avion du régime international\nINT.SP.SURF     | Petits paquets de surface du régime international\nINT.TP          | Paquet repérable – International",
+        "type": "string"
+      },
+      "serviceName": {
+        "description": "Service name in the language of choice.\n\n---\n\nNom du service dans la langue privilégiée.",
+        "type": "string"
+      },
+      "optionName": {
+        "description": "Name of the option in the language of choice.\n\n---\n\nNom de l'option dans la langue privilégiée.",
+        "type": "string"
+      },
+      "postalCodeDomestic": {
+        "description": "The destination Postal Code. Format ANANAN (only accepted with uppercase).\n\n---  \n\nCode postal de destination Format ANANAN (seulement accepté avec majuscules).",
+        "type": "string",
+        "minLength": 6,
+        "maxLength": 6,
+        "pattern": "^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$"
+      },
+      "options": {
+        "description": "Structure containing the list of options desired for the shipment.\n\n---\n\nStructure contenant la liste d'options voulues pour l'envoi",
+        "type": "array",
+        "items": {
+          "description": "Holds the option code and qualifier for a selected option.\n\n---\n\nComprend le code d'option et le qualificatif pour une option sélectionnée.",
+          "type": "object",
+          "properties": {
+            "optionCode": {
+              "description": "(10 alphanumeric)\n\nHolds the Canada Post-specific option code.\n\nValid values:\n\n- SO - Signature\n- COV - Coverage (requires qualifier)\n- COD - COD (requires qualifier)\n- PA18 - Proof of Age Required - 18\n- PA19 - Proof of Age Required - 19\n- PA21 - Proof of Age Required - 21\n- HFP - Card for pickup\n- DNS - Do not safe drop\n- LAD - Leave at door - do not card.\n\n---\n\n(10 caractères alphanumériques)\n\nComprend le code d'option propre à Postes Canada.\n\nValeurs valides :\n\n- SO – Signature\n- COV – Couverture (qualificatif requis)\n- COD – CR (qualificatif requis)\n- PA18 – Preuve d'âge requise (18 ans)\n- PA19 – Preuve d'âge requise (19 ans)\n- PA21 – Preuve d'âge requise (21 ans)\n- HFP – Annoncer par carte\n- DNS – Ne pas laisser en lieu sûr\n- LAD – Laisser à la porte – Pas d'avis",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/optionCode"
+                }
+              ]
+            },
+            "optionAmount": {
+              "description": "Required for COV – the amount of insurance to be purchased.\n\n5.2 digits e.g. 99999.99\n\n---\n\nRequis pour COV – Montant de l'assurance à acheter\n\nCinq chiffres, suivis de deux décimales (p. ex. 99999.99)  ",
+              "type": "number",
+              "exclusiveMinimum": true,
+              "minimum": 0,
+              "maximum": 999999.99
+            }
+          },
+          "required": ["optionCode"],
+          "additionalProperties": false
+        },
+        "maxItems": 20
+      },
+      "optionCode": {
+        "description": "The code used to select the option in Get Rates or Create Shipment.\n\n---\n\nContient des détails liés aux taxes facturées pour cet envoi s'il est envoyé à l'aide de ce service. (Ne contiendra pas les trois types de taxes à la fois)",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10
+      },
+      "number5Dec2": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 99999.99,
+        "multipleOf": 0.01
+      },
+      "number4Dec2": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 9999.99,
+        "multipleOf": 0.01
+      },
+      "percentage": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100,
+        "multipleOf": 0.01
+      },
+      "tax": {
+        "type": "object",
+        "properties": {
+          "amt": {
+            "$ref": "#/components/schemas/number5Dec2"
+          },
+          "percent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/percentage"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false
+      },
+      "link": {
+        "description": "Link for Get Option. See Provided endpoints.\n\n---\n\nLien pour obtenir l'option. Voir les points de terminaison fournis.",
+        "type": "object",
+        "properties": {
+          "href": {
+            "description": "Indicates the endpoint to be used to call the web service. It contains the URL and may also contain a query string.\n\n---\n\nDésigne le point final à utiliser pour présenter une demande de service en ligne. Il contient l'adresse URL et peut également contenir une chaîne de requête.",
+            "type": "string"
+          },
+          "rel": {
+            "description": "Indicates the resource related to the current response.\n\n---\n\nIndique la ressource associée à la réponse actuelle.",
+            "type": "string"
+          },
+          "index": {
+            "description": "Present on links to formatted output such as labels. The value starts at 0 for the first page and subsequent pages (if extant) count up by 1.\n\n---\n\nFait partie des liens vers les données de sortie formatées, comme les étiquettes. La valeur de la première page est de « 0 », et cette valeur augmente de un pour chaque page subséquente (le cas échéant).",
+            "type": "integer",
+            "minimum": 0
+          },
+          "mediaType": {
+            "description": "A character string that indicates the format and version of the data to expect when the web service is invoked.\n\nThe value in this attribute should be copied to the HTTP header variable \"Accept\" when the href link is invoked.\n\n---\n\nIl s'agit d'une chaîne de caractères indiquant le format et la version des données prévus lorsqu'un service Internet est utilisé.\n\nLa valeur de cet attribut doit être copiée dans la variable de l'en-tête HTTP « Accept » lorsque le lien href est utilisé.",
+            "type": "string"
+          }
+        },
+        "required": ["href", "rel", "mediaType"],
+        "additionalProperties": false
+      },
+      "quoteType": {
+        "description": "Either commercial or counter.\n\n- \"commercial\" will return the discounted price for the commercial customer or Solutions for Small Business member.\n- \"counter\" will return the regular price paid by consumers.\n\nDefaults to \"commercial\" if not specified.\n\n---\n\nOption « Commercial » ou « Counter »\n\n- L'option « Commercial » remettra le tarif réduit en place pour le client commercial ou le client du programme Solutions pour petites entreprises.</li>\n- Si l'option « Counter » est sélectionnée, le prix courant payé par les consommateurs s'affiche.\n\nL'option « Commercial » s'affiche par défaut si aucune option n'est sélectionnée.",
+        "enum": ["commercial", "counter"]
+      },
+      "expectedMailingDate": {
+        "description": "The expected mailing date for the parcel.\n\nThis date is used in calculations of the expected delivery date, however all rate quotes are based on the current system date.\n\n(YYYY-MM-DD date format)\n\n---\n\nDate d'expédition prévue pour le colis.\n\nCette date est utilisée pour calculer la date de livraison prévue. Cependant, toutes les propositions tarifaires sont fonction de la date actuelle du système.\n\n(Format de la date : AAAA-MM-JJ)",
+        "type": "string",
+        "format": "date"
+      },
+      "dimensionMeasure": {
+        "description": "Details of the parcel dimensions in centimeters\n\n---\n\nDétails liés aux dimensions du colis en centimètres.",
+        "type": "number",
+        "exclusiveMinimum": true,
+        "minimum": 0,
+        "maximum": 999.9,
+        "multipleOf": 0.1
+      },
+      "length": {
+        "description": "Specifies the dimension range of the longest dimension of an item in cm.\n\n---\n\nPrécise la gamme de dimensions de la dimension la plus longue pour un envoi en centimètres.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/dimensionMeasure"
+          }
+        ]
+      },
+      "width": {
+        "description": "Specifies the dimension range of the second longest dimension of an item in cm.\n\n---\n\nPrécise la gamme de dimensions de la deuxième dimension la plus longue pour un envoi en centimètres.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/dimensionMeasure"
+          }
+        ]
+      },
+      "height": {
+        "description": "Specifies the dimension range of the shortest dimension of an item in cm.\n\n---\n\nPrécise la gamme de dimensions de la dimension la plus courte pour un envoi en centimètres.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/dimensionMeasure"
+          }
+        ]
+      },
+      "parcelCharacteristics": {
+        "description": "Details of the parcel such as weight, dimensions and appearance.\n\n---\n\nDétails liés au colis (p. ex. poids, dimensions et apparence).",
+        "type": "object",
+        "properties": {
+          "weight": {
+            "description": "The weight of the parcel in kilograms.\n\n---\n\nPoids du colis en kilogrammes.",
+            "type": "number",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "maximum": 99.999,
+            "multipleOf": 0.001
+          },
+          "dimensions": {
+            "description": "Details of the parcel dimensions in centimeters.\n\n---\n\nDétails liés aux dimensions du colis en centimètres.",
+            "type": "object",
+            "properties": {
+              "length": {
+                "$ref": "#/components/schemas/length"
+              },
+              "width": {
+                "$ref": "#/components/schemas/width"
+              },
+              "height": {
+                "$ref": "#/components/schemas/height"
+              }
+            },
+            "required": ["length", "width", "height"]
+          },
+          "unpackaged": {
+            "description": "- defaults to \"false\".\n- true indicates that the parcel will be unpackaged (e.g. tires).\n\n---\n\n- La valeur par défaut est « faux ».\n- La mention « vrai » signifie que le colis ne sera pas emballé (p. ex. pneus).",
+            "type": "boolean"
+          },
+          "mailingTube": {
+            "description": "- defaults to \"false\"\n- true indicates that the object will be shipped in a mailing tube\n\n---\n\nvrai | faux\n\n - La valeur par défaut est « faux ».\n - La mention « vrai » signifie que l'objet sera expédié dans un tube d'expédition.",
+            "type": "boolean"
+          },
+          "oversized": {
+            "description": "- defaults to \"false\".\n- true indicates that the object has oversized dimensions.\n- automatically set correctly if dimensions are provided.\n\n---\n\n- La valeur par défaut est « faux ».\n- La mention « vrai » signifie que l'objet est surdimensionné.\n- La valeur est définie correctement si les dimensions sont fournies.",
+            "type": "boolean"
+          }
+        },
+        "required": ["weight"]
+      },
+      "mailingScenario": {
+        "description": "Get Rates - Request\n\n---\n\nObtenir les tarifs - Demande",
+        "type": "object",
+        "properties": {
+          "customerNumber": {
+            "$ref": "#/components/schemas/customerNumber"
+          },
+          "contractId": {
+            "$ref": "#/components/schemas/contractID"
+          },
+          "promoCode": {
+            "description": "If you have a promotional discount code, enter it here. The discount amount will be returned in the response under the adjustment structure.\n\n---\n\nSi vous avez un code de réduction promotionnelle, saisissez-le ici. Le montant de la réduction sera affiché dans la réponse sous la structure <adjustment>.   ",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10
+          },
+          "quoteType": {
+            "$ref": "#/components/schemas/quoteType"
+          },
+          "expectedMailingDate": {
+            "$ref": "#/components/schemas/expectedMailingDate"
+          },
+          "options": {
+            "$ref": "#/components/schemas/options"
+          },
+          "parcelCharacteristics": {
+            "$ref": "#/components/schemas/parcelCharacteristics"
+          },
+          "services": {
+            "description": "Specifies the services to rate for this mailing scenario.\n\n---\n\nPrécise les services pour lesquels il faut déterminer le tarif pour ce scénario d'expédition.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/serviceCode"
+            },
+            "maxItems": 20
+          },
+          "originPostalCode": {
+            "description": "Postal Code from which the parcel will be sent.\n\nFormat ANANAN (only accepted with uppercase)\n\n---\n\nCode postal à partir duquel le colis sera envoyé.\n\nFormat ANANAN (seulement accepté avec majuscules)",
+            "type": "string",
+            "minLength": 6,
+            "maxLength": 6,
+            "pattern": "^[A-Z][0-9][A-Z][0-9][A-Z][0-9]$"
+          },
+          "destination": {
+            "description": "Defines the destination of the parcel.\n\n---\n\nDéfinit la destination du colis.",
+            "type": "object",
+            "anyOf": [
+              {
+                "properties": {
+                  "domestic": {
+                    "description": "Defines the destination in Canada.\n\n---\n\nDéfinit la destination au Canada.",
+                    "type": "object",
+                    "properties": {
+                      "postalCode": {
+                        "$ref": "#/components/schemas/postalCodeDomestic"
+                      }
+                    },
+                    "required": ["postalCode"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["domestic"],
+                "additionalProperties": false
+              },
+              {
+                "properties": {
+                  "unitedStates": {
+                    "description": "Defines destination in the United States.\n\n---\n\nDéfinit la destination aux États-Unis.",
+                    "type": "object",
+                    "properties": {
+                      "zipCode": {
+                        "description": "Used when country code = US. Format is 5 digits or 5-4 (for extended Zip Codes).\n\nE.g. 12345 or 12345-6789\n\n---\n\nIl est utilisé lorsque le code de pays est « US ». Le format est de cinq chiffres ou de cinq chiffres suivis de quatre autres chiffres (pour les codes ZIP prolongés).\n\nExemple : 12345 ou 12345-6789",
+                        "type": "string",
+                        "minLength": 5,
+                        "maxLength": 10,
+                        "pattern": "^[0-9]{5}(-[0-9]{4})?$"
+                      }
+                    },
+                    "required": ["zipCode"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["unitedStates"],
+                "additionalProperties": false
+              },
+              {
+                "properties": {
+                  "international": {
+                    "description": "Defines an international destination (destination other than the United States or Canada). Only one of international, us-destination or domestic can be specified.\n\n---\n\nIl s'agit de la destination internationale (destination autre que les États-Unis ou le Canada). Seule une destination (internationale, États-Unis ou régime intérieur) peut être précisée.",
+                    "type": "object",
+                    "properties": {
+                      "countryCode": {
+                        "description": "The destination country code. Standard 2-character country code (valid country code other than CA or US).\n\n---\n\nCode de pays de destination – Code de pays standard à deux caractères (code de pays valide autre que CA ou US).",
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 2,
+                        "pattern": "^[a-zA-Z][a-zA-Z]$"
+                      },
+                      "postalCode": {
+                        "description": "The Postal Code field can be provided if the customer would like to receive a Guaranteed date for a Kahala Posts Group (KPG) country.\n\n---\n\nLe champ relatif au code postal peut être fourni si le client aimerait recevoir une garantie de date de livraison pour un pays membre du Kahala Post Group (KPG).",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10
+                      }
+                    },
+                    "required": ["countryCode"],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["international"],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": ["parcelCharacteristics", "originPostalCode", "destination"],
+        "additionalProperties": true,
+        "example": "{\n  \"customerNumber\": \"7023210\",\n  \"contractId\": \"40662505\",\n  \"quoteType\": \"commercial\",\n  \"options\": [\n    {\n      \"optionCode\": \"PA18\"\n    },\n    {\n      \"optionCode\": \"COV\",\n      \"optionAmount\": 500\n    }\n  ],\n  \"parcelCharacteristics\": {\n    \"weight\": 0.5,\n    \"dimensions\": {\n      \"length\": 22,\n      \"width\": 21,\n      \"height\": 20\n    },\n    \"unpackaged\": false,\n    \"mailingTube\": false,\n    \"oversized\": false\n  },\n  \"services\": [\n    \"DOM.PC\"\n  ],\n  \"originPostalCode\": \"T5L3B0\",\n  \"destination\": {\n    \"domestic\": {\n      \"postalCode\": \"K1K1K1\"\n    }\n  }\n}"
+      },
+      "priceQuotes": {
+        "description": "Get Rates - Response\n\n---\n\nObtenir les tarifs - Réponse",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "serviceCode": {
+              "$ref": "#/components/schemas/serviceCode"
+            },
+            "serviceLink": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/link"
+                },
+                {
+                  "type": "object"
+                }
+              ]
+            },
+            "serviceName": {
+              "$ref": "#/components/schemas/serviceName"
+            },
+            "priceDetails": {
+              "description": "Contains the detailed breakdown of the costs for this shipment if sent using this service.\n\n---\n\nAnalyse détaillée des coûts pour l'envoi s'il est expédié à l'aide de ce service.",
+              "type": "object",
+              "properties": {
+                "base": {
+                  "description": "Base cost of the shipment before taxes.\n\n---\n\nCoût de base de l'envoi avant les taxes.",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/number5Dec2"
+                    }
+                  ]
+                },
+                "taxes": {
+                  "description": "Contains details on taxes charged for this shipment if sent using this service. (Will not contain all three tax type fields at once.)\n\n---\n\nContient des détails sur les taxes facturées pour cet envoi s'il est envoyé à l'aide de ce service. (Ne contiendra pas les trois champs de type de taxe à la fois.)",
+                  "type": "object",
+                  "properties": {
+                    "gst": {
+                      "description": "Goods and services tax.\n\n---\n\nTaxe sur les produits et services.",
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/tax"
+                        }
+                      ]
+                    },
+                    "pst": {
+                      "description": "Provincial sales tax.\n\n---\n\nTaxe de vente provinciale.",
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/tax"
+                        }
+                      ]
+                    },
+                    "hst": {
+                      "description": "Harmonized sales tax.\n\n---\n\nTaxe de vente harmonisée.",
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/tax"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "due": {
+                  "description": "Total cost of the shipment if sent using this service including the cost of selected or required options, surcharges, discounts and taxes.\n\n---\n\nCoût total de l'envoi s'il est expédié à l'aide de ce service (y compris les taxes, les réductions, les suppléments et les options sélectionnés ou nécessaires).",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/number5Dec2"
+                    }
+                  ]
+                },
+                "options": {
+                  "description": "This structure contains the options that were selected and will also show free options and the parcel characteristics of mailing tube, unpackaged or oversize if selected or warranted by dimensions.\n\n---\n\nCette structure contient les options sélectionnées ainsi que les options gratuites et les caractéristiques de colis pour les tubes d'expédition, les articles surdimensionnés ou non emballés si elles ont été sélectionnées ou justifiées selon les dimensions.",
+                  "type": "array",
+                  "items": {
+                    "description": "This structure contains details about a single option.\n\n---\n\nCette structure contient les détails liés à une seule option.",
+                    "type": "object",
+                    "properties": {
+                      "optionCode": {
+                        "$ref": "#/components/schemas/optionCode"
+                      },
+                      "optionName": {
+                        "$ref": "#/components/schemas/optionName"
+                      },
+                      "optionPrice": {
+                        "description": "Cost of this option for the current parcel.\n\n---\n\nCoût de cette option pour le colis en question.",
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/number5Dec2"
+                          }
+                        ]
+                      },
+                      "qualifier": {
+                        "description": "Contains additional details about the option if available.\n\n---\n\nContient le qualificatif du rajustement (le cas échéant).",
+                        "type": "object",
+                        "properties": {
+                          "stepSize": {
+                            "description": "Indicates the step size for additional step pricing. E.g. the amount of coverage purchased in one step such as $100.\n\n---\n\nIndique la taille de la tranche aux fins de tarification par tranche supplémentaire (p. ex. montant de la couverture achetée dans une tranche, soit 100 $).",
+                            "type": "number"
+                          },
+                          "stepCost": {
+                            "description": "Indicates the cost for a step size. E.g. 75 cents for each step size ($100) of coverage.\n\n---\n\nIndique le coût lié à la taille d'une tranche (p. ex. 75 cents pour chaque tranche (100 $) de la couverture.",
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/number5Dec2"
+                              }
+                            ]
+                          },
+                          "includedAmount": {
+                            "description": "Indicates how much is covered by base service. E.g. the first $100 of coverage is included.\n\n---\n\nDésigne la couverture offerte par le service de base (p. ex. la première tranche de 100 $ de la couverture est incluse).",
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/number5Dec2"
+                              }
+                            ]
+                          },
+                          "maxValue": {
+                            "description": "Indicates the maximum option amount. E.g. $5000 maximum coverage.\n\n---\n\nIndique le montant maximal de l'option (p. ex. couverture maximale de 5 000 $).",
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/number5Dec2"
+                              }
+                            ]
+                          },
+                          "included": {
+                            "description": "Indicates that the option is included at no charge.\n\n---\n\nIndique que l'option est offerte gratuitement.",
+                            "type": "boolean"
+                          },
+                          "percent": {
+                            "description": "If the option is based on a percentage value the percentage will be returned.\n\n---\n\nSi l'option est fonction de la valeur du pourcentage, le pourcentage en question s'affichera.",
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/percentage"
+                              }
+                            ]
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": ["optionCode", "optionName", "optionPrice"],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 20
+                },
+                "adjustments": {
+                  "description": "Structure containing details of the adjustments to a price.\n\n---\n\nStructure contenant les détails liés aux rajustements tarifaires.",
+                  "type": "array",
+                  "items": {
+                    "description": "Structure containing details of an adjustment to a price.\n\n---\n\nStructure contenant les détails liés à un rajustement tarifaire",
+                    "type": "object",
+                    "properties": {
+                      "adjustmentCode": {
+                        "description": "Code identifying the adjustment.\n\n- AUTDISC – Automation discount\n- FUELSC – Fuel surcharge\n- NCNTGST – Non-contiguous state fee (applies to Priority Worldwide products sent to Alaska and Hawaii)\n- PROMODISC – Promotional discount (if the promo code is invalid or expired, the discount amount will show as zero under adjustment-cost)\n- PLATFMDISC – Discount for using an e-commerce platform\n- NEWREGDISC – Discount for joining the Developer Program\n- SAADJ – Service area adjustment (rate adjustment up or down for specific source and destination postal code combinations)\n\n---\n\nCode désignant le rajustement\n\n- AUTDISC – Réduction à l'automatisation\n- FUELSC – Supplément pour carburant\n- PROMODISC – Réduction promotionnelle (si le code de promotion est invalide ou expiré, le montant de la réduction sera indiqué comme étant zéro sous adjustment-cost)\n- PLATFMDISC – Réduction pour utilisation d’une plateforme de cybercommerce\n- NEWREGDISC – Réduction accordée lors de l’inscription au Programme pour\n- SAADJ – Ajustement pour zone de service (rajustement tarifaire à la hausse ou à la baisse pour des combinaisons précises de codes postaux d’origine et de destination)",
+                        "type": "string"
+                      },
+                      "adjustmentName": {
+                        "description": "Adjustment name in preferred language.\n\n---\n\nNom du rajustement dans la langue de préférence.",
+                        "type": "string"
+                      },
+                      "adjustmentCost": {
+                        "description": "Amount of the adjustment in dollars and cents.\n\n---\n\nMontant du rajustement en dollars et en cents.",
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/number4Dec2"
+                          }
+                        ]
+                      },
+                      "qualifier": {
+                        "description": "Contains the qualifier for the adjustment if applicable.\n\n---\n\nContient le qualificatif du rajustement (le cas échéant).",
+                        "type": "object",
+                        "properties": {
+                          "percent": {
+                            "description": "If the adjustment is based on a percentage value the percentage will be returned. E.g. fuel surcharge.\n\n---\n\nSi le rajustement est fonction de la valeur du pourcentage, le pourcentage en question s'affichera (p. ex. supplément pour carburant).",
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/percentage"
+                              }
+                            ]
+                          }
+                        },
+                        "required": ["percent"],
+                        "additionalProperties": false
+                      }
+                    },
+                    "required": ["adjustmentCode", "adjustmentName", "adjustmentCost"],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 20
+                }
+              },
+              "required": ["base", "due"],
+              "additionalProperties": false
+            },
+            "weightDetails": {
+              "description": "Will be empty if dimensions were not provided or actual parcel weight exceeds standard density weight for the dimensions.\n\n---\n\nIl sera vide si les dimensions ne sont pas fournies ou si le poids réel du colis dépasse le poids volumétrique standard propre aux dimensions.",
+              "type": "object",
+              "properties": {
+                "cubedWeight": {
+                  "description": "The volumetric equivalent of the actual weight (VE) of the package. VE is not a unit of measure, a mass or a volume. It allows for more accurate pricing of an item given its weight and the space it occupies.\n\n---\n\nL'équivalent volumétrique du poids réel (EV) du paquet. L'EV n'est pas une unité de mesure ni une masse ou un volume. Il assure une tarification plus exacte d'un article, compte tenu de son poids et de l'espace qu'il occupe.",
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            },
+            "serviceStandard": {
+              "description": "Contains details about package delivery if the quoted service is selected.\n\n---\n\nContient les détails liés à la livraison du colis si le service ayant fait l'objet d'une proposition tarifaire est sélectionné.",
+              "type": "object",
+              "properties": {
+                "amDelivery": {
+                  "description": "Indicates whether a.m. delivery is defined as part of the service standard for this service.\n\n---\n\nIndique si la livraison le matin est définie dans le cadre de la norme de service pour le service en question.",
+                  "type": "boolean"
+                },
+                "guaranteedDelivery": {
+                  "description": "Indicates if the delivery date is guaranteed.\n\n---\n\nIndique si la date de livraison est garantie.",
+                  "type": "boolean"
+                },
+                "expectedTransitTime": {
+                  "description": "Indicates the number of days from drop-off or pickup to 1st delivery attempt.\n\n---\n\nIndique le nombre de jours entre le dépôt ou le ramassage et la première tentative de livraison.",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 99
+                },
+                "expectedDeliveryDate": {
+                  "description": "The estimated date of delivery, starting from the expected mailing-date.\n\n---\n\nDate approximative de livraison en fonction de la date d'expédition prévue.",
+                  "type": "string",
+                  "format": "date"
+                }
+              },
+              "required": ["amDelivery", "guaranteedDelivery"],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "serviceCode",
+            "serviceLink",
+            "serviceName",
+            "priceDetails",
+            "weightDetails",
+            "serviceStandard"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "messages": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Type of error.\n\n---\n\nType d'erreur."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Detailed description of type of error.\n\n---\n\nDescription détaillée du type d'erreur."
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors.\n\n---\n\nListe des erreurs.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errorCode": {
+                  "type": "string",
+                  "description": "Error code related to error.\n\n---\n\nCode d'erreur lié à l'erreur."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Detailed message for the error that occured.\n\n---\n\nMessage détaillé concernant l'erreur survenue."
+                }
+              },
+              "required": ["message", "errorCode"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["title", "detail", "errors"],
+        "additionalProperties": false,
+        "example": {
+          "title": "Validation failed",
+          "detail": "Errors occurred while processing the request.",
+          "errors": [
+            {
+              "errorCode": "002",
+              "message": "Duplicate Pin."
+            }
+          ]
+        }
+      },
+      "unauthorizedError": {
+        "type": "object",
+        "properties": {
+          "httpCode": {
+            "type": "string",
+            "description": "Code associated with the unauthorized error.\n  ---\n\nCode associé à l'erreur d'autorisation."
+          },
+          "httpMessage": {
+            "type": "string",
+            "description": "Error message.\n  ---\n\nmessage d'erreur."
+          },
+          "moreInformation": {
+            "type": "string",
+            "description": "Detailed error message.\n  ---\n\nMessage d'erreur détaillé."
+          }
+        }
+      },
+      "services": {
+        "description": "Discover Services - Response\n\n---\n\nDiscover Services - Réponse",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "serviceCode": {
+              "$ref": "#/components/schemas/serviceCode"
+            },
+            "serviceName": {
+              "$ref": "#/components/schemas/serviceName"
+            },
+            "link": {
+              "$ref": "#/components/schemas/link"
+            }
+          },
+          "required": ["serviceCode", "serviceName", "link"],
+          "additionalProperties": false
+        }
+      },
+      "service": {
+        "description": "Get Service - Response\n\n---\n\nObtenir le service - Réponse",
+        "type": "object",
+        "properties": {
+          "serviceCode": {
+            "$ref": "#/components/schemas/serviceCode"
+          },
+          "serviceName": {
+            "$ref": "#/components/schemas/serviceName"
+          },
+          "comment": {
+            "description": "Coverage message stating the maximum amount of coverage included with this service (which can be none); only returned on a few U.S. and international services where additional coverage cannot be purchased.\n\n---\n\nMessage indiquant le montant maximal de couverture inclus avec ce service (qui peut être aucune); l'information est retournée uniquement pour quelques services vers les É.-U. et le régime international pour lesquels on ne peut pas acheter une couverture supplémentaire.",
+            "type": "string"
+          },
+          "options": {
+            "description": "This structure contains the options that were selected and will also show free options and the parcel characteristics of mailing tube, unpackaged or oversize if selected or warranted by dimensions\n\n---\n\nCette structure contient les options sélectionnées ainsi que les options gratuites et les caractéristiques de colis pour les tubes d'expédition, les articles surdimensionnés ou non emballés si elles ont été sélectionnées ou justifiées selon les dimensions.",
+            "type": "array",
+            "items": {
+              "description": "One specific option.\n\n---\n\nOption précise.",
+              "type": "object",
+              "properties": {
+                "optionCode": {
+                  "$ref": "#/components/schemas/optionCode"
+                },
+                "optionName": {
+                  "$ref": "#/components/schemas/optionName"
+                },
+                "mandatory": {
+                  "description": "Indicates whether this option is mandatory for the service.\n\n---\n\nIndique si cette option est obligatoire pour le service.",
+                  "type": "boolean"
+                },
+                "qualifierRequired": {
+                  "description": "True indicates that this option if selected must include a qualifier on the option. This is true for insurance (COV) and collect on delivery (COD) options.\n\n---\n\nLa mention « Vrai » signifie que cette option doit inclure un qualificatif si elle est sélectionnée. C'est le cas pour les options Couverture (COV) et Contre remboursement (COD).",
+                  "type": "boolean"
+                },
+                "qualifierMax": {
+                  "description": "Numeric – indicates the maximum value of the qualifier for this service. The maximum value of a qualifier may differ between services. This is specific to the insurance (COV) option.\n\n---\n\nLe code numérique correspond à la valeur maximale du qualificatif pour ce service. La valeur maximale d'un qualificatif peut varier selon les services. Cet élément est propre à l'option Couverture (COV).",
+                  "type": "number"
+                },
+                "link": {
+                  "$ref": "#/components/schemas/link"
+                }
+              },
+              "required": ["optionCode", "optionName", "mandatory", "qualifierRequired", "link"],
+              "additionalProperties": false
+            }
+          },
+          "restrictions": {
+            "description": "Details the weight and size restrictions of parcels shipped via this service.\n\n---\n\nDécrit les restrictions relatives aux dimensions et au poids pour les colis expédiés par l'intermédiaire de ce service.",
+            "type": "object",
+            "properties": {
+              "weightRestriction": {
+                "description": "Details the weight restrictions of items shipped via this service in grams.\n\n---\n\nDécrit les restrictions relatives au poids pour les articles expédiés par l'intermédiaire de ce service.",
+                "type": "object",
+                "properties": {
+                  "min": {
+                    "description": "Minimum weight in grams.\n\n---\n\nPoids minimal en grammes",
+                    "type": "number"
+                  },
+                  "max": {
+                    "description": "Maximum weight in grams that can be sent using this service.\n\n---\n\nPoids maximal en grammes pouvant être envoyé par l'intermédiaire de ce service",
+                    "type": "number"
+                  }
+                },
+                "required": ["min", "max"],
+                "additionalProperties": false
+              },
+              "densityFactor": {
+                "description": "Standard density factor used to calculate volumetric equivalent of actual weight (VE).\n\n**Note:** Canada Post can use another factor to calculate the volumetric equivalent, depending on your parcels agreement.\n\n---\n\nFacteur de densité standard utilisé pour calculer l'équivalent volumétrique du poids réel.\n\n**Remarque** : Postes Canada peut utiliser un autre facteur pour calculer l'équivalent volumétrique, selon votre convention du service de colis",
+                "type": "number"
+              },
+              "canShipInMailingTube": {
+                "description": "True indicates that parcels shipped with this service can be shipped in a mailing tube (option CYL can be used).\n\n---\n\nLa mention « Vrai » indique que les colis expédiés par l'intermédiaire de ce service peuvent être expédiés dans un tube d'expédition (l'option CYL peut être utilisée).",
+                "type": "boolean"
+              },
+              "canShipUnpackaged": {
+                "description": "True indicates that parcels shipped with this service can be shipped unpackaged (option UP can be used).\n\n---\n\nLa mention « Vrai » indique que les colis expédiés par l'intermédiaire de ce service peuvent être expédiés sans être emballés (l'option UP peut être utilisée).",
+                "type": "boolean"
+              },
+              "allowedAsReturnService": {
+                "description": "True indicates that this service can be used in the returnSpec of a Create Shipment request.\n\n---\n\nLa mention « Vrai » indique que ce service peut être utilisé dans returnSpec d'une demande de service Créer l'envoi.",
+                "type": "boolean"
+              },
+              "dimensionalRestrictions": {
+                "description": "Details the dimension restrictions of items shipped via this service.\n\n---\n\nDécrit les restrictions relatives aux dimensions pour les articles expédiés par l'intermédiaire de ce service.",
+                "type": "object",
+                "properties": {
+                  "length": {
+                    "$ref": "#/components/schemas/length"
+                  },
+                  "width": {
+                    "$ref": "#/components/schemas/width"
+                  },
+                  "height": {
+                    "$ref": "#/components/schemas/height"
+                  },
+                  "lengthPlusGirthMax": {
+                    "description": "Maximum calculated value of length + 2*width + 2*height in cm.\n\n---\n\nValeur maximale calculée : Longueur + (2 x Largeur) + (2 x Hauteur) (en centimètres).",
+                    "type": "number"
+                  },
+                  "lengthHeightWidthSumMax": {
+                    "description": "Maximum value of length + width + height in cm.\n\n---\n\nValeur maximale : Longueur + Largeur + Hauteur (en centimètres).",
+                    "type": "number"
+                  },
+                  "oversizeLimit": {
+                    "description": "If any dimension exceeds this limit an oversize fee will apply to the shipment (cm).\n\n---\n\nSi l'une des dimensions dépasse cette limite, un droit supplémentaire pour article surdimensionné s'appliquera à l'envoi (en centimètres).",
+                    "type": "number"
+                  }
+                },
+                "required": ["length", "width", "height"],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "weightRestriction",
+              "canShipInMailingTube",
+              "canShipUnpackaged",
+              "allowedAsReturnService",
+              "dimensionalRestrictions"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": ["serviceCode", "serviceName", "restrictions"],
+        "additionalProperties": false
+      },
+      "option": {
+        "description": "Get Option - Response\n\n---\n\nObtenir l'option - Réponse",
+        "type": "object",
+        "properties": {
+          "optionCode": {
+            "$ref": "#/components/schemas/optionCode"
+          },
+          "optionName": {
+            "$ref": "#/components/schemas/optionName"
+          },
+          "optionClass": {
+            "description": "- FEAT indicates that this option is a service feature.\n- DI indicates that this is a delivery instruction.\n- NDI indicates that this is an instruction in the case of unsuccessful delivery.\n\n---\n\n- EAT indique que cette option est une caractéristique du service.\n- DI indique qu'il s'agit d'une directive de livraison.\n- NDI indique qu'il s'agit d'une directive à suivre en cas de livraison infructueuse.",
+            "type": "string",
+            "enum": ["FEAT", "DI", "NDI"]
+          },
+          "printsOnLabel": {
+            "description": "Indicates that evidence of this option selection is printed on the label.\n\n---\n\nIndique qu'une preuve de la sélection de cette option est imprimée sur l'étiquette.",
+            "type": "boolean"
+          },
+          "qualifierRequired": {
+            "description": "True indicates that when this option is used in a Rate request or Create Shipment request, a qualifier for the option is required.\n\n---\n\nLa mention « Vrai » indique que, lorsque cette option est utilisée pour la demande de tarif ou de service Créer l'envoi, un qualificatif s'avère nécessaire pour l'option.",
+            "type": "boolean"
+          },
+          "conflictingOptions": {
+            "description": "List of codes that cannot be selected at the same time as this option.\n\n---\n\nListe de codes ne pouvant pas être sélectionnés en même temps pour cette option.",
+            "type": "array",
+            "items": {
+              "description": "An option that is mutually exclusive with the option specified in the option request.\n\n---\n\nOption s'excluant mutuellement avec option précisée dans la demande connexe.",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/optionCode"
+                }
+              ]
+            }
+          },
+          "prerequisiteOptions": {
+            "description": "List of codes that are required to support this option.\n\n---\n\nListe de codes nécessaires pour appuyer cette option.",
+            "type": "array",
+            "items": {
+              "description": "An option that must also be selected when the option specified in the option request is selected.\n\n---\n\nOption devant également être sélectionnée lorsque l'option précisée dans la demande connexe est sélectionnée.",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/optionCode"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "optionCode",
+          "optionName",
+          "optionClass",
+          "printsOnLabel",
+          "qualifierRequired"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "type": "oauth2",
+        "x-ibm-oauth-provider": "cpc-api-native-oauth-provider",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token",
+            "scopes": {
+              "merchant": "default description",
+              "platform": ""
+            }
+          }
+        }
+      }
+    },
+    "requestBodies": {}
+  },
+  "x-ibm-configuration": {
+    "cors": {
+      "enabled": true
+    },
+    "type": "rest",
+    "phase": "realized",
+    "enforced": true,
+    "testable": true,
+    "oauth-servers": {
+      "Oauth2": {
+        "clientCredentials": {
+          "tokenUrls": [
+            "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token"
+          ],
+          "authorizationUrls": [],
+          "refreshUrls": []
+        }
+      }
+    }
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1"
+    }
+  ],
+  "security": [
+    {
+      "Oauth2": ["merchant"]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/rating/v1"
+    }
+  ]
+}

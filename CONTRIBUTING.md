@@ -26,9 +26,13 @@ Use conventional commit messages (`feat(sdk): ...`, `fix(sdk): ...`, `docs: ...`
 ## Rules that protect real money and real accounts
 
 - **Never** run `create`, `void`, `transmit` or refund calls against production, and never add
-  them to `packages/canada-post/test/live/`. The live suite is read-only and sandbox-only
+  them to `packages/canada-post/test/live/`. That live suite is read-only and sandbox-only
   (`npm run check:live-readonly`). New mutating operations go into
   `packages/canada-post/src/operations.ts` with `access: "write"`, which extends the guard.
+- The REST Test-app suite (`packages/canada-post/test/live-test-app/`, `npm run
+test:live:test-app`) may create and void shipments because the Test app answers static stubs, and
+  only because every test file awaits `assertTestApp()` in `beforeAll`. Never put Production app
+  credentials anywhere near it (`.env` for this suite holds the Test app only).
 - Never commit credentials, customer numbers, contract ids, PINs or real addresses. Fixtures use
   fake values transcribed from the official examples. Secrets belong in a local `.env`
   (copy `.env.example`); `npm run check:secrets` scans the working tree.

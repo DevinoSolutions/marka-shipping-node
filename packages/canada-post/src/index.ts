@@ -15,12 +15,15 @@ export type {
 } from "./config.js";
 
 export {
+  CanadaPostAccessDeniedError,
   CanadaPostApiError,
+  CanadaPostAuthError,
   CanadaPostConfigurationError,
   CanadaPostError,
   CanadaPostIndeterminateError,
   CanadaPostNetworkError,
   CanadaPostParseError,
+  CanadaPostTestAppRequiredError,
   CanadaPostTimeoutError,
   CanadaPostValidationError,
 } from "./errors.js";
@@ -118,6 +121,22 @@ export type {
   TrackingQuery,
   TrackingSummary,
 } from "./api/tracking.js";
+
+export { createCanadaPostRestClient } from "./rest/client.js";
+export type { CanadaPostRestClient, RestFollowedLink } from "./rest/client.js";
+export { REST_BASE_URL } from "./rest/config.js";
+export type { CanadaPostRestClientOptions } from "./rest/config.js";
+export { findRestLink, requireRestLink } from "./rest/links.js";
+export type { RestTarget } from "./rest/context.js";
+export type { RestRatingApi, RestListServicesInput } from "./rest/rating.js";
+export type {
+  RestCreateShipmentOptions,
+  RestLabelSource,
+  RestShipmentListInput,
+  RestShipmentsApi,
+} from "./rest/shipments.js";
+export type { TestAppProbeResult } from "./rest/test-app.js";
+export type * from "./rest/types.js";
 
 export { OPERATIONS } from "./operations.js";
 export type { OperationSpec } from "./operations.js";

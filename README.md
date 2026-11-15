@@ -148,6 +148,68 @@ await canadaPost.artifacts.saveToFile(manifest.artifactLink!, "./manifest.pdf");
 
 Every response keeps its `links`. `canadaPost.followLink(link)` performs a GET with the link's own `media-type` as `Accept` and returns either the parsed XML (`{ kind: "xml", raw, text }`) or bytes (`{ kind: "binary", data, contentType }`). Links must point at the configured environment host, so credentials never leave it.
 
+## REST/OAuth client (new Developer Portal)
+
+Canada Post's new Developer Portal serves JSON over OAuth2. `createCanadaPostRestClient` covers
+it: contract shipments (Shipping v1) and quotes (Rating v3). It is an additional transport; the
+XML client above is unchanged.
+
+```ts
+import { createCanadaPostRestClient } from "@joinmarka/canada-post";
+
+const canadaPost = createCanadaPostRestClient({
+  clientId: process.env.CANADAPOST_CLIENT_ID!,
+  clientSecret: process.env.CANADAPOST_CLIENT_SECRET!,
+  customerNumber: process.env.CANADAPOST_CUSTOMER_NUMBER!,
+  app: "test", // "test" (default) or "production": YOU declare which kind of app these are
+});
+
+const quotes = await canadaPost.rating.getPrices({
+  originPostalCode: "K1A0B1",
+  destination: { domestic: { postalCode: "M5V2T6" } },
+  parcelCharacteristics: { weight: 1.2 },
+});
+
+const shipment = await canadaPost.shipments.create({
+  customerRequestId: "ORDER-1001", // always set it: it is how an indeterminate create is found again
+  transmitShipment: true,
+  deliverySpec: {
+    /* serviceCode, sender, destination, parcelCharacteristics, preferences, settlementInfo */
+  },
+});
+const label = await canadaPost.shipments.getLabel(shipment); // { contentType, data }
+await canadaPost.shipments.void(shipment.links.find((l) => l.rel === "self")!);
+```
+
+| App            | Answers                                      | Money                                  |
+| -------------- | -------------------------------------------- | -------------------------------------- |
+| `"test"`       | Static stubs; the request payload is ignored | Free                                   |
+| `"production"` | Real rates and labels                        | `shipments.create` **charges postage** |
+
+- Both apps use the same host and token URL, so the SDK cannot tell them apart. `app` is what you
+  declare (default `"test"`, never read from an environment variable). To prove credentials are a
+  Test app before writing anything, call `await canadaPost.assertTestApp()`: it sends two very
+  different quotes and only passes if both answers are byte-identical stubs
+  (`CanadaPostTestAppRequiredError` otherwise; `probeTestApp()` reports instead of throwing). A client
+  declared `"production"` always refuses.
+- The access token is cached, refreshed a minute before it expires and fetched once for concurrent
+  callers. Reads retry 5xx/429 and replay once after a 401; **writes (`create`, `void`) are sent
+  exactly once**, and a timeout or gateway error is `CanadaPostIndeterminateError` (look the shipment
+  up with `shipments.list({ requestId })` before retrying).
+- Errors: `CanadaPostApiError` (JSON error bodies mapped to `messages`, `title`, `detail`),
+  `CanadaPostAccessDeniedError` (HTTP 403; `emptyBody` when an app is not linked to the account yet),
+  `CanadaPostAuthError` (the token endpoint refused: wrong client id or secret).
+- Links (`label`, `details`, `price`, ...) are followed as given, only on
+  `api.canadapost-postescanada.ca`, so the bearer token cannot leak. The client secret and tokens never
+  appear in errors or in `onDebug` events.
+- The Test app's stubs deviate from Canada Post's OpenAPI documents in a few places (for example
+  `details` and `price` come back as one-element arrays); the SDK accepts both shapes. See section 10
+  of the contracts document.
+
+Run the live suite against your own Test app with
+`CANADAPOST_TEST_APP_LIVE=true npm run test:live:test-app` (needs `CANADAPOST_CLIENT_ID`,
+`CANADAPOST_CLIENT_SECRET` and `CANADAPOST_CUSTOMER_NUMBER` of the **Test** app in `.env`).
+
 ## API surface
 
 | Namespace     | Methods                                                                                                           |

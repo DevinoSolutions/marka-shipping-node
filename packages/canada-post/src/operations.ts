@@ -7,7 +7,10 @@
  * and `test/operations.test.ts` fails if a public method is missing from this table.
  */
 export interface OperationSpec {
-  /** `namespace.method`, as called on the client. */
+  /**
+   * `namespace.method`, as called on the XML client; `rest.namespace.method` for the REST
+   * client (`createCanadaPostRestClient`), whose namespaces carry the same names.
+   */
   id: string;
   /** `write` operations create, void, transmit, bill or request refunds. */
   access: "read" | "write";
@@ -66,5 +69,19 @@ export const OPERATIONS: Readonly<Record<string, OperationSpec>> = Object.fromEn
 
     read("tracking.getSummary"),
     read("tracking.getDetails"),
+
+    // REST/OAuth client (Developer Portal). `rating.getPrices` is a POST that only quotes.
+    read("rest.rating.getPrices", "POST"),
+    read("rest.rating.listServices"),
+    read("rest.rating.getService"),
+    read("rest.rating.getOption"),
+
+    write("rest.shipments.create"),
+    read("rest.shipments.get"),
+    read("rest.shipments.getDetails"),
+    read("rest.shipments.getPrice"),
+    read("rest.shipments.list"),
+    read("rest.shipments.getLabel"),
+    write("rest.shipments.void", "DELETE", false),
   ].map((op) => [op.id, op]),
 );

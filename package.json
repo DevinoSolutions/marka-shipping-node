@@ -21,6 +21,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:live": "vitest run --config packages/canada-post/vitest.live.config.ts",
+    "test:live:test-app": "vitest run --config packages/canada-post/vitest.live-test-app.config.ts",
     "docs:api": "typedoc",
     "verify:exports": "tsx scripts/verify-exports.ts",
     "check:secrets": "tsx scripts/check-secrets.ts",

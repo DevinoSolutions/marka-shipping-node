@@ -1,22 +1,36 @@
-// Enforces the repository rule that the live test suite is READ-ONLY and SANDBOX-ONLY.
+// Enforces the repository rules for the two live suites against the Canada Post APIs.
 //
-// The live tests in packages/canada-post/test/live/ use real Canada Post sandbox credentials; they must
-// never create, void, transmit or refund anything, and they must never target production.
-// This guard fails CI when a live file gains a mutating SDK call, a raw write-shaped request,
-// a production environment, an ungated describe block, or when the guard itself would pass
-// vacuously (no files found).
+// 1. packages/canada-post/test/live/ — XML sandbox, READ-ONLY and SANDBOX-ONLY. It must never
+//    create, void, transmit or refund anything, never target production, and its read-only
+//    gate must be present.
+// 2. packages/canada-post/test/live-test-app/ — the REST/OAuth Test app (static stubs, no
+//    postage). It MAY create and void shipments, but only if every test file proves a Test
+//    app with `await ...assertTestApp()` in beforeAll before its first test, and nothing in
+//    the directory can name the production app credentials, the "production" app type, the
+//    legacy XML client or raw network access. It may read no environment variable beyond the
+//    opt-in flag and the three Test-app credentials.
 //
-// The forbidden list is DERIVED, not hand-maintained: it loads packages/canada-post/src/operations.ts
-// and turns every `access: "write"` entry into a forbidden token. Adding a mutating operation
-// to the SDK therefore extends this guard automatically (and test/operations.test.ts fails if a
-// public method is missing from that table).
+// The forbidden lists are DERIVED, not hand-maintained: they come from
+// packages/canada-post/src/operations.ts (every `access: "write"` entry), so adding a
+// mutating operation to the SDK extends this guard automatically. The guard fails on a
+// vacuous pass (no files found). The scanning logic lives in live-guard.ts and is unit tested
+// by live-guard.test.ts.
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import type { OperationSpec } from "../packages/canada-post/src/operations.js";
+import {
+  checkTestAppFileList,
+  deriveRules,
+  scanReadOnlyFile,
+  scanTestAppFile,
+  scanWorkflow,
+  type GuardOperation,
+} from "./live-guard.js";
 
 const root = resolve(import.meta.dirname, "..");
 const liveDir = join(root, "packages", "canada-post", "test", "live");
+const testAppDir = join(root, "packages", "canada-post", "test", "live-test-app");
+const workflowDir = join(root, ".github", "workflows");
 const operationsFile = join(root, "packages", "canada-post", "src", "operations.ts");
 
 let failures = 0;
@@ -25,128 +39,73 @@ const fail = (msg: string): void => {
   console.error(`FAIL ${msg}`);
 };
 
-// Write surfaces the SDK does not implement yet (pickup requests, authorized returns, ...).
-// Listed so that the day they land, a live test that calls them is rejected immediately.
-const FUTURE_WRITE_IDS = ["pickup.create", "returns.create", "returns.createAuthorized"] as const;
-
-// Mutating verbs, blocked even unqualified (`await create(...)` via a local alias).
-const MUTATING_VERBS = [
-  "create",
-  "void",
-  "transmit",
-  "requestRefund",
-  "refund",
-  "cancel",
-  "update",
-  "submit",
-] as const;
-
 const operationsModule = (await import(pathToFileURL(operationsFile).href)) as {
-  OPERATIONS?: Record<string, OperationSpec>;
+  OPERATIONS?: Record<string, GuardOperation>;
 };
 const operations = Object.values(operationsModule.OPERATIONS ?? {});
 if (operations.length === 0) {
   fail(`no operations loaded from ${relative(root, operationsFile)} — guard cannot derive rules`);
 }
-
-const writeIds = [
-  ...operations.filter((op) => op.access === "write").map((op) => op.id),
-  ...FUTURE_WRITE_IDS,
-];
-if (writeIds.length === 0) {
+const rules = deriveRules(operations);
+if (rules.writeIds.length === 0) {
   fail("operation table declares no write operations — the derived guard would be empty");
 }
-
-const escape = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const forbidden: Array<{ re: RegExp; why: string }> = [];
-for (const id of writeIds) {
-  const [module, method] = id.split(".");
-  if (module === undefined || method === undefined) continue;
-  forbidden.push({
-    re: new RegExp(`\\b${escape(module)}\\s*\\.\\s*${escape(method)}\\s*\\(`),
-    why: `${id} (write)`,
-  });
-  forbidden.push({
-    re: new RegExp(`["'\`]${escape(id)}["'\`]`),
-    why: `${id} operation id (write)`,
-  });
+if (rules.restWriteShapes.size === 0) {
+  fail("operation table declares no REST write operations — the test-app rules would be empty");
 }
-for (const verb of MUTATING_VERBS) {
-  forbidden.push({
-    re: new RegExp(`(?<![A-Za-z0-9_.])${verb}\\s*\\(`, "i"),
-    why: `unqualified mutating call ${verb}(...)`,
-  });
-}
-// Raw write-shaped traffic: every live call goes through the SDK.
-forbidden.push({
-  re: /["'`](POST|PUT|DELETE|PATCH)["'`]/i,
-  why: "raw write-verb request (all live traffic must be reads)",
-});
-forbidden.push({
-  re: /\/rs\/[^"'`\s]*(?:ncshipment|shipment|manifest|artifact)/i,
-  why: "raw shipping endpoint path",
-});
-forbidden.push({
-  re: /transmitShipment|createPublicKey|createQrCode/,
-  why: "shipment-creation flag in a live file",
-});
 
-let files: string[] = [];
-try {
-  files = readdirSync(liveDir).filter((f) => f.endsWith(".ts"));
-} catch {
-  fail(`live test directory missing at ${liveDir} — guard cannot verify anything`);
+function listTs(dir: string, label: string): string[] {
+  try {
+    return readdirSync(dir).filter((f) => f.endsWith(".ts"));
+  } catch {
+    fail(`${label} directory missing at ${dir} — guard cannot verify anything`);
+    return [];
+  }
 }
-if (files.length === 0 && failures === 0) {
+
+const rel = (path: string): string => relative(root, path).replaceAll("\\", "/");
+
+// --- 1. read-only sandbox suite ---------------------------------------------------------
+const liveFiles = listTs(liveDir, "live test");
+if (liveFiles.length === 0 && failures === 0) {
   fail("no live test files found — guard would pass vacuously; fix the path or the suite");
 }
-
-for (const file of files) {
+for (const file of liveFiles) {
   const path = join(liveDir, file);
-  const rel = relative(root, path).replaceAll("\\", "/");
-  const text = readFileSync(path, "utf8");
-  const lines = text.split(/\r?\n/);
-  const isTestFile = file.endsWith(".live.test.ts");
-  const isEnvFile = file === "env.ts";
-  lines.forEach((line, i) => {
-    // Comments are documentation, not calls; skip them so the suite can explain itself.
-    const code = line.replace(/\/\/.*$/, "").replace(/^\s*\*.*$/, "");
-    for (const { re, why } of forbidden) {
-      if (re.test(code)) fail(`${rel}:${i + 1} ${why} — the live suite is read-only`);
-    }
-    // Every live call goes through the SDK; no raw network access.
-    if (/\bfetch\s*\(/.test(code)) {
-      fail(
-        `${rel}:${i + 1} raw fetch() in the live suite — every live call must go through the SDK`,
-      );
-    }
-    // The production environment is never allowed as a value outside the env refusal check.
-    if (!isEnvFile && /["'`]production["'`]/.test(code)) {
-      fail(`${rel}:${i + 1} mentions the production environment — the live suite is sandbox-only`);
-    }
-  });
-  if (isTestFile && !lines.some((l) => l.includes("describe.skipIf(!liveEnabled)"))) {
-    fail(`${rel} missing the describe.skipIf(!liveEnabled) gate`);
+  for (const finding of scanReadOnlyFile(rel(path), readFileSync(path, "utf8"), rules)) {
+    fail(finding);
   }
-  if (isEnvFile) {
-    if (!/environment:\s*"development"/.test(text)) {
-      fail(`${rel} must hard-code environment: "development" when building the client`);
-    }
-    if (!/Refusing to run the live suite/.test(text)) {
-      fail(`${rel} lost its refusal to run against a non-development environment`);
-    }
-    if (/environment:(?!\s*"development")/.test(text.replace(/\/\/.*$/gm, ""))) {
-      fail(`${rel} sets the client environment to something other than "development"`);
-    }
+}
+
+// --- 2. REST Test-app suite -------------------------------------------------------------
+const testAppFiles = listTs(testAppDir, "live test-app");
+for (const finding of checkTestAppFileList(testAppFiles)) fail(finding);
+for (const file of testAppFiles) {
+  const path = join(testAppDir, file);
+  for (const finding of scanTestAppFile(rel(path), readFileSync(path, "utf8"), rules)) {
+    fail(finding);
   }
+}
+
+// --- 3. workflows: no route to the production app credentials --------------------------
+let workflows: string[] = [];
+try {
+  workflows = readdirSync(workflowDir).filter((f) => /\.ya?ml$/.test(f));
+} catch {
+  fail(`workflow directory missing at ${workflowDir}`);
+}
+for (const file of workflows) {
+  const path = join(workflowDir, file);
+  for (const finding of scanWorkflow(rel(path), readFileSync(path, "utf8"))) fail(finding);
 }
 
 if (failures > 0) {
-  console.error(`\n${failures} read-only guard check(s) failed`);
+  console.error(`\n${String(failures)} live-suite guard check(s) failed`);
   process.exit(1);
 }
 console.log(
-  `Live suite read-only guard passed (${files.length} file(s) scanned, ` +
-    `${writeIds.length} write operation(s) blocked)`,
+  `Live suite guards passed (${String(liveFiles.length)} read-only file(s), ` +
+    `${String(testAppFiles.length)} test-app file(s), ${String(workflows.length)} workflow(s) scanned; ` +
+    `${String(rules.writeIds.length)} write operation(s) blocked in test/live/, ` +
+    `${String(rules.restWriteShapes.size)} REST write(s) allowed only in test/live-test-app/)`,
 );

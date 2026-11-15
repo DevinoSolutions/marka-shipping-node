@@ -1,0 +1,136 @@
+name: Canada Post Test-app canary
+
+# Runs the live suite in packages/canada-post/test/live-test-app/ against the Canada Post
+# Developer Portal TEST app (free, static stub answers, no postage). It proves the REST/OAuth
+# transport still works against the real gateway, and catches a drift of the stubs or of
+# Canada Post's OpenAPI documents. It is a canary: a broken run is a signal, never silenced.
+#
+# Credentials come from the GitHub Environment `canada-post-test` (secrets
+# CANADAPOST_CLIENT_ID, CANADAPOST_CLIENT_SECRET, CANADAPOST_CUSTOMER_NUMBER). Only Test-app
+# credentials ever belong there: the suite refuses to write unless assertTestApp() proves a
+# Test app, and `npm run check:live-readonly` fails CI if anything here or in the suite can
+# reach production credentials.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "37 7 * * *" # daily, off-peak (07:37 UTC)
+
+permissions:
+  contents: read
+
+# Never two canary runs at once: they share one app and its rate limit.
+concurrency:
+  group: canada-post-test-app
+  cancel-in-progress: false
+
+jobs:
+  live:
+    name: Live Test-app suite
+    # Fork pull requests (and Dependabot) get no secrets: skip them cleanly instead of failing.
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+       github.actor != 'dependabot[bot]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: canada-post-test
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+      - name: Require the Test-app credentials
+        env:
+          CANADAPOST_CLIENT_ID: ${{ secrets.CANADAPOST_CLIENT_ID }}
+          CANADAPOST_CLIENT_SECRET: ${{ secrets.CANADAPOST_CLIENT_SECRET }}
+          CANADAPOST_CUSTOMER_NUMBER: ${{ secrets.CANADAPOST_CUSTOMER_NUMBER }}
+        run: |
+          set -o pipefail
+          missing=0
+          for name in CANADAPOST_CLIENT_ID CANADAPOST_CLIENT_SECRET CANADAPOST_CUSTOMER_NUMBER; do
+            if [ -z "${!name}" ]; then
+              echo "::error title=Missing secret::${name} is not set in the 'canada-post-test' GitHub Environment. The canary cannot run, and a silent skip would hide a broken canary."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then exit 1; fi
+          # The values are secrets and already masked; mask the derived ones as well.
+          echo "::add-mask::${CANADAPOST_CLIENT_ID}"
+          echo "::add-mask::${CANADAPOST_CUSTOMER_NUMBER}"
+      - name: Install
+        run: |
+          set -o pipefail
+          npm ci
+      - name: Build
+        run: |
+          set -o pipefail
+          npm run build
+      - name: Guards (secrets, live-suite rules)
+        run: |
+          set -o pipefail
+          npm run check:secrets
+          npm run check:live-readonly
+      - name: Live Test-app suite
+        env:
+          CANADAPOST_TEST_APP_LIVE: "true"
+          CANADAPOST_CLIENT_ID: ${{ secrets.CANADAPOST_CLIENT_ID }}
+          CANADAPOST_CLIENT_SECRET: ${{ secrets.CANADAPOST_CLIENT_SECRET }}
+          CANADAPOST_CUSTOMER_NUMBER: ${{ secrets.CANADAPOST_CUSTOMER_NUMBER }}
+        run: |
+          set -o pipefail
+          npm run test:live:test-app -- --reporter=default --reporter=json --outputFile.json="$GITHUB_WORKSPACE/live-test-app-results.json"
+      - name: Fail if the suite passed vacuously
+        run: |
+          set -o pipefail
+          node -e '
+            const r = JSON.parse(require("node:fs").readFileSync("live-test-app-results.json", "utf8"));
+            const bad = r.numFailedTests + r.numPendingTests + r.numTodoTests + r.numFailedTestSuites;
+            console.log(`passed=${r.numPassedTests} failed=${r.numFailedTests} skipped=${r.numPendingTests}`);
+            if (r.numPassedTests < 1 || bad !== 0) {
+              console.error("::error::the live Test-app suite did not run in full (skipped or too few tests)");
+              process.exit(1);
+            }
+          '
+
+  # Opens (or comments on) an issue when the SCHEDULED canary fails, and closes it again on the
+  # next green scheduled run. Push and pull request failures are already visible on the commit.
+  report:
+    name: Canary issue
+    needs: live
+    if: always() && github.event_name == 'schedule' && (needs.live.result == 'failure' || needs.live.result == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ISSUE_TITLE: Canada Post Test-app canary failing
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      LIVE_RESULT: ${{ needs.live.result }}
+    steps:
+      - name: Open, update or close the canary issue
+        shell: bash
+        run: |
+          set -o pipefail
+          number=$(gh issue list --state open --search "\"${ISSUE_TITLE}\" in:title" --json number,title --jq "map(select(.title == \"${ISSUE_TITLE}\")) | .[0].number // empty")
+          if [ "$LIVE_RESULT" = "failure" ]; then
+            body="The scheduled Canada Post Test-app canary failed: ${RUN_URL}"
+            if [ -n "$number" ]; then
+              gh issue comment "$number" --body "Still failing: ${RUN_URL}"
+            else
+              gh issue create --title "$ISSUE_TITLE" --body "$body"$'\n\n'"The suite talks to the real Canada Post Test app. Open the run for the failing test: a stub or OpenAPI drift, expired credentials, or an outage. This issue closes itself on the next green scheduled run."
+            fi
+          elif [ -n "$number" ]; then
+            gh issue close "$number" --comment "Green again: ${RUN_URL}"
+          else
+            echo "Canary is green and no issue is open."
+          fi
