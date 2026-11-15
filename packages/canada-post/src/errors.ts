@@ -59,6 +59,10 @@ export class CanadaPostApiError extends CanadaPostError {
   readonly request: CanadaPostRequestInfo;
   /** First 500 characters of the response body (text), for diagnostics. */
   readonly bodyExcerpt: string | undefined;
+  /** REST/JSON API only: the `title` of a `{ title, detail, errors }` error body. */
+  readonly title: string | undefined;
+  /** REST/JSON API only: the `detail` of a `{ title, detail, errors }` error body. */
+  readonly detail: string | undefined;
 
   constructor(init: {
     status: number;
@@ -66,17 +70,24 @@ export class CanadaPostApiError extends CanadaPostError {
     request: CanadaPostRequestInfo;
     requestId?: string | undefined;
     bodyExcerpt?: string | undefined;
+    title?: string | undefined;
+    detail?: string | undefined;
+    /** Replaces the generated summary (used by subclasses with a clearer explanation). */
+    summary?: string | undefined;
   }) {
     const summary =
-      init.messages.length > 0
+      init.summary ??
+      (init.messages.length > 0
         ? init.messages.map((m) => `${m.code}: ${m.description}`).join("; ")
-        : `HTTP ${String(init.status)}`;
+        : `HTTP ${String(init.status)}`);
     super(`Canada Post ${init.request.operation} failed (HTTP ${String(init.status)}): ${summary}`);
     this.status = init.status;
     this.messages = init.messages;
     this.request = init.request;
     this.requestId = init.requestId;
     this.bodyExcerpt = init.bodyExcerpt;
+    this.title = init.title;
+    this.detail = init.detail;
   }
 
   /** All message codes, in order. */
@@ -175,5 +186,86 @@ export class CanadaPostIndeterminateError extends CanadaPostError {
     this.reason = init.reason;
     this.status = init.status;
     this.recovery = init.recovery;
+  }
+}
+
+/**
+ * REST/JSON API only: the gateway answered HTTP 403.
+ *
+ * An EMPTY 403 body was observed (2026-11-15) for a Production app whose credentials are valid
+ * (a token is issued) but which is not yet linked to the customer number. That reading is an
+ * **ASSUMPTION**; a non-empty body carries Canada Post's own explanation in
+ * {@link CanadaPostApiError.messages}.
+ */
+export class CanadaPostAccessDeniedError extends CanadaPostApiError {
+  /** True when the 403 had no body at all. */
+  readonly emptyBody: boolean;
+
+  constructor(init: ConstructorParameters<typeof CanadaPostApiError>[0] & { emptyBody: boolean }) {
+    super({
+      ...init,
+      summary: init.emptyBody
+        ? "access denied with an empty body: the credentials were accepted but this app is not " +
+          "authorized for this customer number or API (is the app linked to the account?)"
+        : init.summary,
+    });
+    this.emptyBody = init.emptyBody;
+  }
+}
+
+/**
+ * REST/JSON API only: the OAuth2 token endpoint refused or could not issue an access token.
+ * Nothing was sent to the shipping or rating API, so this is a DEFINITIVE failure even for
+ * writes. The client secret and tokens are never part of the message.
+ */
+export class CanadaPostAuthError extends CanadaPostError {
+  /** HTTP status of the token endpoint, if one answered. */
+  readonly status: number | undefined;
+  /** OAuth `error` code (for example `unauthorized_client`), if the body carried one. */
+  readonly oauthError: string | undefined;
+  /**
+   * True when the failure looks transient (network error, timeout, 429 or 5xx) and every
+   * retry was used up. False when the credentials were rejected.
+   */
+  readonly transient: boolean;
+
+  constructor(
+    message: string,
+    init: {
+      status?: number | undefined;
+      oauthError?: string | undefined;
+      transient: boolean;
+      cause?: unknown;
+    },
+  ) {
+    super(message, init.cause === undefined ? undefined : { cause: init.cause });
+    this.status = init.status;
+    this.oauthError = init.oauthError;
+    this.transient = init.transient;
+  }
+}
+
+/**
+ * `assertTestApp()` could not prove that the credentials belong to a Canada Post Test app (or
+ * the client was declared `app: "production"`). Callers that require a Test app (the live
+ * test-app suite) must stop and make NO write.
+ */
+export class CanadaPostTestAppRequiredError extends CanadaPostError {
+  /**
+   * `declared-production`: the client was created with `app: "production"`;
+   * `probe-failed`: a quote request failed, so nothing can be proven;
+   * `responses-differ`: two different quotes returned different bodies (real, computed prices);
+   * `unexpected-response`: the quote answers were not usable price lists.
+   */
+  readonly reason:
+    "declared-production" | "probe-failed" | "responses-differ" | "unexpected-response";
+
+  constructor(
+    reason: CanadaPostTestAppRequiredError["reason"],
+    message: string,
+    options?: { cause?: unknown },
+  ) {
+    super(`Not a Test app, refusing: ${message}`, options);
+    this.reason = reason;
   }
 }

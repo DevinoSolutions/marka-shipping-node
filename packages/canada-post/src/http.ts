@@ -72,7 +72,7 @@ export function queryString(params: Record<string, string | number | boolean | u
 }
 
 /** Extracts `<message>` entries if the root element is `messages`. */
-function extractMessages(text: string): CanadaPostMessage[] | undefined {
+export function extractMessages(text: string): CanadaPostMessage[] | undefined {
   if (!/<(?:[\w.-]+:)?messages[\s>/]/.test(text.slice(0, 2000))) return undefined;
   let root: XmlNode;
   try {
