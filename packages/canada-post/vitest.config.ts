@@ -5,6 +5,6 @@ export default defineProject({
     name: "sdk",
     environment: "node",
     include: ["test/**/*.test.ts"],
-    exclude: ["test/live/**"],
+    exclude: ["test/live/**", "test/live-test-app/**"],
   },
 });
