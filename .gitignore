@@ -28,3 +28,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 
+
+# Local live-suite reports
+live-test-app-results.json
