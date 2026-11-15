@@ -488,3 +488,162 @@ public-key info calls, credit-status calls, SOAP.
 8. Tracking errors using the `messages` envelope.
 9. Which statuses a gateway returns for a half-completed POST (the SDK treats 502/503/504 on a
    charging POST as indeterminate, see ADR 0001).
+
+## 10. REST/JSON APIs (new Developer Portal, OAuth2)
+
+Canada Post's new Developer Portal serves JSON over OAuth2. It is an additional transport next
+to the XML/Basic-auth APIs above (sections 1-9, unchanged). Source of truth for the wire shapes:
+the OpenAPI 3.0 documents downloaded from the portal and committed as
+`docs/research/openapi/shipping-v1.json` (Shipping 1.0.0) and
+`docs/research/openapi/rating-v1.json` (Rating 3.0.0), retrieved **2026-11-15** (see
+`docs/research/openapi/README.md`). Behaviour marked "verified live 2026-11-15" was observed
+against the portal with a **Test** app. Facts about the Production app (same host and token
+URL, the empty 403) were reported by the account owner the same day and were not exercised by
+this work; they are marked as such. Everything else the documents do not state is **ASSUMPTION**.
+
+### 10.1 Hosts, apps and authentication
+
+| Item           | Value                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| API base       | `https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs`                                               |
+| Shipping       | `{base}/shipping/v1` (OpenAPI `servers[0].url`)                                                                              |
+| Rating         | `{base}/rating/v1` (OpenAPI `servers[0].url`)                                                                                |
+| Token endpoint | `POST {base}/cpc-api-native-oauth-provider/oauth2/token` (OpenAPI `securitySchemes.Oauth2.flows.clientCredentials.tokenUrl`) |
+
+The Test app and the Production app use the **same host and the same token URL** (the token
+URL was confirmed for the Test app and reported identical for Production); the app
+(its client id and secret) alone decides whether answers are static stubs or real, billed
+postage. The SDK therefore cannot tell them apart from the URL, which is why the caller declares
+`app: "test" | "production"` and why `assertTestApp()` proves a Test app from behaviour (10.5).
+
+Token request (verified live 2026-11-15): `Content-Type: application/x-www-form-urlencoded`,
+body `grant_type=client_credentials&client_id=…&client_secret=…&scope=merchant`
+(`scope` is `merchant` or `platform` per the OpenAPI document). Response `200`:
+`{ token_type: "Bearer", access_token, scope, expires_in: 3600, consented_on }`. Wrong client
+secret: HTTP `401` `{ "error": "unauthorized_client", "error_description": "Invalid client ID or
+secret, or client not subscribed to this API" }`. Retry behaviour of the token endpoint on 5xx
+and 429 is **ASSUMPTION** (the SDK retries them: the request is idempotent).
+
+API requests: `Authorization: Bearer <access_token>`, `Accept: application/json`,
+`Content-Type: application/json` (bodies), `Accept-Language: en-CA|fr-CA`. Optional headers from
+the OpenAPI parameters: `platform-id` (customer number of the platform) and
+`X-CPC-Zonos-Key` (create shipment, US-bound without a declaration id).
+
+An API call with an invalid token answers HTTP `401`
+`{ "httpCode": "401", "httpMessage": "Unauthorized", "moreInformation": "Cannot pass the security checks …" }`
+(verified live; the OpenAPI example wraps it in an array). Whether a `401` can arrive after a
+write was applied is **ASSUMPTION**: the SDK treats it as a rejection by the gateway and never
+replays a write.
+
+A Production app whose account is not yet linked answers `403` with an **empty body**
+(reported by the account owner 2026-11-15, not exercised by this work; the reading "not
+linked" is **ASSUMPTION**). The SDK raises `CanadaPostAccessDeniedError` (`emptyBody: true`).
+
+### 10.2 Shipping v1 (paths relative to `{base}/shipping/v1`)
+
+`{mailedBy}` and `{mobo}` are customer numbers (`mobo` repeats `mailedBy` when not mailing on
+behalf of someone else).
+
+| SDK method             | Verb and path                                               | OpenAPI `operationId`  | Success |
+| ---------------------- | ----------------------------------------------------------- | ---------------------- | ------- |
+| `shipments.create`     | `POST /{mailedBy}/{mobo}/shipments`                         | `PostShipment`         | 200     |
+| `shipments.get`        | `GET /{mailedBy}/{mobo}/shipments/{id}`                     | `getShipmentById`      | 200     |
+| `shipments.getDetails` | `GET /{mailedBy}/{mobo}/shipments/{id}/details`             | `GetShipmentIdDetails` | 200     |
+| `shipments.getPrice`   | `GET /{mailedBy}/{mobo}/shipments/{id}/price`               | `getShipmentPrice`     | 200     |
+| `shipments.list`       | `GET /{mailedBy}/{mobo}/shipments?request-id=…`             | `getShipments`         | 200/202 |
+| `shipments.void`       | `DELETE /{mailedBy}/{mobo}/shipments/{id}`                  | `emptyShipment`        | 204     |
+| `shipments.getLabel`   | `GET /artifacts/{consumerId}/shipping/{artifactId}/{index}` | `shipmentArtifact`     | 200     |
+
+Not wrapped: receipt, QR code, refund, groups, manifests (documented in the OpenAPI file).
+
+Create request (`createShipmentRequest`, `additionalProperties: false`): exactly one of
+`transmitShipment: true` (no manifest needed) or `groupId`; `deliverySpec` required
+(`serviceCode`, `sender`, `destination`, `parcelCharacteristics`, `preferences`,
+`settlementInfo`); optional `customerRequestId` (≤ 35 chars), `requestedShippingPoint`
+(`A1A1A1`), `expectedMailingDate` (`YYYY-MM-DD`), `providePricingInfo: true`,
+`provideReceiptInfo: true`, `createPublicKey`, `createQrCode`, `cpcPickupIndicator`,
+`quickshipLabelRequested`, `shippingPointId`, `returnSpec`, `preAuthorizedPayment`.
+`settlementInfo.intendedMethodOfPayment` is a string ≤ 15 chars; the SDK types it as
+`CreditCard | Account | SupplierAccount`. The sender address is domestic (`countryCode: "CA"`,
+required) and the destination needs `name` or `company` when the country is `CA`.
+
+Create response: `{ customerRequestId?, shipmentId, shipmentStatus, trackingPin?, links[],
+shipmentPrice?, shipmentReceipt? }`. Links (`rel`, `href`, `mediaType`, `index?`) are followed as
+given: `self`, `details`, `price`, `group`, `label` (PDF, `index: 0`), `publicLabel`
+(`…/shipping/v1?key-cle=…`, a capability URL that must never be logged) and `publicKeyInfo`
+(verified live). The SDK only follows links on `api.canadapost-postescanada.ca` under
+`/prod/devportal-portaildesdeveloppeurs/`.
+
+Errors: `400` `messages` = `{ title, detail, errors: [{ errorCode, message }] }` (OpenAPI).
+Also observed from the Test app for a schema failure (verified live 2026-11-15):
+`{ "errorCode": "400", "errorMessage": "Schema validation Error", "errorDescription": "Schema validation failed" }`.
+Other documented codes: `401`, `403`, `404`, `412`, `500`, `501`, `503`, `504`.
+
+**Writes** (`create`, `void`) are never retried, never replayed after a `401`, and a timeout,
+dropped connection or `502/503/504` is `CanadaPostIndeterminateError` (ADR 0001). The way to
+find a shipment again is `shipments.list({ requestId })` with the `customerRequestId` sent on
+create (the `request-id` filter is documented, max 32 chars; the Test app ignores it).
+
+### 10.3 Rating v3 (paths relative to `{base}/rating/v1`)
+
+| SDK method            | Verb and path                      | OpenAPI `operationId` |
+| --------------------- | ---------------------------------- | --------------------- |
+| `rating.getPrices`    | `POST /prices`                     | `price`               |
+| `rating.listServices` | `GET /services?country=&contract=` | `service`             |
+| `rating.getService`   | `GET /services/{serviceCode}`      | `serviceCode`         |
+| `rating.getOption`    | `GET /options/{optionCode}`        | `optionCode`          |
+
+`POST /prices` (`mailingScenario`) is a **quote and therefore classified as a read** (like the
+XML `rating.getRates`): `parcelCharacteristics`, `originPostalCode` and `destination`
+(exactly one of `domestic.postalCode`, `unitedStates.zipCode`, `international.{countryCode,
+postalCode?}`) are required; `customerNumber`, `contractId`, `quoteType`
+(`commercial|counter`), `expectedMailingDate`, `options`, `services`, `promoCode` optional.
+Response: array of `priceQuotes` (`serviceCode`, `serviceLink`, `serviceName`, `priceDetails`
+`{ base, taxes, due, options, adjustments }`, `weightDetails`, `serviceStandard`).
+
+### 10.4 Test app behaviour (verified live 2026-11-15)
+
+The Test app returns **static stubs and ignores the request payload**:
+
+- `POST /prices` answers one canned `DOM.RP` quote (`due` 35.7, delivery date in 2025) whatever
+  the parcel, origin, destination, service filter or quote type: two different requests return
+  byte-identical bodies. `GET /services` answers four canned services; `GET /options/{code}`
+  answers option `DC` for any code; `GET /services/{code}` answers `DOM.EP` for any code.
+- `POST …/shipments` answers `200` with a `shipmentId`, `shipmentStatus: "created"`, a
+  `trackingPin` and the links above; the label is a canned three-page "for testing purposes
+  only" PDF (about 55 KB, `Content-Type: application/pdf`, starts with `%PDF-1.4`).
+- `GET …/shipments/{id}` answers `200` for **any id**, including ids that were never created.
+- `GET …/details` and `GET …/price` answer a **one-element JSON array** although the OpenAPI
+  document specifies an object. The SDK accepts both (`jsonObjectOrSingleton`). Whether a
+  Production app does the same is **ASSUMPTION**.
+- `GET /services/{code}` answers `restrictions.dimensionalRestrictions.{length,width,height}`
+  as `{ "min": 0.1, "max": 200 }` although the OpenAPI document specifies a number. The SDK
+  types both (`RestDimensionLimit`); the live suite pins this deviation exactly.
+- `DELETE …/shipments/{id}` answers `204` for any id, including unknown ones.
+- Schema failures answer `400` with the `errorCode/errorMessage/errorDescription` body above.
+- Rate limit headers `x-ratelimit-limit` and `x-ratelimit-remaining` are present (not used).
+
+The Test app answers carry fixed identifiers from Canada Post's own documentation; no real
+account data is involved.
+
+### 10.5 The Test-app interlock
+
+`app` is declared by the caller (default `"test"`), never read from an environment variable.
+`assertTestApp()` sends two `POST /prices` quotes that differ in origin, destination, weight,
+dimensions and service filter, and passes only when **both answers are HTTP 200 price lists
+and byte-identical**. A real (Production) app computes different prices for those two quotes;
+errors, empty lists and identical error pages are not accepted as proof. A client declared
+`app: "production"` refuses without sending anything. That a Production app can never return
+identical bytes for these two quotes is **ASSUMPTION** (it would require equal rates for
+different zones and weights).
+
+### 10.6 Open items (REST)
+
+1. Retry semantics of the token endpoint on 429/5xx (SDK retries; undocumented).
+2. Whether a `401` on a write can follow a partially applied write (SDK: never replays).
+3. Whether Production returns an object (per OpenAPI) or a one-element array for details/price.
+4. Whether Production returns a number or `{ min, max }` for service dimension limits.
+5. Meaning of the empty `403` (account not linked) for Production apps.
+6. Label rendering delay: the OpenAPI document lists no `202` for artifacts (the SDK reports a
+   `202` as a pending `CanadaPostApiError`).
+7. Gateway status for a half-completed `POST /shipments` (same as open item 9 above).
