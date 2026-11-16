@@ -65,6 +65,23 @@ const packages: PackageSpec[] = [
       "./testing": ["createMockFetch"],
     },
   },
+  {
+    dir: "packages/canada-post-mcp",
+    name: "@joinmarka/canada-post-mcp",
+    entries: {
+      ".": [
+        "createCanadaPostMcpServer",
+        "connectStdio",
+        "loadConfigFromEnv",
+        "writePolicy",
+        "InMemoryPreviewStore",
+        "McpStartupError",
+        "McpConfigError",
+        "SERVER_NAME",
+        "SERVER_VERSION",
+      ],
+    },
+  },
 ];
 
 for (const pkg of packages) {

@@ -1,7 +1,7 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "entryPointStrategy": "packages",
-  "entryPoints": ["packages/canada-post"],
+  "entryPoints": ["packages/canada-post", "packages/canada-post-mcp"],
   "out": "docs/api",
   "includeVersion": true,
   "excludePrivate": true,

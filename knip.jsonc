@@ -11,6 +11,10 @@
       "entry": ["src/index.ts", "src/testing/index.ts", "test/**/*.ts"],
       "project": ["src/**/*.ts", "test/**/*.ts"],
     },
+    "packages/canada-post-mcp": {
+      "entry": ["src/index.ts", "src/cli.ts", "test/**/*.ts"],
+      "project": ["src/**/*.ts", "test/**/*.ts"],
+    },
     "packages/shipping": {
       "entry": ["src/index.ts", "src/testing/index.ts"],
       "project": ["src/**/*.ts"],

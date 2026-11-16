@@ -252,7 +252,10 @@ function walk(node: ts.Node, visit: (n: ts.Node) => void): void {
 const lineOf = (source: ts.SourceFile, node: ts.Node): number =>
   source.getLineAndCharacterOfPosition(node.getStart(source)).line + 1;
 
-/** Clients are built in setup.ts only, and every `app` property is the literal "test". */
+/**
+ * Clients (and MCP servers) are built in setup.ts only, and every `app` property is the
+ * literal "test".
+ */
 function scanClients(name: string, source: ts.SourceFile, isSetup: boolean): string[] {
   const findings: string[] = [];
   let builds = 0;
@@ -264,6 +267,33 @@ function scanClients(name: string, source: ts.SourceFile, isSetup: boolean): str
       builds += 1;
       if (!isSetup) {
         findings.push(`${name}:${String(lineOf(source, node))} builds a client; only setup.ts may`);
+      }
+    }
+    // The MCP server builds its OWN client from the environment unless one is handed in: it
+    // may only be created in setup.ts, and only with the proven Test-app client.
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.getText(source) === "createCanadaPostMcpServer"
+    ) {
+      if (!isSetup) {
+        findings.push(
+          `${name}:${String(lineOf(source, node))} creates an MCP server; only setup.ts may`,
+        );
+      } else {
+        const options = node.arguments[0];
+        const hasClient =
+          options !== undefined &&
+          ts.isObjectLiteralExpression(options) &&
+          options.properties.some(
+            (p) =>
+              (ts.isPropertyAssignment(p) || ts.isShorthandPropertyAssignment(p)) &&
+              p.name.getText(source) === "client",
+          );
+        if (!hasClient) {
+          findings.push(
+            `${name}:${String(lineOf(source, node))} creates an MCP server without an explicit client option`,
+          );
+        }
       }
     }
     if (ts.isShorthandPropertyAssignment(node) && node.name.text === "app") {

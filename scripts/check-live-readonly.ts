@@ -3,8 +3,8 @@
 // 1. packages/canada-post/test/live/ — XML sandbox, READ-ONLY and SANDBOX-ONLY. It must never
 //    create, void, transmit or refund anything, never target production, and its read-only
 //    gate must be present.
-// 2. packages/canada-post/test/live-test-app/ — the REST/OAuth Test app (static stubs, no
-//    postage). It MAY create and void shipments, but only if every test file proves a Test
+// 2. packages/canada-post/test/live-test-app/ and packages/canada-post-mcp/test/live-test-app/
+//    — the REST/OAuth Test app (static stubs, no postage; the second is the MCP server smoke). It MAY create and void shipments, but only if every test file proves a Test
 //    app with `await ...assertTestApp()` in beforeAll before its first test, and nothing in
 //    the directory can name the production app credentials, the "production" app type, the
 //    legacy XML client or raw network access. It may read no environment variable beyond the
@@ -29,7 +29,11 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 const liveDir = join(root, "packages", "canada-post", "test", "live");
-const testAppDir = join(root, "packages", "canada-post", "test", "live-test-app");
+// Every directory of REST Test-app suites: the SDK's and the MCP server's smoke suite.
+const testAppDirs = [
+  join(root, "packages", "canada-post", "test", "live-test-app"),
+  join(root, "packages", "canada-post-mcp", "test", "live-test-app"),
+];
 const workflowDir = join(root, ".github", "workflows");
 const operationsFile = join(root, "packages", "canada-post", "src", "operations.ts");
 
@@ -78,12 +82,16 @@ for (const file of liveFiles) {
 }
 
 // --- 2. REST Test-app suite -------------------------------------------------------------
-const testAppFiles = listTs(testAppDir, "live test-app");
-for (const finding of checkTestAppFileList(testAppFiles)) fail(finding);
-for (const file of testAppFiles) {
-  const path = join(testAppDir, file);
-  for (const finding of scanTestAppFile(rel(path), readFileSync(path, "utf8"), rules)) {
-    fail(finding);
+let testAppFileCount = 0;
+for (const testAppDir of testAppDirs) {
+  const testAppFiles = listTs(testAppDir, "live test-app");
+  testAppFileCount += testAppFiles.length;
+  for (const finding of checkTestAppFileList(testAppFiles)) fail(`${rel(testAppDir)}: ${finding}`);
+  for (const file of testAppFiles) {
+    const path = join(testAppDir, file);
+    for (const finding of scanTestAppFile(rel(path), readFileSync(path, "utf8"), rules)) {
+      fail(finding);
+    }
   }
 }
 
@@ -105,7 +113,7 @@ if (failures > 0) {
 }
 console.log(
   `Live suite guards passed (${String(liveFiles.length)} read-only file(s), ` +
-    `${String(testAppFiles.length)} test-app file(s), ${String(workflows.length)} workflow(s) scanned; ` +
+    `${String(testAppFileCount)} test-app file(s), ${String(workflows.length)} workflow(s) scanned; ` +
     `${String(rules.writeIds.length)} write operation(s) blocked in test/live/, ` +
     `${String(rules.restWriteShapes.size)} REST write(s) allowed only in test/live-test-app/)`,
 );
