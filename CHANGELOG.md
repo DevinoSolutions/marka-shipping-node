@@ -8,6 +8,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 
 ### Added
 
+- REST client, full surface: `shipments.getReceipt`, `getQrCode`, `getGroups`, `requestRefund`,
+  `transmit`; `manifests` (`list`, `get`, `getDetails`); `tracking` (summaries and details by
+  PIN, DNC and reference, `createCertificate`); `customers` (`get`, `getMobo`,
+  `getPaymentReadiness`: card aliases are never exposed, logged or put in errors); `returns`
+  (authorized returns, open-return templates and their artifacts); `pickup` (create, update,
+  cancel, list, details, price, availability); `postOffices` (`find`, `getDetails`);
+  `serviceInfo` (`getMessages`). Typed from the new OpenAPI documents (kept in
+  `docs/research/openapi/`), all registered in the operations table (writes: `requestRefund`,
+  `transmit`, `pickup.create/update/cancel`, `returns.createAuthorized/createOpen/deleteOpen` and
+  `returns.getOpenArtifact`, a GET that consumes a label).
+- Contract tests for every new operation against its OpenAPI document, mocked tests for the
+  behaviour, and live Test-app tests for the APIs the Test app is subscribed to (tracking, customer
+  information, the later Shipping endpoints). Pickup, Returns, Post Office and Service Information
+  have no live tests: the Test app is not subscribed to them (HTTP 401). ADR 0003.
+
 - `createCanadaPostRestClient`: an additional transport for the new Canada Post Developer Portal
   (REST/JSON, OAuth2 `client_credentials`). `shipments` (`create`, `get`, `getDetails`, `getPrice`,
   `list`, `getLabel`, `void`) and `rating` (`getPrices`, `listServices`, `getService`,

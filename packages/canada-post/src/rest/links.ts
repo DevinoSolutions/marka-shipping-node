@@ -1,4 +1,4 @@
-import { CanadaPostConfigurationError, CanadaPostError } from "../errors.js";
+import { CanadaPostConfigurationError, CanadaPostError, CanadaPostParseError } from "../errors.js";
 import { REST_ORIGIN, REST_PATH_PREFIX } from "./config.js";
 import { safeUrl } from "./redact.js";
 import type { RestLink } from "./types.js";
@@ -45,4 +45,21 @@ export function requireRestLink(links: readonly RestLink[], rel: string): RestLi
     throw new CanadaPostError(`Response has no rel="${rel}" link (links present: ${have})`);
   }
   return link;
+}
+
+function isLink(value: unknown): value is RestLink {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { rel?: unknown }).rel === "string" &&
+    typeof (value as { href?: unknown }).href === "string"
+  );
+}
+
+/** Checks that a parsed JSON array holds links (`rel` and `href`) and returns it typed. */
+export function asRestLinks(value: unknown[], operation: string): RestLink[] {
+  if (!value.every(isLink)) {
+    throw new CanadaPostParseError(`${operation}: expected a list of links in the response`);
+  }
+  return value;
 }

@@ -29,16 +29,59 @@ export interface OpenApiDoc {
   };
 }
 
-export type SpecName = "shipping-v1" | "rating-v1";
+export type SpecName =
+  | "shipping-v1"
+  | "rating-v1"
+  | "tracking-v1"
+  | "customerinfo-v1"
+  | "returns-v1"
+  | "pickup-v1"
+  | "postoffice-v1"
+  | "serviceinfo-v1";
+
+/** Every committed OpenAPI document. */
+export const SPEC_NAMES: readonly SpecName[] = [
+  "shipping-v1",
+  "rating-v1",
+  "tracking-v1",
+  "customerinfo-v1",
+  "returns-v1",
+  "pickup-v1",
+  "postoffice-v1",
+  "serviceinfo-v1",
+];
 
 const specDir = resolve(import.meta.dirname, "..", "..", "..", "..", "docs", "research", "openapi");
 const cache = new Map<SpecName, OpenApiDoc>();
+
+/**
+ * KNOWN VENDOR BUG (Post Office v1, observed 2026-11-16): the officeId and opening-hours
+ * patterns are double-escaped (two backslashes before the d), so as written they only match a
+ * literal backslash. The validator repairs them in memory; the committed document stays
+ * verbatim, and rest-services.test.ts fails when Canada Post fixes the document so that this
+ * repair can be removed.
+ */
+function fixDoubleEscapedPatterns(node: unknown): void {
+  if (Array.isArray(node)) {
+    node.forEach(fixDoubleEscapedPatterns);
+  } else if (typeof node === "object" && node !== null) {
+    const record = node as Record<string, unknown>;
+    for (const [key, value] of Object.entries(record)) {
+      if (key === "pattern" && typeof value === "string") {
+        record[key] = value.replaceAll("\\\\", "\\");
+      } else {
+        fixDoubleEscapedPatterns(value);
+      }
+    }
+  }
+}
 
 /** Loads (and caches) one of the committed OpenAPI documents. */
 export function loadSpec(name: SpecName): OpenApiDoc {
   let doc = cache.get(name);
   if (doc === undefined) {
     doc = JSON.parse(readFileSync(join(specDir, `${name}.json`), "utf8")) as OpenApiDoc;
+    if (name === "postoffice-v1") fixDoubleEscapedPatterns(doc);
     cache.set(name, doc);
   }
   return doc;
@@ -81,7 +124,7 @@ const METADATA_KEYWORDS = new Set([
   "writeOnly",
   "externalDocs",
 ]);
-const KNOWN_FORMATS = new Set(["date", "date-time", "email", "binary"]);
+const KNOWN_FORMATS = new Set(["date", "date-time", "email", "binary", "uri"]);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -167,6 +210,8 @@ function formatOk(format: string, value: string): boolean {
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     case "binary":
       return true;
+    case "uri":
+      return URL.canParse(value);
     default:
       throw new Error(`unsupported format "${format}"`);
   }

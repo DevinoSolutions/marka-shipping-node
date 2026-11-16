@@ -1,0 +1,1593 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Pickup",
+    "x-ibm-name": "pickup",
+    "x-ibm-languages": {
+      "title": {
+        "fr": "Ramasser"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/pickup/v1"
+    }
+  ],
+  "paths": {
+    "/{customer}/pickup-request/{requestId}": {
+      "put": {
+        "tags": ["Pickup"],
+        "summary": "Modify On-demand Pickup",
+        "description": "Modifies the details of an existing pickup request, such as contact details or pickup time.",
+        "operationId": "updatePickup",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Modifier le retrait sur demande"
+          },
+          "description": {
+            "fr": "Modifie les détails d’une demande de ramassage existante, comme les coordonnées ou l’heure de ramassage."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "$ref": "#/components/parameters/customerId"
+          },
+          {
+            "$ref": "#/components/parameters/requestId"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePickupRequest"
+              },
+              "example": {
+                "contactInfo": {
+                  "contactName": "John Doe",
+                  "email": "user@example.com",
+                  "contactPhone": "555-555-0100",
+                  "lang": "e",
+                  "receiveEmailUpdatesFlag": true
+                },
+                "locationDetails": {
+                  "fiveTonFlag": true,
+                  "loadingDockFlag": true,
+                  "pickupInstructions": "Door at Back"
+                },
+                "itemCharacteristics": {
+                  "priorityFlag": false,
+                  "returnsFlag": true,
+                  "heavyItemFlag": true
+                },
+                "pickupVolume": "50",
+                "pickupTimes": {
+                  "onDemandPickupTime": {
+                    "date": "2026-02-25",
+                    "preferredTime": "15:00",
+                    "closingTime": "17:00"
+                  }
+                },
+                "paymentInfo": {
+                  "methodOfPayment": "CreditCard",
+                  "contractId": "0040662505"
+                }
+              }
+            }
+          },
+          "description": "<p><strong>Request &ndash; Fields</strong></p>\n<table>\n  <tbody>\n    <tr>\n      <th>Field Name</th>\n      <th>Type</th>\n      <th>Required / Optional</th>\n      <th>Description</th>\n    </tr>\n    <tr>\n      <td>\n        <p>contactInfo</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Structure containing the contact for questions or inquiries.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contactName</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 35 characters)</p>\n        <p>Contact name for the pickup.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>email</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 60 characters)</p>\n        <p>Must be a valid email address.</p>\n        <p>Pattern is (['_A-Za-z0-9\\-\\+]+)(\\.['_A-Za-z0-9\\-\\+]+)*@([A-Za-z0-9\\-]+)(\\.[A-Za-z0-9\\-]+)*(\\.[A-Za-z]{2,5})</p>\n        <p>Email address to receive status updates regarding your pickup request.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contactPhone</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 16 numeric characters)</p>\n        <p>Contact phone number for the pickup.</p>\n        <p>Format 999-999-9999</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>telephoneExt</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>(up to 6 numeric digits)</p>\n        <p>Telephone extension.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>receiveEmailUpdatesFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>True indicates that you wish to receive status updates about the request.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>locationDetails</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Structure containing characteristics of the physical location where pickup is to occur.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>fiveTonFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>True identifies that a 5-ton truck is needed.</p>\n        <p>Only applicable to an on-demand pickup request.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>loadingDockFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>True identifies that there is a loading dock at the location.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupInstructions</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string&nbsp; up to 40 characters)</p>\n        <p>Instructions for the driver (e.g., use back door, use side entrance, bring a dolly)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>itemCharacteristics</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>Structure to identify that items for pickup have special processing needs.</p>\n        <p>Only applicable to on-demand pickups.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>priorityFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>Identifies that Priority items could be available for pickup.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>returnsFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>Identifies that returned items could be available for pickup.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>heavyItemFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>Identifies that some the items to pick up may have a weight greater than 23 kg (50 lbs.)</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupVolume</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 40 characters)</p>\n        <p>For on-demand pickup, this is the expected number of items to be picked up. For scheduled pickups, it's the average number of items you expect for each pickup.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupTimes</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Structure containing the date and time range in which the pickup is to be done.</p>\n        <p>Only one of the child structures (onDemandPickupTime or scheduledPickupTimes) must be provided.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>onDemandPickupTime</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Conditionally required</p>\n      </td>\n      <td>\n        <p>Structure containing the details for an on-demand pickup request.</p>\n        <p>Mandatory for an on-demand pickup request; must not be provided otherwise.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>date</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(YYYY-MM-DD format)</p>\n        <p>Date you would like the on-demand pickup. The date cannot be more than 5 days in the future, unless you have a parcels agreement, in which case it can be up to 30 days.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>preferredTime</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(hh:mm format)</p>\n        <p>The preferred time for the on-demand pickup. Must be between noon (12:00) and 4&nbsp;p.m. (16:00), in 15-minute intervals (i.e. minutes must be 00, 15, 30 or 45).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>closingTime</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(hh:mm format)</p>\n        <p>The latest time for the on-demand pickup. Must be a minimum of one hour after preferred-time, in 15-minute intervals (i.e. minutes must be 00, 15, 30 or 45).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>paymentInfo</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>optional</p>\n      </td>\n      <td>\n        <p>Structure containing details on payment.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contractId</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>(Up to 10 numeric digits)</p>\n        <p>Your parcels agreement number, if applicable.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>methodOfPayment</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>&nbsp;</p>\n        <p>&nbsp; &nbsp;&nbsp;<br>For future use only.</p>\n        <p>In the initial release, the system will determine the method of payment:</p>\n        <ul>\n          <li>If you do not have a parcels agreement, fees will be charged to the default credit card in your online profile (or the request rejected if you do not have a default credit card on file).</li>\n          <li>If you have a parcels agreement and request a pickup at your main address (on demand), it will be billed to your account (unless your account is blocked, in which case the default credit card in your online profile would be used, or the request rejected if you do not have a default credit card on file).</li>\n          <li>If you have, or have authority to use, a parcels agreement and request a pickup at an alternate address (i.e. third-party pickup), it will be charged to the default credit card in your online profile.</li>\n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>",
+          "x-ibm-languages": {
+            "description": {
+              "fr": "<p><strong>Demande &ndash; Champs</strong></p>\n<table>\n  <tbody>\n    <tr>\n      <th>Nom du champ</th>\n      <th>Type</th>\n      <th>Requis/Facultatif</th>\n      <th>Description</th>\n    </tr>\n    <tr>\n      <td>contactInfo</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>Structure contenant la personne-ressource &agrave; qui adresser les questions ou les demandes.</td>\n    </tr>\n    <tr>\n      <td>contactName</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 35 caract&egrave;res)</p>\n        <p>Nom de la personne-ressource d&eacute;sign&eacute;e pour le ramassage.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>email</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 60 caract&egrave;res)</p>\n        <p>Il doit s'agir d'une adresse &eacute;lectronique valide.</p>\n        <p>Le format est le suivant: (['_A-Za-z0-9-+]+)(.['_A-Za-z0-9-+]+)<em>@([A-Za-z0-9-]+)(.[A-Za-z0-9-]+)</em>(.[A-Za-z]{2,5}).</p>\n        <p>Adresse &eacute;lectronique &agrave; laquelle envoyer les mises &agrave; jour de l'&eacute;tat de votre demande de ramassage.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>contactPhone</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 16 caract&egrave;res&nbsp;num&eacute;riques)</p>\n        <p>Num&eacute;ro de t&eacute;l&eacute;phone de la personne-ressource d&eacute;sign&eacute;e pour le ramassage.</p>\n        <p>Format 999-999-9999</p>\n      </td>\n    </tr>\n    <tr>\n      <td>telephoneExt</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Jusqu'&agrave; 6 caract&egrave;res&nbsp;num&eacute;riques)</p>\n        <p>Num&eacute;ro du poste t&eacute;l&eacute;phonique.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>receiveEmailUpdatesFlag</td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>{vrai, faux}</p>\n        <p>La&nbsp;valeur &laquo;vrai&raquo; indique que vous voulez recevoir de mises &agrave; jour de l'&eacute;tat de votre demande.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>locationDetails</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>Structure contenant les caract&eacute;ristiques du lieu physique o&ugrave; le ramassage doit avoir lieu.</td>\n    </tr>\n    <tr>\n      <td>fiveTonFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>{vrai, faux}</p>\n        <p>La&nbsp;valeur &laquo;vrai&raquo; indique qu'un camion de cinq tonnes est requis.</p>\n        <p>S'applique seulement aux demandes de ramassage sur demande.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>loadingDockFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>{vrai, faux}</p>\n        <p>La&nbsp;valeur &laquo;vrai&raquo; indique qu'il y a un quai de chargement au lieu de ramassage.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>pickupInstructions</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 40 caract&egrave;res)</p>\n        <p>Instructions&nbsp;&agrave; l'intention du conducteur (p.ex. utiliser la porte arri&egrave;re ou la porte lat&eacute;rale, apporter une plate-forme &agrave; roues).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>itemCharacteristics</td>\n      <td>Objet</td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>Structure contenant les d&eacute;tails relatifs aux types d'articles &agrave; ramasser.</p>\n        <p>Structure pour&nbsp;d&eacute;terminer qu'un traitement sp&eacute;cial est n&eacute;cessaire pour les articles &agrave; ramasser.</p>\n        <p>Applicable&nbsp;uniquement aux ramassages sur demande.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>priorityFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>{vrai, faux}</p>\n        <p>Indique si des articles prioritaires peuvent &ecirc;tre disponibles pour le ramassage.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>returnsFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>{vrai, faux}</p>\n        <p>Indique si des articles renvoy&eacute;s peuvent &ecirc;tre disponibles pour le ramassage.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>heavyItemFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>{vrai, faux}</p>\n        <p>Indique si certains articles &agrave; ramasser peuvent peser plus de 23kg (50lb).</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>pickupVolume</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 40 caract&egrave;res)</p>\n        <p>Pour&nbsp;un ramassage sur demande, il s'agit du nombre pr&eacute;vu d'articles &agrave; ramasser. Pour les ramassages &agrave; horaire fixe, il s'agit du nombre moyen pr&eacute;vu d'articles &agrave; ramasser.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>pickupTimes</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>\n        <p>Structure contenant la date et la p&eacute;riode &agrave; laquelle le ramassage doit avoir lieu.</p>\n        <p>Seulement une des structures fils doit &ecirc;tre fournie (&laquo;onDemandPickupTime&raquo;&nbsp;ou &laquo;scheduledPickupTimes&raquo;).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>onDemandPickupTime</td>\n      <td>Objet</td>\n      <td>Requis sous condition</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>Structure contenant les d&eacute;tails d'une demande de ramassage sur demande.</p>\n        <p>&Agrave; remplir uniquement pour une demande de ramassage sur demande.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>date</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Format de la date: AAAA-MM-JJ)</p>\n        <p>Date&nbsp;&agrave; laquelle vous souhaitez votre ramassage sur demande. La date doit se situer dans les cinq jours suivants, &agrave; moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut &ecirc;tre report&eacute;e &agrave; 30 jours.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>&nbsp;preferredTime</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Format de l'heure: HH:MM)</p>\n        <p>Heure pr&eacute;f&eacute;r&eacute;e du ramassage sur demande. La date doit se situer dans les cinq jours suivants, &agrave; moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut &ecirc;tre report&eacute;e &agrave; 30 jours.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>closingTime</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Format de l'heure: HH:MM)</p>\n        <p>Heure limite pour le ramassage sur demande. La date doit se situer dans les cinq jours suivants, &agrave; moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut &ecirc;tre report&eacute;e &agrave; 30 jours.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>paymentInfo</td>\n      <td>Objet</td>\n      <td>Facultatif</td>\n      <td>Structure containing détails sur payment.</td>\n    </tr>\n    <tr>\n      <td>contractId</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>(Jusqu'&agrave; 10 caract&egrave;res&nbsp;num&eacute;riques)</p>\n        <p>Votre num&eacute;ro de convention du service de colis, s'il y a lieu.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>methodOfPayment</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>Dans la version initiale, le syst&egrave;me d&eacute;terminera le mode de paiement :</p>\n        <ul>\n          <li>Si vous ne disposez pas d'une convention du service de colis, des frais seront imput&eacute;s sur la carte de cr&eacute;dit par d&eacute;faut enregistr&eacute;e dans votre profil en ligne (ou la demande sera rejet&eacute;e si vous ne disposez pas d'une carte de cr&eacute;dit par d&eacute;faut dans votre dossier).</li>\n          <li>Si&nbsp;vous disposez d'une convention du service de colis et que vous demandez un ramassage &agrave; votre adresse principale (sur demande), celui-ci sera factur&eacute; &agrave; votre compte (&agrave; moins que ce dernier ne soit bloqu&eacute;, auquel cas, la carte de cr&eacute;dit par d&eacute;faut enregistr&eacute;e dans votre profil en ligne sera utilis&eacute;e; ou bien la demande sera rejet&eacute;e si vous ne disposez pas d'une carte de cr&eacute;dit par d&eacute;faut dans votre dossier).</li>\n          <li>Si&nbsp;vous disposez d'une convention du service de colis, ou disposez de l'autorit&eacute; d'utiliser une convention du service de colis, et que vous demandez un ramassage &agrave; une adresse diff&eacute;rente (c.-&agrave;-d un ramassage en tierce partie), celui-ci sera imput&eacute; sur la carte de cr&eacute;dit par d&eacute;faut enregistr&eacute;e dans votre profil en ligne.</li>\n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204"
+          },
+          "400": {
+            "$ref": "#/components/responses/400-11022"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Pickup"],
+        "summary": "Cancel On-demand Pickup",
+        "description": "Cancel On-demand Pickup",
+        "operationId": "deletePickup",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Annuler la commande à emporter"
+          },
+          "description": {
+            "fr": "Annuler la commande à emporter"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "$ref": "#/components/parameters/customerId"
+          },
+          {
+            "$ref": "#/components/parameters/requestId"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      }
+    },
+    "/{customer}/pickup-request": {
+      "get": {
+        "tags": ["Pickup"],
+        "summary": "Get All On-demand Pickups",
+        "description": "Retrieves all open pickup requests and the status of each.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenez tous les retraits sur demande"
+          },
+          "description": {
+            "fr": "Affiche toutes les demandes de ramassage ouvertes et l’état de chacune."
+          }
+        },
+        "operationId": "getAllPickups",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "$ref": "#/components/parameters/customerId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupRequestsResponse"
+                },
+                "example": {
+                  "pickupRequests": [
+                    {
+                      "pickupRequestHeader": {
+                        "requestId": "11104183",
+                        "requestStatus": "Active",
+                        "pickupType": "OnDemand",
+                        "requestDate": "2025-12-17"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Pickup"],
+        "summary": "Create On-demand Pickup",
+        "description": "Creates a request for a One-Time On-Demand pickup and returns pickup request ID and links (URLs included in the API response).",
+        "operationId": "createPickup",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Créer un service de ramassage à la demande"
+          },
+          "description": {
+            "fr": "Crée une demande de ramassage unique sur demande et affiche le numéro de demande et les liens (URL incluses dans la réponse API)."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "$ref": "#/components/parameters/customerId"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePickupRequest"
+              },
+              "example": {
+                "pickupType": "OnDemand",
+                "pickupLocation": {
+                  "businessAddressFlag": false,
+                  "alternateAddress": {
+                    "company": "ABC Corp",
+                    "addressLine1": "123 Main St",
+                    "city": "Toronto",
+                    "province": "ON",
+                    "postalCode": "A1A1A1"
+                  }
+                },
+                "contactInfo": {
+                  "contactName": "John Doe",
+                  "email": "user@example.com",
+                  "contactPhone": "555-555-0100",
+                  "lang": "e",
+                  "receiveEmailUpdatesFlag": true
+                },
+                "locationDetails": {
+                  "fiveTonFlag": true,
+                  "loadingDockFlag": false,
+                  "pickupInstructions": "Use side entrance"
+                },
+                "itemCharacteristics": {
+                  "priorityFlag": false,
+                  "returnsFlag": true,
+                  "heavyItemFlag": false
+                },
+                "pickupVolume": "50",
+                "pickupTimes": {
+                  "onDemandPickupTime": {
+                    "date": "2026-03-26",
+                    "preferredTime": "14:00",
+                    "closingTime": "16:00"
+                  }
+                },
+                "paymentInfo": {
+                  "methodOfPayment": "CreditCard",
+                  "contractId": "0040662505"
+                }
+              }
+            }
+          },
+          "description": "<p><strong>Request &ndash; Fields</strong></p> <table>\n  <thead>\n    <tr>\n      <th>Field Name</th>\n      <th>Type</th>\n      <th>Required / Optional</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>\n        <p>pickupType</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Type of pickup requested:</p>\n        <ul>\n          <li>Ondemand &ndash; for an on-demand (one-time) pickup</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupLocation</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Structure containing the address where the pickup is to occur.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>businessAddressFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>{true}, {false}</p>\n        <p>True indicates that the pickup (or pickups) is at the business address specified in your Canada Post profile. (You can sign in to your profile to check the address we have on file for you.)</p>\n        <p>False indicates that the pickup is at an alternate address. You must specify the alternate address. Please note the following:</p>\n        <ul>\n          <li>On-demand pickups at an alternate address can only be paid for by credit card.</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>alternateAddress</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Conditionally required</p>\n      </td>\n      <td>\n        <p>Address for third-party pickup.</p>\n        <p>Required for third-party pickups (businessAddressFlag = false). Must not be supplied if businessAddressFlag = true.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>company</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 35 characters)</p>\n        <p>Company name of the organization requesting the pickup.</p>\n        <p>Required for third-party pickups (businessAddressFlag = false). Must not be supplied if businessAddressFlag = true.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>addressLine1</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 35 characters)</p>\n        <p>Street address of your pickup location</p>\n        <p>Required for third-party pickups (businessAddressFlag = false). Must not be supplied if businessAddressFlag = true.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>city</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 35 characters)</p>\n        <p>City of pickup location.</p>\n        <p>Required for third-party pickups (businessAddressFlag = false). Must not be supplied if businessAddressFlag = true.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>province</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(2 characters)</p>\n        <p>Province of pickup location.</p>\n        <p>Use standard 2-character Canadian province codes.</p>\n        <p>Required for third-party pickups (businessAddressFlag = false). Must not be supplied if businessAddressFlag = true.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>postalCode</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(6-character alphanumeric)</p>\n        <p>Postal Code of pickup location in format A9A9A9</p>\n        <p>Required for third-party pickups (businessAddressFlag = false).Must not be supplied if businessAddressFlag = true.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contactInfo</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Structure containing the contact for questions or inquiries.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contactName</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string&nbsp; up to 35 characters)</p>\n        <p>Contact name for the pickup.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>email</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 60 characters)</p>\n        <p>Must be a valid email address.</p>\n        <p>Pattern is (['_A-Za-z0-9\\-\\+]+)(\\.['_A-Za-z0-9\\-\\+]+)*@([A-Za-z0-9\\-]+)(\\.[A-Za-z0-9\\-]+)*(\\.[A-Za-z]{2,5})</p>\n        <p>Email address to receive status updates regarding your pickup request.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contactPhone</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 16 numeric characters)</p>\n        <p>Contact phone number for the pickup.</p>\n        <p>Format 999-999-9999</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>telephoneExt</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>(up to 6 numeric digits)</p>\n        <p>Telephone extension.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>receiveEmailUpdatesFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>True indicates that you wish to receive status updates about the request.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>locationDetails</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Structure containing characteristics of the physical location where pickup is to occur.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>fiveTonFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>True identifies that a 5-ton truck is needed.</p>\n        <p>Only applicable to an on-demand pickup request.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>loadingDockFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>True identifies that there is a loading dock at the location.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupInstructions</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string&nbsp; up to 40 characters)</p>\n        <p>Instructions for the driver (e.g., use back door, use side entrance, bring a dolly)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>itemCharacteristics</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>Structure to identify that items for pickup have special processing needs.</p>\n        <p>Only applicable to on-demand pickups.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>priorityFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>Identifies that Priority items could be available for pickup.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>returnsFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>Identifies that returned items could be available for pickup.</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>heavyItemFlag</p>\n      </td>\n      <td>\n        <p>Boolean</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>{true, false}</p>\n        <p>Identifies that some the items to pick up may have a weight greater than 23 kg (50 lbs.)&nbsp;</p>\n        <p>Defaults to False</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupVolume</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(Character string up to 40 characters)</p>\n        <p>The expected number of items to be picked up. You can also include additional details, such as &ldquo;50 parcels and 10 packets&rdquo;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupTimes</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>Structure containing the date and time range in which the pickup is to be done.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>onDemandPickupTime</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Conditionally required</p>\n      </td>\n      <td>\n        <p>Structure containing the details for an on-demand pickup request.</p>\n        <p>Mandatory for an on-demand pickup request; must not be provided otherwise.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>date</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(YYYY-MM-DD format)</p>\n        <p>Date you would like the on-demand pickup. The date cannot be more than 5 days in the future, unless you have a parcels agreement, in which case it can be up to 30 days.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>preferredTime</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(hh:mm format)</p>\n        <p>The preferred time for the on-demand pickup. Must be between noon (12:00) and 4&nbsp;p.m. (16:00), in 15-minute intervals (i.e. minutes must be 00, 15, 30 or 45).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>closingTime</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Required</p>\n      </td>\n      <td>\n        <p>(hh:mm format)</p>\n        <p>The latest time for the on-demand pickup. Must be a minimum of one hour after preferred-time, in 15-minute intervals (i.e. minutes must be 00, 15, 30 or 45).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>paymentInfo</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>Structure containing details on payment.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contractId</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>(Up to 10 numeric digits)</p>\n        <p>Your parcels agreement number, if applicable.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>methodOfPayment</p>\n      </td>\n      <td>\n        <p>String</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>For future use only.</p>\n        <p>In the initial release, the system will determine the method of payment:</p>\n        <ul>\n          <li>If you do not have a parcels agreement, fees will be charged to the default credit card in your online profile (or the request rejected if you do not have a default credit card on file).</li>\n          <li>If you have a parcels agreement and request a pickup at your main address (on demand), it will be billed to your account (unless your account is blocked, in which case the default credit card in your online profile would be used, or the request rejected if you do not have a default credit card on file).</li>\n          <li>If you have, or have authority to use, a parcels agreement with third-party pickup activated and request a pickup at an alternate address, it will be billed to your account (unless your account is blocked, in which case the default credit card in your online profile would be used, or the request rejected if you do not have a default credit card on file).</li>\n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>",
+          "x-ibm-languages": {
+            "description": {
+              "fr": "<p><strong>Demande &ndash; Champs</strong></p>\n<table>\n  <thead>\n    <tr>\n      <th>Nom du champ</th>\n      <th>Type</th>\n      <th>Requis/Facultatif</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>\n        <p>pickupType</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>&nbsp;</p>\n        <p>Type de demande de ramassage:</p>\n        <ul>\n          <li>Ondemand &ndash; ramassage sur demande (ponctuel)</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>pickupLocation</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>Structure contenant l'adresse du lieu de ramassage.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>businessAddressFlag&nbsp;</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Requis sous condition</p>\n      </td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>La valeur &laquo; vrai &raquo; signifie que le ramassage est &agrave; effectuer &agrave; l'adresse commerciale pr&eacute;cis&eacute;e dans votre profil Postes Canada.&nbsp;</p>\n        <p>Ne&nbsp;doit pas &ecirc;tre propos&eacute;e si l&rsquo;element &laquo; alternate-address &raquo; est fourni.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>alternateAddress</p>\n      </td>\n      <td>\n        <p>Object</p>\n      </td>\n      <td>\n        <p>Requis sous condition</p>\n      </td>\n      <td>\n        <p>Adresse pour un ramassage en tierce partie.</p>\n        <p>Requise pour ramassages en tierce partie. Ne doit pas &ecirc;tre propos&eacute;e si l'indicateur &laquo; business-address-flag &raquo; est vrai.</p>\n        <ul>\n          <li>Les&nbsp;ramassages sur demande &agrave; une adresse diff&eacute;rente ne peuvent &ecirc;tre pay&eacute;s que par carte de cr&eacute;dit.&nbsp;</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>company</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 35 caract&egrave;res)</p>\n        <p>Raison sociale de l'organisation qui demande le ramassage.</p>\n        <p>Requise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas &ecirc;tre propos&eacute;e si l'indicateur d'adresse commerciale = vrai.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>addressLine1</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 35 caract&egrave;res)</p>\n        <p>Adresse municipale du lieu de ramassage.</p>\n        <p>Requise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas &ecirc;tre propos&eacute;e si l'indicateur d'adresse commerciale = vrai.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>city</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 35 caract&egrave;res)</p>\n        <p>Ville du lieu de ramassage. Requise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux).</p>\n        <p>Ne&nbsp;doit pas &ecirc;tre propos&eacute;e si l'indicateur d'adresse commerciale = vrai.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>province</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>&nbsp;</p>\n        <p>(2 caract&egrave;res)</p>\n        <p>Province&nbsp;du lieu de ramassage.</p>\n        <p>Code&nbsp;de province standard &agrave; 2caract&egrave;res pour les provinces au Canada.</p>\n        <p>Requise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas &ecirc;tre propos&eacute;e si l'indicateur d'adresse commerciale = vrai.</p>\n        <p>&nbsp;</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>postalCode</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(6 caract&egrave;res&nbsp;alphanum&eacute;riques)</p>\n        <p>Code postal&nbsp;du lieu de ramassage au format &laquo;A9A9A9&raquo;.</p>\n        <p>Requise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas &ecirc;tre propos&eacute;e si l'indicateur d'adresse commerciale = vrai.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>contactInfo</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>Structure contenant la personne-ressource &agrave; qui adresser les questions ou les demandes.</td>\n    </tr>\n    <tr>\n      <td>contactName</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 35 caract&egrave;res)</p>\n        <p>Nom de la personne-ressource d&eacute;sign&eacute;e pour le ramassage.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>email</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 60 caract&egrave;res)</p>\n        <p>Il doit s'agir d'une adresse &eacute;lectronique valide.</p>\n        <p>Le format est le suivant: (['_A-Za-z0-9-+]+)(.['_A-Za-z0-9-+]+)<em>@([A-Za-z0-9-]+)(.[A-Za-z0-9-]+)</em>(.[A-Za-z]{2,5}).</p>\n        <p>Adresse &eacute;lectronique &agrave; laquelle envoyer les mises &agrave; jour de l'&eacute;tat de votre demande de ramassage.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>contactPhone</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 16 caract&egrave;res&nbsp;num&eacute;riques)</p>\n        <p>Num&eacute;ro de t&eacute;l&eacute;phone de la personne-ressource d&eacute;sign&eacute;e pour le ramassage.</p>\n        <p>Format 999-999-9999</p>\n      </td>\n    </tr>\n    <tr>\n      <td>telephoneExt</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Facultatif</td>\n      <td>\n        <p>(Jusqu'&agrave; 6 caract&egrave;res&nbsp;num&eacute;riques)</p>\n        <p>Num&eacute;ro du poste t&eacute;l&eacute;phonique.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>receiveEmailUpdatesFlag</td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>Facultatif</td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>La&nbsp;valeur &laquo;vrai&raquo; indique que vous voulez recevoir de mises &agrave; jour de l'&eacute;tat de votre demande.</p>\n        <p>La valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>locationDetails</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>Structure contenant les caract&eacute;ristiques du lieu physique o&ugrave; le ramassage doit avoir lieu.</td>\n    </tr>\n    <tr>\n      <td>fiveTonFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>La&nbsp;valeur &laquo;vrai&raquo; indique qu'un camion de cinq tonnes est requis.</p>\n        <p>S'applique seulement aux demandes de ramassage sur demande.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>loadingDockFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>La&nbsp;valeur &laquo;vrai&raquo; indique qu'il y a un quai de chargement au lieu de ramassage.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>pickupInstructions</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 40 caract&egrave;res)</p>\n        <p>Instructions&nbsp;&agrave; l'intention du conducteur (p.ex. utiliser la porte arri&egrave;re ou la porte lat&eacute;rale, apporter une plate-forme &agrave; roues).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>itemCharacteristics</td>\n      <td>Objet</td>\n      <td>Facultatif</td>\n      <td>\n        <p>Structure contenant les d&eacute;tails relatifs aux types d'articles &agrave; ramasser.</p>\n        <p>Structure pour&nbsp;d&eacute;terminer qu'un traitement sp&eacute;cial est n&eacute;cessaire pour les articles &agrave; ramasser.</p>\n        <p>Applicable&nbsp;uniquement aux ramassages sur demande.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>priorityFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>Indique si des articles prioritaires peuvent &ecirc;tre disponibles pour le ramassage.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>returnsFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>Indique si des articles renvoy&eacute;s peuvent &ecirc;tre disponibles pour le ramassage.</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>heavyItemFlag</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>Indique si certains articles &agrave; ramasser peuvent peser plus de 23kg (50lb).</p>\n        <p>La&nbsp;valeur par d&eacute;faut est &laquo;faux&raquo;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>pickupVolume</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 40 caract&egrave;res)</p>\n        <p>Pour&nbsp;un ramassage sur demande, il s'agit du nombre pr&eacute;vu d'articles &agrave; ramasser. Pour les ramassages &agrave; horaire fixe, il s'agit du nombre moyen pr&eacute;vu d'articles &agrave; ramasser.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>pickupTimes</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>\n        <p>Structure contenant la date et la p&eacute;riode &agrave; laquelle le ramassage doit avoir lieu.</p>\n        <p>Seulement une des structures fils doit &ecirc;tre fournie (&laquo;onDemandPickupTime&raquo;&nbsp;ou &laquo;scheduledPickupTimes&raquo;).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>onDemandPickupTime</td>\n      <td>Objet</td>\n      <td>Requis sous condition</td>\n      <td>\n        <p>Structure&nbsp;contenant les d&eacute;tails d'une demande de ramassage sur demande.</p>\n        <p>&Agrave; remplir uniquement pour une demande de ramassage sur demande.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>date</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(Format&nbsp;de la date: AAAA-MM-JJ)</p>\n        <p>Date&nbsp;&agrave; laquelle vous souhaitez votre ramassage sur demande. La date doit se situer dans les cinq jours suivants, &agrave; moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut &ecirc;tre report&eacute;e &agrave; 30 jours.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>&nbsp;preferredTime</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(Format&nbsp;de l'heure: HH:MM)</p>\n        <p>Heure pr&eacute;f&eacute;r&eacute;e du ramassage sur demande. La date doit se situer dans les cinq jours suivants, &agrave; moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut &ecirc;tre report&eacute;e &agrave; 30 jours.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>closingTime</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(Format de l'heure: HH:MM)</p>\n        <p>Heure limite pour le ramassage sur demande. La date doit se situer dans les cinq jours suivants, &agrave; moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut &ecirc;tre report&eacute;e &agrave; 30 jours.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>paymentInfo</td>\n      <td>Objet</td>\n      <td>Facultatif</td>\n      <td>Structure containing d&eacute;tails sur payment.</td>\n    </tr>\n    <tr>\n      <td>contractId</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>(Jusqu'&agrave; 10 caract&egrave;res&nbsp;num&eacute;riques)</p>\n        <p>Votre num&eacute;ro de convention du service de colis, s'il y a lieu.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>methodOfPayment</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>Dans la version initiale, le syst&egrave;me d&eacute;terminera le mode de paiement :</p>\n        <ul>\n          <li>Si vous ne disposez pas d'une convention du service de colis, des frais seront imput&eacute;s sur la carte de cr&eacute;dit par d&eacute;faut enregistr&eacute;e dans votre profil en ligne (ou la demande sera rejet&eacute;e si vous ne disposez pas d'une carte de cr&eacute;dit par d&eacute;faut dans votre dossier).</li>\n          <li>Si&nbsp;vous disposez d'une convention du service de colis et que vous demandez un ramassage &agrave; votre adresse principale (sur demande), celui-ci sera factur&eacute; &agrave; votre compte (&agrave; moins que ce dernier ne soit bloqu&eacute;, auquel cas, la carte de cr&eacute;dit par d&eacute;faut enregistr&eacute;e dans votre profil en ligne sera utilis&eacute;e; ou bien la demande sera rejet&eacute;e si vous ne disposez pas d'une carte de cr&eacute;dit par d&eacute;faut dans votre dossier).</li>\n          <li>Si&nbsp;vous disposez d'une convention du service de colis, ou disposez de l'autorit&eacute; d'utiliser une convention du service de colis, et que vous demandez un ramassage &agrave; une adresse diff&eacute;rente (c.-&agrave;-d un ramassage en tierce partie), celui-ci sera imput&eacute; sur la carte de cr&eacute;dit par d&eacute;faut enregistr&eacute;e dans votre profil en ligne.</li>\n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>         "
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "The 201 (Created) status code indicates that the request has been fulfilled and has resulted in one or more new resources being created.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 201 (Créée) indique que la demande a été traitée et qu’une ou plusieurs nouvelles ressources ont alors été créées."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePickupResponse"
+                },
+                "example": {
+                  "pickupRequestHeader": {
+                    "requestId": "4322776",
+                    "requestStatus": "Active",
+                    "pickupType": "OnDemand",
+                    "requestDate": "2025-12-17"
+                  },
+                  "pickupRequestPrice": {
+                    "preTaxAmount": 0,
+                    "gstAmount": 0,
+                    "pstAmount": 0,
+                    "hstAmount": 0,
+                    "dueAmount": 0
+                  },
+                  "links": [
+                    {
+                      "rel": "self",
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/pickup/v1/0000000002/pickup-request",
+                      "mediaType": "application/json"
+                    },
+                    {
+                      "rel": "details",
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/pickup/v1/0000000002/pickup-request/11104183/details",
+                      "mediaType": "application/json"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-11022"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "412": {
+            "$ref": "#/components/responses/412"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      }
+    },
+    "/{customer}/pickup-request/{requestId}/details": {
+      "get": {
+        "tags": ["Pickup"],
+        "summary": "Get Pickup Details",
+        "description": "Uses the request ID returned from the Create Pickup request and returns an information summary about a specific pickup.",
+        "operationId": "getPickupDetails",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir les détails de la prise en charge"
+          },
+          "description": {
+            "fr": "Utilise le numéro obtenu au moment de la création de la demande de ramassage et affiche un résumé des renseignements sur ce ramassage."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "$ref": "#/components/parameters/customerId"
+          },
+          {
+            "$ref": "#/components/parameters/requestId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupDetailsResponse"
+                },
+                "example": {
+                  "pickupRequestHeader": {
+                    "requestId": "4322776",
+                    "requestStatus": "Active",
+                    "pickupType": "OnDemand",
+                    "requestDate": "2025-12-17"
+                  },
+                  "pickupRequestDetails": {
+                    "pickupLocation": {
+                      "businessAddressFlag": false,
+                      "alternateAddress": {
+                        "company": "IIQA CUST DO NOT USE - 005",
+                        "addressLine1": "10 SAINTE-CATHERINE ST E",
+                        "city": "MONTREAL",
+                        "province": "QC",
+                        "postalCode": "H2X1K4"
+                      }
+                    },
+                    "contactInfo": {
+                      "contactName": "John Doe",
+                      "email": "user@example.com",
+                      "contactPhone": "555-555-0100",
+                      "receiveEmailUpdatesFlag": true,
+                      "lang": "e"
+                    },
+                    "locationDetails": {
+                      "fiveTonFlag": false,
+                      "loadingDockFlag": true,
+                      "pickupInstructions": "Door at Back"
+                    },
+                    "itemCharacteristics": {
+                      "priorityFlag": true,
+                      "returnsFlag": false,
+                      "heavyItemFlag": true
+                    },
+                    "pickupVolume": "50",
+                    "pickupTimes": {
+                      "onDemandPickupTime": {
+                        "date": "2025-12-17",
+                        "preferredTime": "12:00",
+                        "closingTime": "13:00"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      }
+    },
+    "/{customer}/pickup-request/price": {
+      "get": {
+        "tags": ["Pickup"],
+        "summary": "Get Pickup Price",
+        "description": "Returns price for a pickup request.",
+        "operationId": "getPickupPrice",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenez le prix de retrait"
+          },
+          "description": {
+            "fr": "Affiche le prix pour une demande de ramassage."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "$ref": "#/components/parameters/customerId"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Pickup date. Date format (yyyy-mm-dd).\nImportant: Only used to determine the price on that date; no validation is done that pickup is actually possible on that date.          ",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Date de ramassage. Format de la date (aaaa-mm-jj).\nDate du jour par défaut. Important : Seulement utilisé pour établir le tarif à cette date; aucune vérification n’est effectuée pour confirmer que le ramassage est possible.              "
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-04-30"
+          },
+          {
+            "name": "contractId",
+            "in": "query",
+            "description": "Your Parcels agreement number, if you have one.            \nNote: You can omit this element. It will be used in a future release.          ",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Votre numéro de convention de colis, si vous en avez un.                \nRemarque : Vous pouvez ignorer cet élément. Il sera utilisé dans une version future."
+              }
+            },
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 10,
+              "pattern": "^\\d{1,10}$"
+            },
+            "example": 1234567890
+          },
+          {
+            "name": "priorityFlag",
+            "description": "Identifies that Priority™ items will be in the pickup request.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Indique que les articles du service  Priorité<sup>MC</sup> seront dans la demande de ramassage."
+              }
+            },
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "alternateAddressPostalCode",
+            "in": "query",
+            "required": false,
+            "description": "The postal code of the address where the pickup is to be done.\n\nOnly required if the pickup is to be done at an alternate address than the business address specified in your Canada Post profile. Format A9A9A9 or A9A 9A9. Note: Province would be derived from this postal code when calculating taxes.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code postal de l’adresse où le ramassage doit être effectué.\n\nRequis seulement si le ramassage doit être effectué à une adresse autre que l’adresse commerciale indiquée dans votre profil de Postes Canada. Format A9A9A9 ou A9A 9A9. Remarque : La province serait déterminée à partir de ce code postal lors du calcul des taxes.              "
+              }
+            },
+            "schema": {
+              "type": "string"
+            },
+            "example": "K2K3N5"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupPriceResponse"
+                },
+                "example": {
+                  "preTaxAmount": "0.00",
+                  "gstAmount": "0.00",
+                  "pstAmount": "0.00",
+                  "hstAmount": "0.00",
+                  "dueAmount": "0.00"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                },
+                "examples": {
+                  "English": {
+                    "value": {
+                      "title": "Validation failed",
+                      "detail": "Errors occurred while processing the request.",
+                      "errors": [
+                        {
+                          "errorCode": "11003",
+                          "message": "Pickup cannot be done on the date requested (may be in the past, invalid  or not a business day)."
+                        }
+                      ]
+                    }
+                  },
+                  "Français": {
+                    "value": {
+                      "title": "Validation échouée",
+                      "detail": "Une erreur est survenue lors du traitement de la demande.",
+                      "errors": [
+                        {
+                          "errorCode": "11003",
+                          "message": "Le ramassage ne peut être effectué à la date requise (elle est dans le passé, invalide ou nest pas un jour ouvrable)."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      }
+    },
+    "/pickup-availability/{postalCode}": {
+      "get": {
+        "tags": ["Pickup"],
+        "summary": "Get Pickup Availability",
+        "description": "Retrieves pickup availability and cut-off times based on pickup location (postal code entered).",
+        "operationId": "getPickupAvailability",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Voir la disponibilité du service"
+          },
+          "description": {
+            "fr": "Affiche la disponibilité du service de ramassage et les heures limites en fonction du lieu de ramassage (code postal saisi)."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          },
+          {
+            "name": "postalCode",
+            "in": "path",
+            "description": "Full Postal Code\n6-character Postal Code in valid Postal Code format, e.g. A9A9A9.\nNote: If you wish to use Postal Codes with an embedded space (e.g. A9A 9A9), you must convert these spaces to %20 in your code before passing the value to the web service.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Code postal complet\nCode postal à six caractères en format de code postal valide (c.-à-d. A9A9A9).\nNota : Si vous voulez utiliser des codes postaux avec une espace intégrée (p.ex. A9A 9A9), vous devez convertir ces espaces en %20 dans votre code avant de transférer la valeur au service Internet.                            "
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z]\\d[A-Z]\\d[A-Z]\\d$"
+            },
+            "example": "K2K3N5"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PickupAvailabilityResponse"
+                },
+                "example": {
+                  "postalCode": "A1A 1A1",
+                  "onDemandCutoff": "13:30",
+                  "onDemandTour": true,
+                  "scheduledPickupsAvailable": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Indicates your language preference for receiving error messages.\n\n- en-CA = English\n- fr-CA = French",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Indique votre langue de préférence pour recevoir les messages d'erreur.\n- en-CA = Anglais - fr-CA = Français"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "enum": ["en-CA", "fr-CA"],
+          "example": "en-CA",
+          "default": "en-CA"
+        }
+      },
+      "requestId": {
+        "name": "requestId",
+        "in": "path",
+        "description": "The ID number for the pickup request.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Numéro d'identification de la demande de ramassage."
+          }
+        },
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": 11104183
+      },
+      "customerId": {
+        "name": "customer",
+        "in": "path",
+        "description": "Your customer number.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Votre numéro de client."
+          }
+        },
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": 7023210
+      }
+    },
+    "responses": {
+      "202": {
+        "description": "The 202 (Accepted) status code indicates that the request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 202 (Acceptée) indique que la demande a été acceptée aux fins de traitement, mais que le traitement n’a pas été effectué. La demande pourrait éventuellement être traitée ou non, car elle pourrait être refusée au moment du traitement."
+          }
+        }
+      },
+      "204": {
+        "description": "The 204 (No Content) status code indicates that the server has successfully fulfilled the request and that there is no additional content to send in the response content.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 204 (Aucun contenu) indique que le serveur a bien traité la demande et qu’il n’y a pas de contenu supplémentaire à envoyer dans le contenu de la réponse."
+          }
+        }
+      },
+      "400": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "The 401 (Unauthorized) status code indicates that the server understood the request but refuses to fulfill it.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 401 (Non autorisé) indique que le serveur a compris la requête mais refuse de la satisfaire."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorizedError"
+            },
+            "example": [
+              {
+                "httpCode": 401,
+                "httpMessage": "Unauthorized",
+                "moreInformation": "Cannot pass the security checks that are required by the target API or operation, Enable debug headers for more details."
+              }
+            ]
+          }
+        }
+      },
+      "403": {
+        "description": "The HTTP 403 (Forbidden) error means the web server received your request but denies you access to the requested resource because you don't have permission.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "L'erreur HTTP 403 (Interdit) signifie que le serveur Web a reçu votre requête mais vous refuse l'accès à la ressource demandée car vous n'en avez pas l'autorisation."
+          }
+        }
+      },
+      "404": {
+        "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "412": {
+        "description": "The 412 (Precondition Failed) status code indicates that one or more conditions given in the request header fields evaluated to false when tested on the server (Section 13).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 412 (Échec de la condition préalable) indique qu'une ou plusieurs conditions données dans les champs d'en-tête de la requête ont été évaluées à faux lors du test sur le serveur (Section 13)."
+          }
+        }
+      },
+      "500": {
+        "description": "The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 500 (Erreur interne du serveur) indique que le serveur a rencontré une condition inattendue l'empêchant de traiter la requête. Transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "501": {
+        "description": "The 501 (Not Implemented) status code indicates that the server does not support the functionality required to fulfill the request.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 501 (non mis en œuvre) indique que le serveur ne prend pas en charge les fonctions nécessaires pour traiter la demande."
+          }
+        }
+      },
+      "503": {
+        "description": "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 503 (Service indisponible) indique que le serveur est actuellement indisponible en raison d'une surcharge temporaire ou d'une maintenance planifiée, qui devrait être résolue après un certain délai. Message transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "504": {
+        "description": "The 504 (Gateway Timeout) status code indicates that the server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. May be passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 504 (Délai d'attente de la passerelle) indique que le serveur, agissant comme passerelle ou proxy, n'a pas reçu de réponse dans un délai raisonnable d'un serveur en amont auquel il devait accéder pour traiter la requête. Ce code peut provenir du serveur principal."
+          }
+        }
+      },
+      "400-11022": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            },
+            "examples": {
+              "English": {
+                "value": {
+                  "title": "Validation failed",
+                  "detail": "Errors occurred while processing the request.",
+                  "errors": [
+                    {
+                      "errorCode": "11022",
+                      "message": "It is too late to request a pickup today; the cut-off time was {0}."
+                    }
+                  ]
+                }
+              },
+              "Français": {
+                "value": {
+                  "title": "Validation échouée",
+                  "detail": "Une erreur est survenue lors du traitement de la demande.",
+                  "errors": [
+                    {
+                      "errorCode": "11022",
+                      "message": "Il est trop tard pour demander un ramassage aujourd’hui; l’heure limite était {0}."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Contact": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Structure containing the contact for questions or inquiries.\n\n---\n\nStructure contenant la personne-ressource à qui adresser les questions ou les demandes.",
+        "properties": {
+          "contactName": {
+            "description": "Contact name for the pickup.\n\n---\n\nNom de la personne-ressource désignée pour le ramassage.              ",
+            "type": "string",
+            "maxLength": 35
+          },
+          "email": {
+            "type": "string",
+            "description": "Must be a valid email address.\n\nEmail address to receive status updates regarding your pickup request.\n\n---\n\nIl doit s'agir d'une adresse électronique valide.\n\nAdresse électronique à laquelle envoyer les mises à jour de l'état de votre demande de ramassage.    ",
+            "pattern": "^(['_A-Za-z0-9\\-+]+)(\\.['_A-Za-z0-9\\-+]+)*@([A-Za-z0-9-]+)(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$",
+            "maxLength": 60
+          },
+          "contactPhone": {
+            "type": "string",
+            "description": "Contact phone number for the pickup.\n\nFormat 999-999-9999\n\n---\n\nNuméro de téléphone de la personne-ressource désignée pour le ramassage.\n\nFormat 999-999-9999          ",
+            "pattern": "^\\d{3}-\\d{3}-\\d{4}$"
+          },
+          "telephoneExt": {
+            "type": "string",
+            "description": "Telephone extension.          \n\n---\n\nNuméro du poste téléphonique.            ",
+            "pattern": "^\\d{1,6}$",
+            "maxLength": 6
+          },
+          "receiveEmailUpdatesFlag": {
+            "type": "boolean",
+            "description": "True indicates that you wish to receive status updates about the request.\n\n---\n\nLa valeur «vrai» indique que vous voulez recevoir de mises à jour de l'état de votre demande.",
+            "default": false
+          },
+          "lang": {
+            "type": "string",
+            "description": "Language used for notification emails.\n\n---\n\nLangue utilisée pour les courriels de notification envoyés.",
+            "enum": ["e", "f"]
+          }
+        },
+        "required": ["contactName", "email", "contactPhone", "lang"]
+      },
+      "ItemCharacteristics": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Structure to identify that items for pickup have special processing needs. Only applicable to on-demand pickups.   \n---\nStructure contenant les détails relatifs aux types d'articles à ramasser. Structure pour déterminer qu'un traitement spécial est nécessaire pour les articles à ramasser. Applicable uniquement aux ramassages sur demande.",
+        "properties": {
+          "priorityFlag": {
+            "description": "Identifies that Priority items could be available for pickup.\n\n---\n\nIndique si des articles prioritaires peuvent être disponibles pour le ramassage.",
+            "type": "boolean",
+            "default": false
+          },
+          "returnsFlag": {
+            "type": "boolean",
+            "description": "Identifies that returned items could be available for pickup.\n\n---\n\nIndique si des articles renvoyés peuvent être disponibles pour le ramassage.",
+            "default": false
+          },
+          "heavyItemFlag": {
+            "type": "boolean",
+            "description": "Identifies that some the items to pick up may have a weight greater than 23 kg (50 lbs.)\n\n---\n\nIndique si certains articles à ramasser peuvent peser plus de 23kg (50lb).",
+            "default": false
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Structure containing characteristics of the physical location where pickup is to occur.\n---\nStructure contenant les caractéristiques du lieu physique où le ramassage doit avoir lieu.",
+        "properties": {
+          "fiveTonFlag": {
+            "type": "boolean",
+            "description": "True identifies that a 5-ton truck is needed. Only applicable to an on-demand pickup request.\n\n---\n\nLa valeur «vrai» indique qu'un camion de cinq tonnes est requis. S'applique seulement aux demandes de ramassage sur demande.",
+            "default": false
+          },
+          "loadingDockFlag": {
+            "description": "True identifies that there is a loading dock at the location.\n---\nLa valeur «vrai» indique qu'il y a un quai de chargement au lieu de ramassage.",
+            "type": "boolean",
+            "default": false
+          },
+          "pickupInstructions": {
+            "description": "Instructions for the driver (e.g., use back door, use side entrance, bring a dolly)\n\n---\n\nInstructions à l'intention du conducteur (p.ex. utiliser la porte arrière ou la porte latérale, apporter une plate-forme à roues).",
+            "type": "string",
+            "maxLength": 40
+          }
+        },
+        "required": ["pickupInstructions"]
+      },
+      "pickupVolume": {
+        "description": "For on-demand pickup, this is the expected number of items to be picked up. For scheduled pickups, its the average number of items you expect for each pickup.\n\n---\n\nPour un ramassage sur demande, il s'agit du nombre prévu d'articles à ramasser. Pour les ramassages à horaire fixe, il s'agit du nombre moyen prévu d'articles à ramasser.          ",
+        "type": "string",
+        "maxLength": 40
+      },
+      "Payment": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Structure containing details on payment.\n\n---\n\nStructure contenant les détails du paiement.",
+        "properties": {
+          "methodOfPayment": {
+            "description": "- If you do not have a parcels agreement, fees will be charged to the default credit card in your online profile (or the request rejected if you do not have a default credit card on file).\n\n- If you have a parcels agreement and request a pickup at your main address (on demand), it will be billed to your account (unless your account is blocked, in which case the default credit card in your online profile would be used, or the request rejected if you do not have a default credit card on file).\n\n- If you have, or have authority to use, a parcels agreement and request a pickup at an alternate address (i.e. third-party pickup), it will be charged to the default credit card in your online profile.\n\n---\n\n- Si vous ne disposez pas d'une convention du service de colis, des frais seront imputés sur la carte de crédit par défaut enregistrée dans votre profil en ligne (ou la demande sera rejetée si vous ne disposez pas d'une carte de crédit par défaut dans votre dossier).\n\n- Si vous disposez d'une convention du service de colis et que vous demandez un ramassage à votre adresse principale (sur demande), celui-ci sera facturé à votre compte (à moins que ce dernier ne soit bloqué, auquel cas, la carte de crédit par défaut enregistrée dans votre profil en ligne sera utilisée; ou bien la demande sera rejetée si vous ne disposez pas d'une carte de crédit par défaut dans votre dossier).\n\n- Si vous disposez d'une convention du service de colis, ou disposez de l'autorité d'utiliser une convention du service de colis, et que vous demandez un ramassage à une adresse différente (c.-à-d un ramassage en tierce partie), celui-ci sera imputé sur la carte de crédit par défaut enregistrée dans votre profil en ligne.",
+            "type": "string"
+          },
+          "contractId": {
+            "description": "Your parcels agreement number, if applicable.\n\n---\n\nVotre numéro de convention du service de colis, s'il y a lieu.",
+            "type": "string",
+            "maxLength": 10,
+            "pattern": "^\\d{1,10}$"
+          }
+        }
+      },
+      "PickupTimeOD": {
+        "description": "Structure containing the details for an on-demand pickup request. Mandatory for an on-demand pickup request; must not be provided otherwise.     \n---\nStructure contenant les détails d'une demande de ramassage sur demande. À remplir uniquement pour une demande de ramassage sur demande.        ",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "(YYYY-MM-DD format)\n\nDate you would like the on-demand pickup. The date cannot be more than 5 days in the future, unless you have a parcels agreement, in which case it can be up to 30 days.\n\n---\n\n(Format de la date: AAAA-MM-JJ)\n\nDate à laquelle vous souhaitez votre ramassage sur demande. La date doit se situer dans les cinq jours suivants, à moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut être reportée à 30 jours.",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "preferredTime": {
+            "type": "string",
+            "description": "(hh:mm format)\n\nThe preferred time for the on-demand pickup. Must be between noon (12:00) and 4 p.m. (16:00), in 15-minute intervals (i.e. minutes must be 00, 15, 30 or 45).\n\n---\n\n(Format de l'heure: HH:MM)\n\nHeure préférée du ramassage sur demande. La date doit se situer dans les cinq jours suivants, à moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut être reportée à 30 jours.                ",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          },
+          "closingTime": {
+            "type": "string",
+            "description": "(hh:mm format)\n\nThe latest time for the on-demand pickup. Must be a minimum of one hour after preferred-time, in 15-minute intervals (i.e. minutes must be 00, 15, 30 or 45).\n\n---\n\n(Format de l'heure: HH:MM)\n\nHeure limite pour le ramassage sur demande. La date doit se situer dans les cinq jours suivants, à moins que vous ne disposiez d'une convention du service de colis, auquel cas la limite peut être reportée à 30 jours.               ",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+          }
+        },
+        "required": ["date", "preferredTime", "closingTime"]
+      },
+      "PickupTimes": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Structure containing the date and time range in which the pickup is to be done. Only one of the child structures (onDemandPickupTime or scheduledPickupTimes) must be provided.      \n---\nStructure contenant la date et la période à laquelle le ramassage doit avoir lieu. Seulement une des structures fils doit être fournie («onDemandPickupTime» ou «scheduledPickupTimes»).",
+        "properties": {
+          "onDemandPickupTime": {
+            "$ref": "#/components/schemas/PickupTimeOD"
+          }
+        },
+        "required": ["onDemandPickupTime"]
+      },
+      "UpdatePickupRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contactInfo": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "locationDetails": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "itemCharacteristics": {
+            "$ref": "#/components/schemas/ItemCharacteristics"
+          },
+          "pickupVolume": {
+            "$ref": "#/components/schemas/pickupVolume"
+          },
+          "pickupTimes": {
+            "$ref": "#/components/schemas/PickupTimes"
+          },
+          "paymentInfo": {
+            "$ref": "#/components/schemas/Payment"
+          }
+        },
+        "required": ["contactInfo", "locationDetails", "pickupVolume", "pickupTimes"],
+        "example": "{\n  \"contactInfo\": {\n      \"contactName\": \"string\",\n      \"email\": \"user@example.com\",\n      \"contactPhone\": \"555-555-0100\",\n      \"telephoneExt\": \"035429\",\n      \"receiveEmailUpdatesFlag\": false\n  },\n  \"locationDetails\": {\n      \"pickupInstructions\": \"string\",\n      \"fiveTonFlag\": true,\n      \"loadingDockFlag\": false\n  },\n  \"pickupVolume\": 5773,\n  \"pickupTimes\": {\n      \"onDemandPickupTime\": {\n          \"date\": \"9106-09-15\",\n          \"preferredTime\": \"22:09\",\n          \"closingTime\": \"20:48\"\n      }\n  },\n  \"itemCharacteristics\": {\n      \"priorityFlag\": true,\n      \"returnsFlag\": false,\n      \"heavyItemFlag\": false\n  },\n  \"paymentInfo\": {\n      \"methodOfPayment\": \"Account\",\n      \"contractId\": \"4029883\"\n  }\n}"
+      },
+      "messages": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Type of error.\n\n---\n\nType d'erreur."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Detailed description of type of error.\n\n---\n\nDescription détaillée du type d'erreur."
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors.\n\n---\n\nListe des erreurs.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errorCode": {
+                  "type": "string",
+                  "description": "Error code related to error.\n\n---\n\nCode d'erreur lié à l'erreur."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Detailed message for the error that occured.\n\n---\n\nMessage détaillé concernant l'erreur survenue."
+                }
+              },
+              "required": ["message", "errorCode"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["title", "detail", "errors"],
+        "additionalProperties": false,
+        "example": {
+          "title": "Validation failed",
+          "detail": "Errors occurred while processing the request.",
+          "errors": [
+            {
+              "errorCode": "002",
+              "message": "Duplicate Pin."
+            }
+          ]
+        }
+      },
+      "unauthorizedError": {
+        "type": "object",
+        "properties": {
+          "httpCode": {
+            "type": "string",
+            "description": "Code associated with the unauthorized error.\n  ---\n\nCode associé à l'erreur d'autorisation."
+          },
+          "httpMessage": {
+            "type": "string",
+            "description": "Error message.\n  ---\n\nmessage d'erreur."
+          },
+          "moreInformation": {
+            "type": "string",
+            "description": "Detailed error message.\n  ---\n\nMessage d'erreur détaillé."
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Address for third-party pickup.\n\nRequired for third-party pickups (businessAddressFlag=false).\n\nMust not be supplied if businessAddressFlag=true.\n\n- On-demand pickups at an alternate address can only be paid for by credit card.\n\n---\n\nAdresse pour un ramassage en tierce partie.\n\nRequise pour les ramassages en tierce partie.\n\nNe doit pas être proposée si l'indicateur « businessAddressFlag » est vrai.\n\n- Les ramassages sur demande à une adresse différente ne peuvent être payés que par carte de crédit.",
+        "properties": {
+          "company": {
+            "type": "string",
+            "description": "Company name of the organization requesting the pickup.\n\nRequired for third-party pickups (businessAddressFlag=false). Must not be supplied if businessAddressFlag = true.\n\n---\n\nRaison sociale de l'organisation qui demande le ramassage.\n\nRequise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas être proposée si l'indicateur d'adresse commerciale = vrai.",
+            "maxLength": 35
+          },
+          "addressLine1": {
+            "type": "string",
+            "description": "Street address of your pickup location.\n\nRequired for third-party pickups (businessAddressFlag=false). Must not be supplied if businessAddressFlag = true.\n\n---\n\nAdresse municipale du lieu de ramassage.\n\nRequise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas être proposée si l'indicateur d'adresse commerciale = vrai.",
+            "maxLength": 35
+          },
+          "city": {
+            "type": "string",
+            "description": "City of pickup location.\n\nRequired for third-party pickups (businessAddressFlag=false). Must not be supplied if businessAddressFlag = true.\n\n---\n\nVille du lieu de ramassage.\n\nRequise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas être proposée si l'indicateur d'adresse commerciale = vrai.",
+            "maxLength": 35
+          },
+          "province": {
+            "type": "string",
+            "description": "Province of pickup location.\n\nUse standard 2-character Canadian province codes.\n\nRequired for third-party pickups (businessAddressFlag=false). Must not be supplied if businessAddressFlag = true.\n\n---\n\nProvince du lieu de ramassage.\n\nCode de province standard de 2caractères pour les provinces au Canada.\n\nRequise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas être proposée si l'indicateur d'adresse commerciale = vrai.",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Postal Code of pickup location in format A9A9A9.\n\nRequired for third-party pickups (businessAddressFlag=false). Must not be supplied if businessAddressFlag = true.\n\n---\n\nCode postal du lieu de ramassage au format «A9A9A9».\n\nRequise pour ramassages en tierce partie.(Indicateur d'adresse commerciale = faux). Ne doit pas être proposée si l'indicateur d'adresse commerciale = vrai.",
+            "pattern": "^[A-Z]\\d[A-Z]\\d[A-Z]\\d$"
+          }
+        },
+        "required": ["company", "addressLine1", "city", "province", "postalCode"]
+      },
+      "CreatePickupRequest": {
+        "description": "The top level element for the request input information.\n\n---\n\nÉlément de niveau supérieur de la structure de la réponse.",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "pickupType": {
+            "description": "Type of pickup requested:\n\n* OnDemand – for an on-demand (one-time) pickup\n\n---\n\nType de demande de ramassage:\n\n* OnDemand – ramassage sur demande (ponctuel)            ",
+            "type": "string",
+            "enum": ["OnDemand"]
+          },
+          "pickupLocation": {
+            "$ref": "#/components/schemas/PickupLocation"
+          },
+          "contactInfo": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "locationDetails": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "itemCharacteristics": {
+            "$ref": "#/components/schemas/ItemCharacteristics"
+          },
+          "pickupVolume": {
+            "description": "The expected number of items to be picked up. You can also include additional details, such as “50 parcels and 10 packets”.\n\n---\n\nNombre prévu d'articles à ramasser. Vous pouvez ajouter d’autres renseignements, comme « 50 colis et 10 paquets ».",
+            "type": "string",
+            "maxLength": 40
+          },
+          "pickupTimes": {
+            "$ref": "#/components/schemas/PickupTimes"
+          },
+          "paymentInfo": {
+            "$ref": "#/components/schemas/Payment"
+          }
+        },
+        "required": [
+          "pickupType",
+          "pickupLocation",
+          "contactInfo",
+          "locationDetails",
+          "pickupVolume",
+          "pickupTimes"
+        ]
+      },
+      "PickupLocation": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Structure containing the address where the pickup is to occur.\n\n---\n\nStructure contenant l'adresse du lieu de ramassage.",
+        "oneOf": [
+          {
+            "required": ["businessAddressFlag", "alternateAddress"],
+            "properties": {
+              "businessAddressFlag": {
+                "enum": [false]
+              }
+            }
+          },
+          {
+            "required": ["businessAddressFlag"],
+            "properties": {
+              "businessAddressFlag": {
+                "enum": [true]
+              }
+            },
+            "not": {
+              "required": ["alternateAddress"]
+            }
+          }
+        ],
+        "properties": {
+          "businessAddressFlag": {
+            "type": "boolean",
+            "description": "True indicates that the pickup (or pickups) is at the business address specified in your Canada Post profile.\n\nFalse indicates that the pickup (or pickups) is at an alternate address. You must specify the alternate address.\n\n---\n\nLa valeur « vrai » signifie que le ramassage est à effectuer à l'adresse commerciale précisée dans votre profil Postes Canada.\n\nLa valeur « faux » signifie que le ramassage (ou les ramassages) est effectué à une autre adresse. Vous devez fournir cette adresse."
+          },
+          "alternateAddress": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
+      },
+      "CCReceipt": {
+        "type": "object",
+        "description": "This structure contains details for a credit card receipt. These details are provided only for on-demand pickup requests paid by credit card. \n\n---\n\nStructure contenant les détails requis pour un reçu de carte de crédit. Ces détails sont seulement fournis pour une demande de ramassage sur demande payée par carte de crédit.",
+        "properties": {
+          "merchantName": {
+            "type": "string",
+            "description": "Will have the value: \"Canada Post\".\n\n---\n\nLa valeur sera la suivante: \"CanadaPost\"."
+          },
+          "merchantUrl": {
+            "type": "string",
+            "description": "Will have the value: \"www.canadapost.ca\".\n\n---\n\nLa valeur sera la suivante: \"www.canadapost.ca\"."
+          },
+          "nameOnCard": {
+            "type": "string",
+            "description": "The name on the default credit card stored by Canada Post, if supplied.\n---\nNom figurant sur la carte de crédit par défaut sauvegardée par PostesCanada, s'il y a lieu."
+          },
+          "authCode": {
+            "type": "string",
+            "description": "The authorization code received from the credit card issuer.\n---\nCode d'autorisation reçu de la société émettrice de la carte de crédit."
+          },
+          "authTimestamp": {
+            "type": "string",
+            "description": "The date and time that the credit card company authorized the transaction.\n---\nDate et heure auxquelles la transaction a été autorisée par la société émettrice de cartes de crédit."
+          },
+          "cardType": {
+            "type": "string",
+            "description": "The type of credit card used for the purchase.\n\n---\n\nType de carte de crédit utilisé pour l'achat."
+          },
+          "chargeAmount": {
+            "type": "string",
+            "description": "The amount authorized by the credit card issuer.\n\n---\n\nMontant autorisé par la société émettrice de la carte de crédit."
+          },
+          "currency": {
+            "type": "string",
+            "description": "The currency of the transaction: CAD.\n\n---\n\nDevise de la transaction: CAD."
+          },
+          "transactionType": {
+            "type": "string",
+            "description": "Will have the value: \"Sale\".\n\n---\n\nLa valeur sera la suivante: \"Sale\"."
+          }
+        }
+      },
+      "CreatePickupResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The top level element for the response that contains the information about the pickup request.\n---\nÉlément de niveau supérieur de la structure de la réponse.",
+        "properties": {
+          "pickupRequestHeader": {
+            "$ref": "#/components/schemas/PickupRequestHeader"
+          },
+          "pickupRequestPrice": {
+            "$ref": "#/components/schemas/PickupRequestPrice"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            }
+          }
+        }
+      },
+      "Link": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Use these links to invoke additional functions on the pickup request. Each link represents a link to one of the web services.\n\nThe following links may be returned and each will have a unique rel type:\n\n1. rel=\"self\"\n\n   This link represents the pickup request itself. The href attribute can be used as an endpoint to the Update Pickup Request service.\n\n2. rel = \"details\"\n\n   This link represents additional details about the Pickup Request that are not returned in the Get Pickup Requests response. The href attribute is an endpoint to the Get Pickup Request Details service.\n\n---\n\nUtilisez ces liens pour récupérer les divers résultats du service «Créer une demande de ramassage» et avoir recours à diverses fonctions supplémentaires pour la demande de ramassage. Chaque lien représente un lien vers l'un des services en ligne.\n\nLes liens ci-dessous s'afficheront avec un type de «rel» unique:\n\n1. rel=\"self\"\n\n   Ce lien représente la demande de ramassage qui vient d'être créée. L'attribut «href» peut être utilisé comme point final du service «Mettre à jour la demande de ramassage».\n\n2. rel = \"details\"\n\n   Ce lien représente les détails supplémentaires de la demande de ramassage et il n'est pas généré dans la réponse du service «Créer une demande de ramassage». L'attribut «href» est un point final du service «Récupérer les demandes de ramassage» servant à récupérer ces renseignements supplémentaires.",
+        "properties": {
+          "rel": {
+            "description": "Indicates the resource related to the current response.\n\n---\n\nIndique la ressource associée à la réponse actuelle.        ",
+            "type": "string"
+          },
+          "href": {
+            "description": "Indicates the endpoint to be used to call the web service. It contains the URL and may also contain a query string.\n\n---\n\nDésigne le point final à utiliser pour présenter une demande de service en ligne. Il contient l'adresse URL et peut également contenir une chaîne de requête.        ",
+            "type": "string"
+          },
+          "mediaType": {
+            "description": "A character string that indicates the format and version of the data to expect when the web service is invoked. The value in this field should be copied to the HTTP header variable \"Accept\" when the href link is invoked.\n\n---\n\nIl s'agit d'une chaîne de caractères indiquant le format et la version des données prévus lorsqu'un service Internet est utilisé.\nLa valeur de cet attribut doit être copiée dans la variable de l'en-tête HTTP « Accept » lorsque le lien href est utilisé.        ",
+            "type": "string"
+          }
+        }
+      },
+      "PickupRequestHeader": {
+        "description": "Basic information about the request.\n\n---\n\nRenseignements de base sur la demande.",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "description": "The ID number for the pickup request.\n\n---\n\nNuméro d'identification de la demande de ramassage."
+          },
+          "requestStatus": {
+            "type": "string",
+            "description": "Status of the request. Active will always be the status of a successful Create Pickup Request. See the response of Get Pickup Request Details for other possible statuses after creation.\n---\nStatut de la demande. Une demande de ramassage créée avec succès aura toujours le statut «Active». Consultez la réponse de la service Obtenir les détails sur la demande de ramassage pour d'autres statuts possibles après la création. "
+          },
+          "pickupType": {
+            "type": "string",
+            "description": "The type of pickup you requested: OnDemand.\n\n---\n\nType de ramassage demandé: OnDemand (sur demande).        "
+          },
+          "requestDate": {
+            "type": "string",
+            "description": "Date the pickup request was created.\n\n---\n\nDate à laquelle la demande de ramassage a été créée."
+          }
+        }
+      },
+      "PickupRequestPrice": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Only provided for on-demand pickup requests.\n---\nRenseignements seulement fournis pour les demandes de ramassage sur demande.",
+        "properties": {
+          "preTaxAmount": {
+            "type": "string",
+            "description": "Pre-tax amount as a string with 2 decimal places.\n\n---\n\nTarif de base du ramassage."
+          },
+          "gstAmount": {
+            "type": "string",
+            "description": "GST amount as a string with 2 decimal places.\n\n---\n\nMontant de la taxe sur les produits et services."
+          },
+          "pstAmount": {
+            "type": "string",
+            "description": "PST amount as a string with 2 decimal places.\n\n---\n\nMontant de la taxe de vente provinciale."
+          },
+          "hstAmount": {
+            "type": "string",
+            "description": "HST amount as a string with 2 decimal places.\n\n---\n\nMontant de la taxe de vente harmonisée."
+          },
+          "dueAmount": {
+            "type": "string",
+            "description": "Due amount as a string with 2 decimal places.\n\n---\n\nTotal des frais."
+          },
+          "ccReceiptDetails": {
+            "$ref": "#/components/schemas/CCReceipt"
+          }
+        }
+      },
+      "PickupRequest": {
+        "type": "object",
+        "properties": {
+          "pickupRequestHeader": {
+            "$ref": "#/components/schemas/PickupRequestHeaderResponse"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            }
+          }
+        }
+      },
+      "PickupRequestHeaderResponse": {
+        "description": "Structure containing basic information about the pickup request.\n\n---\n\nRenseignements de base sur la demande.",
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "description": "The ID number for the pickup request.\n\n---\n\nNuméro d'identification de la demande de ramassage."
+          },
+          "requestStatus": {
+            "type": "string",
+            "description": "Status of the request; possible values are:\n\n- New\n- Pending\n- Cancelled\n- Active\n- Missed Pickup     \n\n---\n\nStatut de la demande. Les valeurs possibles sont les suivantes:\n\n- New (nouveau)\n- Pending (en attente)\n- Cancelled (annulée) -\n- Active (active)\n- Missed Pickup (ramassage manquée)     "
+          },
+          "pickupType": {
+            "type": "string",
+            "description": "The type of pickup you requested: OnDemand.\n\n---\n\nLe type de ramassage demandé: OnDemand (sur demande)."
+          },
+          "requestDate": {
+            "type": "string",
+            "description": "Date the pickup request was created.\n\n---\n\nDate à laquelle la demande de ramassage a été créée."
+          },
+          "nextPickupDate": {
+            "description": "Date when the next on-demand pickup was requested for.\n\n---\n\nDate pour laquelle une demande de ramassage est demandée.",
+            "type": "string"
+          }
+        }
+      },
+      "PickupRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "pickupRequest": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PickupRequest"
+            }
+          }
+        }
+      },
+      "PickupDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "pickupRequestHeader": {
+            "$ref": "#/components/schemas/PickupRequestHeaderResponse"
+          },
+          "pickupRequestDetails": {
+            "$ref": "#/components/schemas/PickupRequestDetails"
+          }
+        }
+      },
+      "PickupRequestDetails": {
+        "type": "object",
+        "properties": {
+          "pickupLocation": {
+            "$ref": "#/components/schemas/PickupLocation"
+          },
+          "contactInfo": {
+            "$ref": "#/components/schemas/Contact"
+          },
+          "locationDetails": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "itemCharacteristics": {
+            "$ref": "#/components/schemas/ItemCharacteristics"
+          },
+          "pickupVolume": {
+            "$ref": "#/components/schemas/pickupVolume"
+          },
+          "pickupTimes": {
+            "$ref": "#/components/schemas/PickupTimes"
+          }
+        }
+      },
+      "PickupPriceResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "This is the top level element of the response structure. It provides the charges for an on-demand pickup based on the parameters provided in the request.\n---\nÉlément de niveau supérieur de la structure de la réponse. Fournit les frais pour un ramassage sur demande selon les paramètres indiqués dans la demande.",
+        "properties": {
+          "preTaxAmount": {
+            "type": "string",
+            "description": "Pre-tax amount as a string with 2 decimal places\n---\nMontant avant impôt sous forme de chaîne de caractères avec 2 décimales"
+          },
+          "gstAmount": {
+            "type": "string",
+            "description": "GST amount as a string with 2 decimal places\n---\nMontant de la TPS sous forme de chaîne de caractères avec 2 décimales"
+          },
+          "pstAmount": {
+            "type": "string",
+            "description": "PST amount as a string with 2 decimal places\n---\nMontant de la TPS sous forme de chaîne de caractères avec 2 décimales"
+          },
+          "hstAmount": {
+            "type": "string",
+            "description": "HST amount as a string with 2 decimal places\n---\nMontant de la TVH sous forme de chaîne de caractères avec 2 décimales"
+          },
+          "dueAmount": {
+            "type": "string",
+            "description": "Due amount as a string with 2 decimal places.\n\n---\n\nMontant dû sous forme de chaîne de caractères avec 2 décimales."
+          }
+        }
+      },
+      "PickupAvailabilityResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The top level element of the response structure.\n\n---\n\nÉlément du niveau supérieur de la structure du message.",
+        "properties": {
+          "postalCode": {
+            "type": "string",
+            "description": "Full Postal Code\n7 character postal code in valid postal code format, (i.e. all capitalized and including an embedded space).\ni.e. A9A 9A9.  \n---\nCode postal complet\nCode postal à sept caractères en format de code postal valide (c.-à-d. toutes des majuscules, y compris une espace intégrée).\n(c'est-à-dire A9A 9A9.)                    "
+          },
+          "onDemandCutoff": {
+            "type": "string",
+            "description": "Time nn:nn (24 hour clock) expressed in local time of the specified postal code.\n\nIndicates the latest time that a pickup can be requested for the same day for parcels.\n\nWill be empty if onDemandTour is false.\n\n---\n\nHeure nn h nn (horloge de 24 h) exprimée selon l'heure locale du code postal précisé.\n\nIndique l'heure la plus tardive à laquelle un ramassage peut être demandé pour le jour même pour les colis.\n\nSera vide si onDemandTour est faux."
+          },
+          "onDemandTour": {
+            "type": "boolean",
+            "description": "Indicates whether on demand pickups can be requested for the specific area.   \n---\nIndique si les ramassages sur demande peuvent être demandés pour la région en question.                   "
+          },
+          "scheduledPickupsAvailable": {
+            "type": "boolean",
+            "description": "Indicates whether scheduled pickups are available to this postal code. \n---\nIndique si le service de ramassage à horaire fixe est offert pour ce code postal.                     "
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "type": "oauth2",
+        "x-ibm-oauth-provider": "cpc-api-native-oauth-provider",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token",
+            "scopes": {
+              "merchant": "default description",
+              "platform": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ibm-configuration": {
+    "cors": {
+      "enabled": true
+    },
+    "type": "rest",
+    "phase": "realized",
+    "enforced": true,
+    "testable": true,
+    "oauth-servers": {
+      "Oauth2": {
+        "clientCredentials": {
+          "tokenUrls": [
+            "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token"
+          ],
+          "authorizationUrls": [],
+          "refreshUrls": []
+        }
+      }
+    }
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/pickup/v1"
+    }
+  ],
+  "security": [
+    {
+      "Oauth2": ["merchant"]
+    }
+  ]
+}

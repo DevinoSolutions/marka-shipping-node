@@ -5,8 +5,10 @@
  * mutually exclusive branches. The contract tests validate requests and responses against
  * those documents, so a drift between these types and the real schemas fails the build.
  *
- * Not modelled yet (see the contracts doc): refunds, manifests/groups, returns,
- * pre-authorized payments and the shipment receipt body.
+ * The other Developer Portal APIs (tracking, customer information, returns, pickup, post
+ * offices, service information) are typed in `types-services.ts`.
+ *
+ * Not modelled yet (see the contracts doc): pre-authorized payments.
  */
 
 /**
@@ -246,8 +248,8 @@ export interface RestShipmentPrice {
 export interface RestCreateShipmentResponse extends RestShipmentInfo {
   /** Present when `providePricingInfo: true` was sent. */
   shipmentPrice?: RestShipmentPrice;
-  /** Present when `provideReceiptInfo: true` was sent. Not modelled. */
-  shipmentReceipt?: Record<string, unknown>;
+  /** Present when `provideReceiptInfo: true` was sent. */
+  shipmentReceipt?: RestShipmentReceipt;
 }
 
 /** Response of `GET .../shipments/{id}/details`. */
@@ -408,4 +410,136 @@ export interface RestArtifact {
   contentType: string;
   /** Raw bytes. ZPL is ASCII text. */
   data: Uint8Array;
+}
+
+/** Card payment details on a receipt (never the card number: Canada Post does not return it). */
+export interface RestCcReceiptDetails {
+  merchantName: string;
+  merchantUrl: string;
+  nameOnCard?: string;
+  authCode: string;
+  /** ISO 8601 date-time. */
+  authTimestamp: string;
+  /** `MC`, `VIS`, `AME`, `DC`, `DIS`, `ER`. */
+  cardType: string;
+  currency: string;
+  transactionType: string;
+}
+
+/** Contract-account payment details on a receipt. */
+export interface RestSupplierAccountReceiptDetails {
+  merchantName: string;
+  merchantUrl: string;
+  authCode: string;
+  authTimestamp: string;
+  supplierId: string;
+  currency: string;
+  transactionType: string;
+}
+
+/** Receipt of a shipment: exactly one of the two detail blocks is present. */
+export type RestShipmentReceipt =
+  | { ccReceiptDetails: RestCcReceiptDetails & { chargeAmount: number } }
+  | { supplierAccountReceiptDetails: RestSupplierAccountReceiptDetails & { chargeAmount: number } };
+
+/** Public QR-code / public-key information of a shipment (`GET .../shipments/{id}/qr-code`). */
+export interface RestPublicKeyInfo {
+  /** ISO 8601 date-time. */
+  expiryDate: string;
+  /** The public label URL. */
+  url: string;
+  /** Base64 PNG of the QR code, when one was requested at creation. */
+  qrCode?: string;
+}
+
+/** Body of `POST .../shipments/{id}/refund`. */
+export interface RestRefundRequest {
+  /** Where Canada Post sends the refund confirmation (max 60 characters). */
+  email: string;
+}
+
+/** Service ticket Canada Post opens for a refund request. */
+export interface RestRefundInfo {
+  /** `YYYY-MM-DD`. */
+  serviceTicketDate: string;
+  serviceTicketId: string;
+}
+
+/** One entry of `GET .../groups`. */
+export interface RestShipmentGroup {
+  groupId: string;
+  link: RestLink;
+}
+
+/** Address printed on a manifest. */
+export interface RestManifestAddress {
+  manifestCompany: string;
+  manifestName?: string;
+  phoneNumber: string;
+  addressDetails: {
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    provState: string;
+    countryCode?: string;
+    postalZipCode: string;
+  };
+}
+
+/** Body of `POST .../manifests`: transmits the shipments of one or more groups. */
+export interface RestTransmitRequest {
+  customerRequestId?: string;
+  /** The groups to transmit (at least one). */
+  groupIds: string[];
+  cpcPickupIndicator?: true;
+  /** Postal code of the shipping point (`K1A0B1`). */
+  requestedShippingPoint?: string;
+  shippingPointId?: string;
+  detailedManifests: boolean;
+  methodOfPayment: string;
+  manifestAddress: RestManifestAddress;
+  /** Max 12 characters. */
+  customerReference?: string;
+  /** Shipment ids to leave out of the manifest. */
+  excludedShipments?: string[];
+}
+
+/** Response of `GET .../manifests/{id}`. */
+export interface RestManifestInfo {
+  customerRequestId?: string;
+  poNumber: string;
+  links: RestLink[];
+}
+
+/** Cost block of a manifest. All amounts are CAD. */
+export interface RestManifestPricingInfo {
+  baseCost: number;
+  automationDiscount: number;
+  optionsAndSurcharges: number;
+  gst: number;
+  pst: number;
+  hst: number;
+  totalDueCpc: number;
+}
+
+/** Response of `GET .../manifests/{id}/details`. */
+export interface RestManifestDetails {
+  poNumber: string;
+  finalShippingPoint: string;
+  shippingPointName: string;
+  shippingPointId: string;
+  cpcPickupIndicator?: true;
+  mailedByCustomer: string;
+  "mailed-on-behalf-of": string;
+  paidByCustomer: string;
+  customerRef?: string;
+  /** `YYYY-MM-DD`. */
+  manifestDate: string;
+  manifestTime: string;
+  contractId?: string;
+  methodOfPayment: string;
+  ccReceiptDetails?: RestCcReceiptDetails;
+  supplierAccountReceiptDetails?: RestSupplierAccountReceiptDetails;
+  manifestPricingInfo: RestManifestPricingInfo;
+  manifestAddress: RestManifestAddress;
 }

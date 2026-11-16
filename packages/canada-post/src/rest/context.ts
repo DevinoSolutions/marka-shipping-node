@@ -1,6 +1,7 @@
 import { CanadaPostParseError, CanadaPostValidationError } from "../errors.js";
-import type { ResolvedRestConfig } from "./config.js";
+import { REST_BASE_URL, type ResolvedRestConfig } from "./config.js";
 import { assertTrustedRestHref } from "./links.js";
+import type { SecretRedactor } from "./redact.js";
 import type { RestResult, RestTransport } from "./transport.js";
 import { parseJsonBody } from "./transport.js";
 import type { RestLink } from "./types.js";
@@ -9,6 +10,13 @@ import type { RestLink } from "./types.js";
 export interface RestContext {
   http: RestTransport;
   config: ResolvedRestConfig;
+  /** Scrubs registered secrets (and card aliases) from anything echoed back. */
+  redactor: SecretRedactor;
+}
+
+/** `{base}/{api}/v1/{customerNumber}/{mobo}`: the account-scoped root of Shipping and Returns. */
+export function accountUrl(ctx: RestContext, api: string): string {
+  return `${REST_BASE_URL}/${api}/v1/${ctx.config.customerNumber}/${ctx.config.mobo}`;
 }
 
 /** A shipment id (digits and letters) or a link returned by a previous call. */
@@ -77,6 +85,18 @@ export function jsonObjectOrSingleton(
   return candidate as Record<string, unknown>;
 }
 
+/**
+ * Like {@link jsonArray}, but a single object is wrapped into a one-element array. Tracking
+ * answers a failed PIN lookup as `{ pin, error }` where a list is documented (observed on
+ * the Production app 2026-11-16).
+ */
+export function jsonArrayOrSingleton(result: RestResult, operation: string): unknown[] {
+  const body = parseJsonBody(result, operation);
+  if (Array.isArray(body)) return body as unknown[];
+  if (typeof body === "object" && body !== null) return [body];
+  throw new CanadaPostParseError(`${operation}: expected a JSON array (or object) in the response`);
+}
+
 /** Parses the JSON body of a successful read and checks it is an array. */
 export function jsonArray(result: RestResult, operation: string): unknown[] {
   const body = parseJsonBody(result, operation);
@@ -84,4 +104,37 @@ export function jsonArray(result: RestResult, operation: string): unknown[] {
     throw new CanadaPostParseError(`${operation}: expected a JSON array in the response`);
   }
   return body as unknown[];
+}
+
+/** GET a JSON resource through the transport. */
+export function getJson(ctx: RestContext, operation: string, url: string): Promise<RestResult> {
+  return ctx.http.execute({ operation, method: "GET", url, accept: "application/json" });
+}
+
+/** Validates a `YYYY-MM-DD` date that will be placed in a URL or request body. */
+export function assertIsoDate(value: string, field: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  const date =
+    m === null ? undefined : new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+  if (m === null || date === undefined || date.toISOString().slice(0, 10) !== value) {
+    throw new CanadaPostValidationError(`${field} must be a real date as YYYY-MM-DD`);
+  }
+  return value;
+}
+
+/** Accepts `YYYY-MM-DD` or `YYYYMMDD` and returns the compact `YYYYMMDD` form some filters want. */
+export function toCompactDate(value: string, field: string): string {
+  const dashed = /^\d{8}$/.test(value)
+    ? `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}`
+    : value;
+  return assertIsoDate(dashed, field).replaceAll("-", "");
+}
+
+/** Normalizes a Canadian postal code (`k1a 0b1` -> `K1A0B1`) or throws. */
+export function normalizePostalCode(value: string, field: string): string {
+  const normalized = value.replace(/\s+/g, "").toUpperCase();
+  if (!/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(normalized)) {
+    throw new CanadaPostValidationError(`${field} must be a Canadian postal code such as K1A0B1`);
+  }
+  return normalized;
 }

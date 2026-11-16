@@ -17,7 +17,7 @@ export interface OperationSpec {
   /** In production the call bills postage or opens a refund ticket. */
   charges: boolean;
   /** HTTP method used on the wire. */
-  http: "GET" | "POST" | "DELETE";
+  http: "GET" | "POST" | "PUT" | "DELETE";
 }
 
 const read = (id: string, http: "GET" | "POST" = "GET"): OperationSpec => ({
@@ -27,7 +27,11 @@ const read = (id: string, http: "GET" | "POST" = "GET"): OperationSpec => ({
   http,
 });
 
-const write = (id: string, http: "POST" | "DELETE" = "POST", charges = true): OperationSpec => ({
+const write = (
+  id: string,
+  http: "GET" | "POST" | "PUT" | "DELETE" = "POST",
+  charges = true,
+): OperationSpec => ({
   id,
   access: "write",
   charges,
@@ -83,5 +87,49 @@ export const OPERATIONS: Readonly<Record<string, OperationSpec>> = Object.fromEn
     read("rest.shipments.list"),
     read("rest.shipments.getLabel"),
     write("rest.shipments.void", "DELETE", false),
+    read("rest.shipments.getReceipt"),
+    read("rest.shipments.getQrCode"),
+    read("rest.shipments.getGroups"),
+    write("rest.shipments.requestRefund", "POST", false),
+    write("rest.shipments.transmit"),
+
+    read("rest.manifests.list"),
+    read("rest.manifests.get"),
+    read("rest.manifests.getDetails"),
+
+    read("rest.tracking.getSummaryByPin"),
+    read("rest.tracking.getSummaryByDnc"),
+    read("rest.tracking.getSummaryByReference"),
+    read("rest.tracking.getDetailsByPin"),
+    read("rest.tracking.getDetailsByDnc"),
+    // A POST that only renders a delivery confirmation certificate.
+    read("rest.tracking.createCertificate", "POST"),
+
+    read("rest.customers.get"),
+    read("rest.customers.getMobo"),
+    read("rest.customers.getPaymentReadiness"),
+
+    write("rest.returns.createAuthorized"),
+    write("rest.returns.createOpen"),
+    read("rest.returns.listOpen"),
+    read("rest.returns.getOpen"),
+    read("rest.returns.getOpenDetails"),
+    write("rest.returns.deleteOpen", "DELETE", false),
+    // A GET on the wire, but it consumes one label of the template (and may bill it).
+    write("rest.returns.getOpenArtifact", "GET"),
+    read("rest.returns.getAuthorizedLabel"),
+
+    write("rest.pickup.create"),
+    write("rest.pickup.update", "PUT", false),
+    write("rest.pickup.cancel", "DELETE", false),
+    read("rest.pickup.list"),
+    read("rest.pickup.getDetails"),
+    read("rest.pickup.getPrice"),
+    read("rest.pickup.getAvailability"),
+
+    read("rest.postOffices.find"),
+    read("rest.postOffices.getDetails"),
+
+    read("rest.serviceInfo.getMessages"),
   ].map((op) => [op.id, op]),
 );

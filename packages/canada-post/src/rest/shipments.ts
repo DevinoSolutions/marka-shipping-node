@@ -1,12 +1,8 @@
-import {
-  CanadaPostApiError,
-  CanadaPostError,
-  CanadaPostParseError,
-  CanadaPostValidationError,
-} from "../errors.js";
+import { CanadaPostApiError, CanadaPostParseError, CanadaPostValidationError } from "../errors.js";
 import { queryString } from "../http.js";
-import { REST_BASE_URL } from "./config.js";
+import { fetchArtifact } from "./artifact.js";
 import {
+  accountUrl,
   jsonArray,
   jsonObject,
   jsonObjectOrSingleton,
@@ -14,7 +10,7 @@ import {
   type RestContext,
   type RestTarget,
 } from "./context.js";
-import { assertTrustedRestHref, requireRestLink } from "./links.js";
+import { asRestLinks, requireRestLink } from "./links.js";
 import { safeUrl } from "./redact.js";
 import { parseJsonBody } from "./transport.js";
 import type {
@@ -22,9 +18,15 @@ import type {
   RestCreateShipmentRequest,
   RestCreateShipmentResponse,
   RestLink,
+  RestPublicKeyInfo,
+  RestRefundInfo,
+  RestRefundRequest,
   RestShipmentDetails,
+  RestShipmentGroup,
   RestShipmentInfo,
   RestShipmentPrice,
+  RestShipmentReceipt,
+  RestTransmitRequest,
 } from "./types.js";
 
 /** Options of {@link RestShipmentsApi.create}. */
@@ -54,68 +56,21 @@ export type RestLabelSource = string | RestLink | { links: readonly RestLink[] }
 const CREATE_RECOVERY =
   "Look the shipment up before retrying: shipments.list({ requestId }) with the " +
   "customerRequestId you sent, or shipments.get(id). A second create is a second, billed label.";
+const REFUND_RECOVERY =
+  "A refund request opens a service ticket and is not idempotent: do not send it again before " +
+  "checking with Canada Post (or the refund confirmation e-mail) that no ticket exists.";
+const TRANSMIT_RECOVERY =
+  "Check manifests.list({ from, to }) and shipments.list({ groupId }) before retrying: a second " +
+  "transmit can create a second manifest and bill the shipments again.";
+/** The e-mail pattern of the Shipping OpenAPI document. */
+const EMAIL =
+  /^(['_A-Za-z0-9\-+]+)(\.['_A-Za-z0-9\-+]+)*@([A-Za-z0-9-]+)(\.[A-Za-z0-9-]+)*(\.[A-Za-z]{2,})$/;
 const VOID_RECOVERY =
   "Check shipments.get(id).shipmentStatus before retrying: it says whether the void took effect.";
 
-function isLink(value: unknown): value is RestLink {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as { rel?: unknown }).rel === "string" &&
-    typeof (value as { href?: unknown }).href === "string"
-  );
-}
-
-function asLinks(value: unknown[], operation: string): RestLink[] {
-  if (!value.every(isLink)) {
-    throw new CanadaPostParseError(`${operation}: expected a list of links in the response`);
-  }
-  return value;
-}
-
-/** An HTML error page must never be returned as a label. */
-function checkArtifact(contentType: string, data: Uint8Array, operation: string): void {
-  if (data.byteLength === 0) {
-    throw new CanadaPostParseError(`${operation}: the artifact response is empty`);
-  }
-  if (contentType === "application/pdf") {
-    const magic = new TextDecoder("latin1").decode(data.subarray(0, 5));
-    if (magic !== "%PDF-") {
-      throw new CanadaPostParseError(`${operation}: the response is not a PDF document`);
-    }
-  }
-}
-
-/** Downloads a binary artifact (PDF or ZPL) through a link on the Canada Post host. */
-export async function fetchArtifact(
-  ctx: RestContext,
-  link: RestLink,
-  operation: string,
-): Promise<RestArtifact> {
-  const url = assertTrustedRestHref(link.href).toString();
-  const accept = link.mediaType === "" ? "application/pdf" : link.mediaType;
-  const result = await ctx.http.execute({ operation, method: "GET", url, accept });
-  if (result.status !== 200) {
-    throw new CanadaPostApiError({
-      status: result.status,
-      messages: [],
-      request: { method: "GET", url: safeUrl(url), operation },
-      requestId: result.requestId,
-    });
-  }
-  const contentType = result.contentType?.split(";")[0]?.trim().toLowerCase();
-  if (contentType !== "application/pdf" && contentType !== "application/zpl") {
-    throw new CanadaPostError(
-      `${operation}: unexpected content type ${JSON.stringify((contentType ?? "none").slice(0, 60))} (expected application/pdf or application/zpl)`,
-    );
-  }
-  checkArtifact(contentType, result.data, operation);
-  return { contentType, data: result.data };
-}
-
 /** `…/shipping/v1/{mailedBy}/{mobo}` of the configured account. */
 function accountPrefix(ctx: RestContext): string {
-  return `${REST_BASE_URL}/shipping/v1/${ctx.config.customerNumber}/${ctx.config.mobo}`;
+  return accountUrl(ctx, "shipping");
 }
 
 /**
@@ -255,7 +210,7 @@ export class RestShipmentsApi {
         request: { method: "GET", url: safeUrl(url), operation: "shipments.list" },
       });
     }
-    return asLinks(jsonArray(result, "shipments.list"), "shipments.list");
+    return asRestLinks(jsonArray(result, "shipments.list"), "shipments.list");
   }
 
   /**
@@ -275,6 +230,107 @@ export class RestShipmentsApi {
       mutating: true,
       recovery: VOID_RECOVERY,
     });
+  }
+
+  /** The payment receipt of a shipment: card or contract-account details and the charge. */
+  async getReceipt(target: RestTarget): Promise<RestShipmentReceipt> {
+    const result = await this.ctx.http.execute({
+      operation: "shipments.getReceipt",
+      method: "GET",
+      url: resolveRestTarget(
+        target,
+        "shipment id",
+        (id) => `${accountPrefix(this.ctx)}/shipments/${id}/receipt`,
+      ),
+      accept: "application/json",
+    });
+    return jsonObjectOrSingleton(result, "shipments.getReceipt") as unknown as RestShipmentReceipt;
+  }
+
+  /**
+   * The public label URL and QR code of a shipment created with `createPublicKey` /
+   * `createQrCode`.
+   */
+  async getQrCode(target: RestTarget): Promise<RestPublicKeyInfo> {
+    const result = await this.ctx.http.execute({
+      operation: "shipments.getQrCode",
+      method: "GET",
+      url: resolveRestTarget(
+        target,
+        "shipment id",
+        (id) => `${accountPrefix(this.ctx)}/shipments/${id}/qr-code`,
+      ),
+      accept: "application/json",
+    });
+    return jsonObjectOrSingleton(result, "shipments.getQrCode") as unknown as RestPublicKeyInfo;
+  }
+
+  /** The shipment groups of the account (a group is what a manifest transmits). */
+  async getGroups(): Promise<RestShipmentGroup[]> {
+    const result = await this.ctx.http.execute({
+      operation: "shipments.getGroups",
+      method: "GET",
+      url: `${accountPrefix(this.ctx)}/groups`,
+      accept: "application/json",
+    });
+    return jsonArray(result, "shipments.getGroups") as RestShipmentGroup[];
+  }
+
+  /**
+   * Requests a refund for a shipment and returns the service ticket Canada Post opened. A
+   * state change (a refund ticket), so it is never retried or replayed; an ambiguous failure is
+   * {@link CanadaPostIndeterminateError}.
+   */
+  async requestRefund(target: RestTarget, request: RestRefundRequest): Promise<RestRefundInfo> {
+    if (request.email.length > 60 || !EMAIL.test(request.email)) {
+      throw new CanadaPostValidationError("email must be a valid address of at most 60 characters");
+    }
+    const result = await this.ctx.http.execute({
+      operation: "shipments.requestRefund",
+      method: "POST",
+      url: resolveRestTarget(
+        target,
+        "shipment id",
+        (id) => `${accountPrefix(this.ctx)}/shipments/${id}/refund`,
+      ),
+      accept: "application/json",
+      body: { email: request.email },
+      mutating: true,
+      recovery: REFUND_RECOVERY,
+    });
+    return jsonObjectOrSingleton(result, "shipments.requestRefund") as unknown as RestRefundInfo;
+  }
+
+  /**
+   * Transmits the shipments of one or more groups (creates a manifest). **Bills the shipments
+   * in a Production app.** Never retried; an ambiguous failure is
+   * {@link CanadaPostIndeterminateError}. Returns links to the manifests it created.
+   */
+  async transmit(request: RestTransmitRequest): Promise<RestLink[]> {
+    if (request.groupIds.length === 0 || request.groupIds.some((g) => g === "" || g.length > 32)) {
+      throw new CanadaPostValidationError(
+        "groupIds needs at least one group id of 1-32 characters",
+      );
+    }
+    if (request.excludedShipments?.length === 0) {
+      throw new CanadaPostValidationError(
+        "excludedShipments must be omitted or hold a shipment id",
+      );
+    }
+    const id = request.customerRequestId;
+    if (id !== undefined && (id === "" || id.length > 35)) {
+      throw new CanadaPostValidationError("customerRequestId must be 1-35 characters");
+    }
+    const result = await this.ctx.http.execute({
+      operation: "shipments.transmit",
+      method: "POST",
+      url: `${accountPrefix(this.ctx)}/manifests`,
+      accept: "application/json",
+      body: request,
+      mutating: true,
+      recovery: TRANSMIT_RECOVERY,
+    });
+    return asRestLinks(jsonArray(result, "shipments.transmit"), "shipments.transmit");
   }
 
   /**

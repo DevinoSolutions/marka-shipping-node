@@ -1,0 +1,892 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PostOfficeServices",
+    "description": "PostOfficeServices",
+    "version": "1.0.0",
+    "x-ibm-name": "findpostoffice",
+    "x-pathalias": "postoffice-api-v1",
+    "x-ibm-languages": {
+      "title": {
+        "fr": "Trouver un bureau de poste"
+      },
+      "description": {
+        "fr": "Trouver un bureau de poste"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/postoffice/v1"
+    }
+  ],
+  "paths": {
+    "/post-offices": {
+      "get": {
+        "tags": ["post office"],
+        "summary": "Get Nearest Post office",
+        "description": "Returns a list of post offices near a given location. It also specifies which ones support direct delivery to the post office rather than to a recipient’s address.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir le bureau de poste le plus près"
+          },
+          "description": {
+            "fr": "Affiche une liste des bureaux de poste situés près d’un emplacement donné. Précise également lesquels appuient la livraison directe au bureau de poste plutôt qu’à l’adresse de la ou du destinataire."
+          }
+        },
+        "parameters": [
+          {
+            "name": "maximum",
+            "in": "query",
+            "description": "Indicates the maximum number of Post Offices to return with the response.\n\nThe maximum allowed value is 50. The default value is 10.\n\nIn remote locations, fewer Post Offices than requested may be returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Indique le nombre maximal de bureaux de poste à afficher avec la réponse.\nLe nombre maximal permis est de 50. La valeur par défaut est de 10.\nDans les emplacements éloignés, un nombre de bureaux de poste moins élevé que celui demandé peut s'afficher."
+              }
+            },
+            "schema": {
+              "type": "integer",
+              "maximum": 50
+            },
+            "example": 50
+          },
+          {
+            "name": "d2po",
+            "in": "query",
+            "description": "True indicates that you want a list of Post Offices that accept the \"Deliver to Post Office\" delivery of parcels. Use this when you want the parcel to be delivered directly to a Post Office rather than to the recipient’s address.\n\nFalse indicates that you want all Post Offices included in the list. This call parameter should be false when looking for Post Offices from which to drop off parcels.\n\nIf the query parameter is missing, it defaults to false.\n\n**Note:** If you’re not using web services to create shipping labels, read  [mandatory requirements for implementing Deliver to Post Office.](https://www.canadapost-postescanada.ca/cpc/en/our-company/news-and-media/corporate-news/news-release-list.page).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "La mention « True » indique que vous voulez une liste de bureaux de poste acceptant la livraison de colis assortis de l'option « Livrer au bureau de poste ». \n\nUtilisez cette option lorsque vous voulez qu'un colis soit livré directement à un bureau de poste plutôt qu'à l'adresse d'un destinataire.\n\nLa mention « False » indique que vous voulez que tous les bureaux de poste soient inclus dans la liste. \n\nCe paramètre de la demande de service doit être « False » lorsque vous cherchez des bureaux de poste où déposer des colis.\n\nS’il manque le paramètre de requête, la mention « False » s’affiche par défaut.\n\n**Nota :** Si vous n'utilisez pas les services Web pour créer des étiquettes d'expédition, lisez les exigences obligatoires pour la mise en œuvre de l'option « Livrer au bureau de poste »."
+              }
+            },
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "bflf",
+            "in": "query",
+            "description": "True indicates that customer wants a list of Post Offices that accept the \"Box Free Label\" delivery of parcels.\n\nFalse indicates that customer wants all Post Offices included in the list and not just the ones with BFLF service.\n\nIf the query parameter is missing, it defaults to false.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "True indique que la personne cherche une liste des bureaux de poste qui acceptent la livraison de colis sans étiquette ni emballage.\n\nFalse indique que la personne veut que tous les bureaux de poste soient inclus dans la liste, pas seulement ceux qui offrent les retours sans étiquette ni emballage.\n\nSi le paramètre de requête est manquant, il est établi par défaut sur « false »."
+              }
+            },
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "tonight",
+            "in": "query",
+            "description": "True indicates that you want a list of the Deliver to Post Offices that can be used for the Delivered TonightTM service (i.e. those that have extended hours of service). Note that it cannot be true when d2po is false.\nFalse indicates that you do not want to filter based on this criterion.\nIf the query parameter is missing, it defaults to false.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "La valeur « Vrai » indique que vous souhaitez obtenir la liste des bureaux de poste proposant le service « Livraison ce soir » (c’est-à-dire ceux qui offrent des horaires d’ouverture étendus). Notez que cette valeur ne peut pas être « Vrai » si la valeur de d2po est « Faux ».\nLa valeur « Faux » indique que vous ne souhaitez pas filtrer selon ce critère.\nSi le paramètre de requête est absent, sa valeur par défaut est « Faux »."
+              }
+            },
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "longitude",
+            "in": "query",
+            "description": "If you use longitude and latitude to define the location, both longitude and latitude must be present and all other search fields (postalCode, province, city, and streetName) should be omitted. (If any of these other search fields are present, they will be ignored)",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Si vous utilisez les données de longitude et de latitude pour définir l'emplacement, la longitude et la latitude doivent toutes deux être indiquées et tous les autres champs de recherche (postalCode, province, city, et streetName) doivent être omis. (Si l'un de ces champs de recherche est présent, le système n'en tiendra pas compte.)"
+              }
+            },
+            "schema": {
+              "type": "number",
+              "pattern": "^-?\\d{1,3}(\\.\\d{0,5})?$",
+              "minimum": -150,
+              "maximum": -50
+            },
+            "example": -101.32354
+          },
+          {
+            "name": "latitude",
+            "in": "query",
+            "description": "If you use longitude and latitude to define the location, both longitude and latitude must be present and all other search fields (postalCode, province, city, and streetName) should be omitted. (If any of these other search fields are present, they will be ignored)",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Si vous utilisez les données de longitude et de latitude pour définir l'emplacement, la longitude et la latitude doivent toutes deux être indiquées et tous les autres champs de recherche (postalCode, province, city, et streetName) doivent être omis. (Si l'un de ces champs de recherche est présent, le système n'en tiendra pas compte.)"
+              }
+            },
+            "schema": {
+              "type": "string",
+              "pattern": "^-?\\d{1,3}(\\.\\d{0,5})?$",
+              "minimum": 40,
+              "maximum": 90
+            },
+            "example": 55.32354
+          },
+          {
+            "name": "postal-code",
+            "in": "query",
+            "description": "Postal Code takes precedence if multiple search criteria are provided. If Postal Code and other parameters are specified, Postal Code will be used by the search algorithm and other parameters will be ignored.\n\nAnything other than a valid Postal Code will produce an error. (e.g. postalcode={blank} will produce an error).\n\n**Note:This search field should only be used if longitude and latitude are not present.**",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code postal prime si des critères de recherche multiples sont fournis. Si le code postal et d'autres paramètres sont précisés, le code postal sera utilisé par l'algorithme de recherche et les autres paramètres seront ignorés.\n\nTout ce qui n'est pas un code postal valide entraînera une erreur. (Par exemple, le format « postalcode={blank} » entraînera une erreur.)\n\n**Note : Ce champ de recherche ne doit être utilisé que si la longitude et la latitude ne sont pas présentes.**"
+              }
+            },
+            "schema": {
+              "$ref": "#/components/schemas/postalCode"
+            },
+            "example": "K2B8J6"
+          },
+          {
+            "name": "province",
+            "in": "query",
+            "description": "If Postal Code is not specified both Province and City should be provided. To get meaningful information, city should be provided along with province. For larger municipalities, a simple province and city search may return a subset of the available Post Offices, and there is no guarantee as to which ones will be in the subset.  \n\nThus, for larger municipalities, either all of Province, City and Street may be required, or, for the best results, use latitude/longitude or postalCode.\n\n(Two character representation of Canadian provinces - ISO 3166-2)\n\n**Note:This search field should only be used if longitude and latitude are not present.**",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Si le code postal n'est pas précisé, la province et la ville doivent être fournies. Pour obtenir des renseignements pertinents, le nom de la ville doit être fourni avec celui de la province. Pour les municipalités plus importantes, une simple recherche par province et par ville peut afficher un sous-ensemble de bureaux de poste disponibles, mais il n'est pas garanti lesquels se trouveront dans le sous-ensemble.\n\nAinsi, pour les municipalités plus importantes, saisissez à la fois la province, la ville et la rue, ou, si vous voulez obtenir de meilleurs résultats, saisissez plutôt la latitude et la longitude ou le code postal.\n\n(Code à deux caractères pour les provinces canadiennes – ISO 3166-2)    \n\n**Note : Ce champ de recherche ne doit être utilisé que si la longitude et la latitude ne sont pas présentes.**"
+              }
+            },
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2
+            },
+            "example": "ON"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "description": "If Postal Code is not specified, both Province and City should be provided to obtain meaningful information. For larger municipalities all of Province, City and Street may be required.\n\n**Note:This search field should only be used if longitude and latitude are not present.**",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Si le code postal n'est pas précisé, la province et la ville doivent être fournies pour obtenir des renseignements pertinents. Pour les plus grandes municipalités, la province, la ville et la rue peuvent être requises.\n\n**Note : Ce champ de recherche ne doit être utilisé que si la longitude et la latitude ne sont pas présentes.**"
+              }
+            },
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "example": "Toronto"
+          },
+          {
+            "name": "street-name",
+            "in": "query",
+            "description": "This field represents the Street Name only—without the house or apartment number (a search with house or apartment number will not be successful). Street Name can be a multi-part name with embedded spaces.\n\nIf City and Province are specified, provision of this parameter will refine the list to a more specific location in the city indicated.\n\nFor larger municipalities a list might not be returned if the Street Name is not provided in addition to the City and Province attributes.\n\n**Note:This search field should only be used if longitude and latitude are not present.**",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Ce champ correspond au nom de rue seulement – sans le numéro de maison ou d'appartement (une recherche avec le numéro de maison ou d'appartement n'aura pas de succès). Le nom de la rue peut être un nom à plusieurs volets ayant des espaces intégrées.\n\nSi la ville et la province sont précisées, le fait de fournir ce paramètre réduira la liste à un endroit plus précis dans la ville indiquée.\n\nPour les plus grandes municipalités, la liste peut ne pas s'afficher si le nom de la rue n'est pas fourni en plus de celui de la ville et de la province.\n\n**Note : Ce champ de recherche ne doit être utilisé que si la longitude et la latitude ne sont pas présentes.**"
+              }
+            },
+            "schema": {
+              "type": "string"
+            },
+            "example": "Main"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/postOfficeList"
+                },
+                "example": [
+                  {
+                    "address": {
+                      "latitude": 49,
+                      "longitude": -86,
+                      "officeAddress": "12 Elm St",
+                      "city": "Edmonton",
+                      "province": "QC",
+                      "postalCode": "P3G7A6"
+                    },
+                    "distance": 0.21,
+                    "location": "Macs Milk #8",
+                    "name": "Some POffice",
+                    "officeId": 982736,
+                    "bilingualDesignation": true,
+                    "link": {
+                      "rel": "detail",
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/postoffice/v1/post-offices/000098276/details",
+                      "mediaType": "application/json"
+                    }
+                  },
+                  {
+                    "address": {
+                      "latitude": 59,
+                      "longitude": -100,
+                      "officeAddress": "4 Pine Pl",
+                      "city": "Oog",
+                      "province": "MN",
+                      "postalCode": "M4X8H3"
+                    },
+                    "distance": 1.87,
+                    "location": "Post Place",
+                    "name": "Main PO",
+                    "officeId": 8374928385,
+                    "bilingualDesignation": false,
+                    "link": {
+                      "rel": "detail",
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/postoffice/v1/post-offices/000098276/details",
+                      "mediaType": "application/json"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-E00010"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "findNearestPostOffice"
+      }
+    },
+    "/post-offices/{id}/details": {
+      "get": {
+        "tags": ["post office"],
+        "summary": "Get Post Office Detail",
+        "description": "Provides details of post offices returned in the Get Nearest Post Office call (for example, hours of operation).",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir les détails d’un bureau de poste"
+          },
+          "description": {
+            "fr": "Fournit des détails sur les bureaux de poste affichés lors de la requête Obtenir le bureau de poste le plus près (par exemple, les heures d’ouverture). "
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Link provided from Get Nearest Post Office where rel=detail",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Lien fourni pour le service « Obtenir le bureau de poste le plus près » lorsque rel=detail"
+              }
+            },
+            "schema": {
+              "type": "string"
+            },
+            "example": 319376
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/postOfficeDetail"
+                },
+                "example": {
+                  "address": {
+                    "latitude": 51,
+                    "longitude": -62,
+                    "officeAddress": "123 Main Rd",
+                    "city": "Toronto",
+                    "province": "BC",
+                    "postalCode": "L2D8S1"
+                  },
+                  "location": "Shoppers #122",
+                  "name": "My PO",
+                  "officeId": 7276837164,
+                  "bilingualDesignation": true,
+                  "hoursList": [
+                    {
+                      "day": 1,
+                      "time": ["07:32", "11:52", "21:17"]
+                    },
+                    {
+                      "day": 2,
+                      "time": ["08:19", "12:28", "13:16", "22:27"]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-E00010"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "findPostOfficeDetails"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "platformID": {
+        "name": "platform-id",
+        "in": "header",
+        "description": "ID associated with the platform.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Identifiant associé à la plateforme."
+          }
+        },
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/customerNumber"
+        }
+      },
+      "language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Indicates your language preference for receiving error messages.\n\n- en-CA = English\n- fr-CA = French",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Indique votre langue de préférence pour recevoir les messages d'erreur.\n- en-CA = Anglais - fr-CA = Français"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "enum": ["en-CA", "fr-CA"],
+          "example": "en-CA",
+          "default": "en-CA"
+        }
+      }
+    },
+    "responses": {
+      "202": {
+        "description": "The 202 (Accepted) status code indicates that the request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 202 (Acceptée) indique que la demande a été acceptée aux fins de traitement, mais que le traitement n’a pas été effectué. La demande pourrait éventuellement être traitée ou non, car elle pourrait être refusée au moment du traitement."
+          }
+        }
+      },
+      "204": {
+        "description": "The 204 (No Content) status code indicates that the server has successfully fulfilled the request and that there is no additional content to send in the response content.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 204 (Aucun contenu) indique que le serveur a bien traité la demande et qu’il n’y a pas de contenu supplémentaire à envoyer dans le contenu de la réponse."
+          }
+        }
+      },
+      "400": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "The 401 (Unauthorized) status code indicates that the server understood the request but refuses to fulfill it.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 401 (Non autorisé) indique que le serveur a compris la requête mais refuse de la satisfaire."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorizedError"
+            },
+            "example": [
+              {
+                "httpCode": 401,
+                "httpMessage": "Unauthorized",
+                "moreInformation": "Cannot pass the security checks that are required by the target API or operation, Enable debug headers for more details."
+              }
+            ]
+          }
+        }
+      },
+      "403": {
+        "description": "The HTTP 403 (Forbidden) error means the web server received your request but denies you access to the requested resource because you don't have permission.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "L'erreur HTTP 403 (Interdit) signifie que le serveur Web a reçu votre requête mais vous refuse l'accès à la ressource demandée car vous n'en avez pas l'autorisation."
+          }
+        }
+      },
+      "404": {
+        "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "412": {
+        "description": "The 412 (Precondition Failed) status code indicates that one or more conditions given in the request header fields evaluated to false when tested on the server (Section 13).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 412 (Échec de la condition préalable) indique qu'une ou plusieurs conditions données dans les champs d'en-tête de la requête ont été évaluées à faux lors du test sur le serveur (Section 13)."
+          }
+        }
+      },
+      "500": {
+        "description": "The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 500 (Erreur interne du serveur) indique que le serveur a rencontré une condition inattendue l'empêchant de traiter la requête. Transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "501": {
+        "description": "The 501 (Not Implemented) status code indicates that the server does not support the functionality required to fulfill the request.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 501 (non mis en œuvre) indique que le serveur ne prend pas en charge les fonctions nécessaires pour traiter la demande."
+          }
+        }
+      },
+      "503": {
+        "description": "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 503 (Service indisponible) indique que le serveur est actuellement indisponible en raison d'une surcharge temporaire ou d'une maintenance planifiée, qui devrait être résolue après un certain délai. Message transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "504": {
+        "description": "The 504 (Gateway Timeout) status code indicates that the server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. May be passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 504 (Délai d'attente de la passerelle) indique que le serveur, agissant comme passerelle ou proxy, n'a pas reçu de réponse dans un délai raisonnable d'un serveur en amont auquel il devait accéder pour traiter la requête. Ce code peut provenir du serveur principal."
+          }
+        }
+      },
+      "400-E00010": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            },
+            "examples": {
+              "English": {
+                "value": {
+                  "title": "Validation failed",
+                  "detail": "Errors occurred while processing the request.",
+                  "errors": [
+                    {
+                      "errorCode": "E00010",
+                      "message": "Post Offices Not Found"
+                    }
+                  ]
+                }
+              },
+              "Français": {
+                "value": {
+                  "title": "Validation échouée",
+                  "detail": "Une erreur est survenue lors du traitement de la demande.",
+                  "errors": [
+                    {
+                      "errorCode": "E00010",
+                      "message": "Bureaux de poste non trouvés"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "customerNumber": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10,
+        "example": "0000000001"
+      },
+      "postOfficeDetail": {
+        "description": "Get Post Office Detail - Response\n\n---\n\nObtenir les détails d’un bureau de poste - Réponse",
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/address"
+          },
+          "location": {
+            "$ref": "#/components/schemas/location"
+          },
+          "name": {
+            "$ref": "#/components/schemas/name"
+          },
+          "officeId": {
+            "$ref": "#/components/schemas/officeId"
+          },
+          "bilingualDesignation": {
+            "$ref": "#/components/schemas/bilingualDesignation"
+          },
+          "hoursList": {
+            "$ref": "#/components/schemas/hoursList"
+          }
+        },
+        "required": [
+          "address",
+          "location",
+          "name",
+          "officeId",
+          "bilingualDesignation",
+          "hoursList"
+        ],
+        "additionalProperties": false
+      },
+      "postOfficeList": {
+        "description": "Get Nearest Post office - Response\n\n---\n\nObtenir le bureau de poste le plus près - Réponse",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/postOffice"
+        }
+      },
+      "address": {
+        "description": "The address of the Post Office.\n\n---\n\nL'adresse du bureau de poste.",
+        "type": "object",
+        "properties": {
+          "city": {
+            "description": "Municipality in which the Post Office is located.\n\n---\n\nMunicipalité dans laquelle se trouve le bureau de poste.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "example": "OTTAWA"
+          },
+          "latitude": {
+            "description": "The latitude of the Post Office.\n\n---\n\nLatitude du bureau de poste.",
+            "type": "string",
+            "pattern": "^-?\\d{1,3}(\\.\\d{0,5})?$",
+            "minimum": 40,
+            "maximum": 90,
+            "example": 55.32354
+          },
+          "longitude": {
+            "description": "The longitude of the Post Office.\n\n---\n\nLongitude du bureau de poste.",
+            "type": "number",
+            "pattern": "^-?\\d{1,3}(\\.\\d{0,5})?$",
+            "minimum": -150,
+            "maximum": -50,
+            "example": -75.8061
+          },
+          "postalCode": {
+            "$ref": "#/components/schemas/postalCode"
+          },
+          "province": {
+            "description": "The province where the Post Office is located.\n\n---\n\nProvince dans laquelle le bureau de poste est situé.",
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2,
+            "example": "ON"
+          },
+          "officeAddress": {
+            "description": "Street number and name for a Post Office.\n\n---\n\nNuméro et nom de rue pour un bureau de poste.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "example": "3080 CARLING AVE"
+          }
+        },
+        "required": ["city", "latitude", "longitude", "postalCode", "province", "officeAddress"],
+        "additionalProperties": false
+      },
+      "postOffice": {
+        "description": "Represents the information about a single Post Office.\n\n---\n\nOccurrence (1 à N fois). Correspond aux renseignements sur un seul bureau de poste.",
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/address"
+          },
+          "distance": {
+            "$ref": "#/components/schemas/distance"
+          },
+          "location": {
+            "$ref": "#/components/schemas/location"
+          },
+          "name": {
+            "$ref": "#/components/schemas/name"
+          },
+          "officeId": {
+            "$ref": "#/components/schemas/officeId"
+          },
+          "bilingualDesignation": {
+            "$ref": "#/components/schemas/bilingualDesignation"
+          },
+          "link": {
+            "$ref": "#/components/schemas/link"
+          }
+        },
+        "required": [
+          "address",
+          "distance",
+          "location",
+          "name",
+          "officeId",
+          "bilingualDesignation",
+          "link"
+        ],
+        "additionalProperties": false
+      },
+      "distance": {
+        "description": "The distance  (in km) to the Post Office from the location specified in the query.\n\n---\n\nDistance (en km) entre le bureau de poste et l'endroit précisé dans la requête.",
+        "type": "number",
+        "minimum": 0,
+        "maximum": 99999.99,
+        "multipleOf": 0.01,
+        "example": 0.65
+      },
+      "location": {
+        "description": "The location of a Post Office. This is used to distinguish among various Post Offices that have similar names.\n\n---\n\nEmplacement de la rue en général ou de la région où se trouve le bureau de poste. On l'utilise pour distinguer divers bureaux de poste qui ont des noms semblables.",
+        "type": "string",
+        "maxLength": 40
+      },
+      "name": {
+        "description": "The name assigned to the Post Office.\n\n---\n\nNom attribué au bureau de poste.",
+        "type": "string",
+        "maxLength": 40
+      },
+      "officeId": {
+        "description": "The internal Canada Post assigned unique identification number for the Post Office. This number is necessary for calling the Get Post Office Detail web service.\n\nNote: leading zeroes are significant and should be included.\n\n---\n\nNuméro d'identification unique interne de Postes Canada attribué au bureau de poste. Ce numéro est nécessaire pour utiliser le service Web « Obtenir les détails d'un bureau de poste ».\n\nNota : Les zéros du début sont importants et doivent être inclus.     ",
+        "type": "string",
+        "pattern": "^\\\\d{10}$",
+        "example": 102978
+      },
+      "bilingualDesignation": {
+        "description": "- True indicates that the Post Office provides bilingual services (English and French).\n- False indicates no designation for the provision of bilingual services. False does not indicate a specific language of service.  \n\n---\n\n- La mention « Vrai » indique que le bureau de poste fournit des services bilingues (français et anglais).\n- La mention « Faux » indique qu'il n'y a aucune désignation quant à la prestation de services bilingues. Elle n'indique pas une langue de service précise.",
+        "type": "boolean"
+      },
+      "postalCode": {
+        "type": "string",
+        "description": "The Postal Code of the Post Office.\n\n---\n\nCode postal du bureau de poste.",
+        "pattern": "^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$",
+        "example": "K2B7K0"
+      },
+      "link": {
+        "description": "This field represents a link to the Get Post Office Detail web service.\n\nThe link has three fields as follows.\n\n1.  **href** - The endpoint that can be called using an HTTP GET to retrieve the information.\n2.  **rel** - This indicates the purpose of the link and the type of information that will be retrieved. In this case, rel=\"detail\" indicates that the link is to retrieve details about the Post Office.\n3.  **mediaType** - This is a string indicating the format and structure of any additional input data that is required when invoking the web services. This is usually a string indicating an appropriate version of Canada Post shipping web services. The value of the mediaType field should be included as an HTTP Accept header in any of the calls to other services pointed to by the href.\n\n---\n\nCe champ représente un lien vers le service Web « Obtenir les détails d'un bureau de poste ».\n\nLe lien compte les trois champs suivants :\n\n1. **href** - Il s'agit du point final pouvant être demandé à l'aide d'une requête GET (protocole HTTP) dans le but de récupérer de l'information.\n\n2. **rel** - Désigne l'objectif du lien et le type de renseignements qui y seront récupérés. Dans ce cas, la chaîne « rel=\"detail » indique que le lien sert à récupérer les détails sur le bureau de poste.\n\n3. **mediaType** - Il s'agit d'une chaîne indiquant le format et la structure de toutes les données d'entrée supplémentaires qui sont nécessaires pour faire une demande de services Web. Il s'agit habituellement d'une chaîne désignant une version appropriée des services Web de Postes Canada pour les expéditions. La valeur du champ mediaType doit être incluse dans un en-tête « Accept » (protocole HTTP) lorsqu'il faut faire une demande à tout autre service désigné par le champ « href ». ",
+        "type": "object",
+        "properties": {
+          "href": {
+            "description": "The endpoint that can be called using an HTTP GET to retrieve the information.\n\n---\n\nIl s'agit du point final pouvant être demandé à l'aide d'une requête GET (protocole HTTP) dans le but de récupérer de l'information.",
+            "type": "string"
+          },
+          "rel": {
+            "description": "This indicates the purpose of the link and the type of information that will be retrieved. In this case, rel=\"detail\" indicates that the link is to retrieve details about the Post Office.\n\n---\n\nDésigne l'objectif du lien et le type de renseignements qui y seront récupérés. Dans ce cas, la chaîne « rel=\"detail » indique que le lien sert à récupérer les détails sur le bureau de poste.",
+            "type": "string"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mediaType": {
+            "description": "This is a string indicating the format and structure of any additional input data that is required when invoking the web services. This is usually a string indicating an appropriate version of Canada Post shipping web services. The value of the mediaType attribute should be included as an HTTP Accept header in any of the calls to other services pointed to by the href.\n\n---\n\nIl s'agit d'une chaîne indiquant le format et la structure de toutes les données d'entrée supplémentaires qui sont nécessaires pour faire une demande de services Web. Il s'agit habituellement d'une chaîne désignant une version appropriée des services Web de Postes Canada pour les expéditions. La valeur de l'attribut mediaType doit être incluse dans un en-tête « Accept » (protocole HTTP) lorsqu'il faut faire une demande à tout autre service désigné par l'attribut « href ».",
+            "type": "string"
+          }
+        },
+        "required": ["href", "rel", "mediaType"],
+        "additionalProperties": false
+      },
+      "messages": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Type of error.\n\n---\n\nType d'erreur."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Detailed description of type of error.\n\n---\n\nDescription détaillée du type d'erreur."
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors.\n\n---\n\nListe des erreurs.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errorCode": {
+                  "type": "string",
+                  "description": "Error code related to error.\n\n---\n\nCode d'erreur lié à l'erreur."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Detailed message for the error that occured.\n\n---\n\nMessage détaillé concernant l'erreur survenue."
+                }
+              },
+              "required": ["message", "errorCode"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["title", "detail", "errors"],
+        "additionalProperties": false,
+        "example": {
+          "title": "Validation failed",
+          "detail": "Errors occurred while processing the request.",
+          "errors": [
+            {
+              "errorCode": "002",
+              "message": "Duplicate Pin."
+            }
+          ]
+        }
+      },
+      "unauthorizedError": {
+        "type": "object",
+        "properties": {
+          "httpCode": {
+            "type": "string",
+            "description": "Code associated with the unauthorized error.\n  ---\n\nCode associé à l'erreur d'autorisation."
+          },
+          "httpMessage": {
+            "type": "string",
+            "description": "Error message.\n  ---\n\nmessage d'erreur."
+          },
+          "moreInformation": {
+            "type": "string",
+            "description": "Detailed error message.\n  ---\n\nMessage d'erreur détaillé."
+          }
+        }
+      },
+      "hoursList": {
+        "type": "array",
+        "description": "Contains information regarding the hours of operation of the Post Office.\n\nOccurs 1 … 7 times, with each occurrence representing the hours of operation of a single day of the week.\n\n---\n\nContient des renseignements concernant les heures d'ouverture du bureau de poste.\n\nOccurrence (1 à 7 fois) : Chaque occurrence représente les heures d'ouverture d'un jour précis de la semaine.        ",
+        "items": {
+          "type": "object",
+          "properties": {
+            "day": {
+              "description": "Indicates which day of the week the corresponding occurrence of hoursList represents.\n\nDay 1 is Sunday and Day 7 is Saturday\n\n---\n\nIndique quel jour de la semaine est représenté par l'occurrence correspondante de le champ « hoursList ».\n\nLe jour « 1 » correspond à dimanche et le jour « 7 », à samedi.",
+              "enum": [1, 2, 3, 4, 5, 6, 7]
+            },
+            "time": {
+              "type": "array",
+              "items": {
+                "description": "The opening and closing times of the Post Office.\n\nOccurs 1 .. 4 times.\n\n- The first occurrence of time is the first opening time of the day.\n- The second occurrence (if present) represents the first closing time of the day. (If absent, then the store remains open to the end of the day)\n- The third occurrence (if present) represents a second opening of the day.\n- The fourth occurrence (if present) represents the second closing time of the day. (If absent, then the store remains open to the end of the day).\n\ne.g., if there are 4 occurrences of the time with the values 09:00, 16:00, 19:00, 23:00, then the store would be open from 9 a.m. – 4 p.m. and 7 p.m. – 11 p.m.\n\n---\n\nHeures d'ouverture et de fermeture du bureau de poste.\n\nOccurrence (1 à 4 fois).\n\n- La première occurrence de l'heure correspond à la première heure d'ouverture de la journée.\n- La deuxième occurrence (s'il y en a une) représente la première heure de fermeture de la journée. (Si aucune donnée n'est précisée, cela indique que le magasin reste ouvert jusqu'à la fin de la journée.)\n- La troisième occurrence (s'il y en a une) représente la deuxième heure d'ouverture de la journée.\n- La quatrième occurrence (s'il y en a une) représente la deuxième heure de fermeture de la journée. (Si aucune donnée n'est précisée, cela indique que le magasin reste ouvert jusqu'à la fin de la journée.)\n\nExemple : S'il y a quatre occurrences d'heure (09:00, 16:00, 19:00, 23:00), le magasin est ouvert de 9 h à 16 h et de 19 h à 23 h.",
+                "type": "string",
+                "pattern": "^((0?\\\\d)|(1\\\\d)|(2[0-3])):[0-5]\\\\d$"
+              },
+              "minItems": 1,
+              "maxItems": 4
+            }
+          },
+          "required": ["day", "time"],
+          "additionalProperties": false
+        },
+        "minItems": 1,
+        "maxItems": 7
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "type": "oauth2",
+        "x-ibm-oauth-provider": "cpc-api-native-oauth-provider",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token",
+            "scopes": {
+              "merchant": "default description",
+              "platform": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ibm-configuration": {
+    "cors": {
+      "enabled": true
+    },
+    "type": "rest",
+    "phase": "realized",
+    "enforced": true,
+    "testable": true,
+    "oauth-servers": {
+      "Oauth2": {
+        "clientCredentials": {
+          "tokenUrls": [
+            "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token"
+          ],
+          "authorizationUrls": [],
+          "refreshUrls": []
+        }
+      }
+    }
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/postoffice/v1"
+    }
+  ],
+  "security": [
+    {
+      "Oauth2": ["merchant"]
+    }
+  ]
+}

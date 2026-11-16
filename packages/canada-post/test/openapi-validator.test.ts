@@ -3,6 +3,7 @@ import {
   assertSupportedKeywords,
   findOperation,
   loadSpec,
+  SPEC_NAMES,
   validateComponent,
   validateSchema,
   type OpenApiDoc,
@@ -111,7 +112,7 @@ describe("OpenAPI validator (the contract tests are only as good as this)", () =
   });
 });
 
-describe.each(["shipping-v1", "rating-v1"] as const)("%s document", (name) => {
+describe.each(SPEC_NAMES)("%s document", (name) => {
   const doc = loadSpec(name);
 
   it("only uses keywords the validator implements", () => {
@@ -136,12 +137,14 @@ describe.each(["shipping-v1", "rating-v1"] as const)("%s document", (name) => {
 
   it("accepts its own request body examples (validator and spec agree)", () => {
     let checked = 0;
+    let withBody = 0;
     for (const ops of Object.values(doc.paths)) {
       for (const op of Object.values(ops)) {
         const content = op.requestBody?.content?.["application/json"] as
           | { schema?: Schema; examples?: Record<string, { value?: unknown }>; example?: unknown }
           | undefined;
         if (content?.schema === undefined) continue;
+        withBody += 1;
         const examples = [
           ...Object.values(content.examples ?? {}).map((e) => e.value),
           ...(content.example === undefined ? [] : [content.example]),
@@ -154,6 +157,8 @@ describe.each(["shipping-v1", "rating-v1"] as const)("%s document", (name) => {
         }
       }
     }
-    expect(checked).toBeGreaterThan(0);
+    // Read-only documents (customer information, post offices, service information) have no
+    // request bodies; every other document must have at least one example to check.
+    if (withBody > 0) expect(checked).toBeGreaterThan(0);
   });
 });

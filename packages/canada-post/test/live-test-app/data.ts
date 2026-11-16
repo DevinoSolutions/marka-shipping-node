@@ -1,6 +1,10 @@
 // Request bodies of the live test-app suite. The Test app ignores the payload (it answers
 // static stubs), so every name, address and phone number here is obviously fake.
-import type { RestCreateShipmentRequest, RestPriceRequest } from "../../src/index.js";
+import type {
+  RestCreateShipmentRequest,
+  RestPriceRequest,
+  RestTransmitRequest,
+} from "../../src/index.js";
 import { testCustomerNumber } from "./setup.js";
 
 /** A schema-valid domestic shipment request. `transmitShipment: true`: no manifest needed. */
@@ -67,4 +71,25 @@ function nextWeekday(): string {
     d.setUTCDate(d.getUTCDate() + 1);
   } while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
   return d.toISOString().slice(0, 10);
+}
+
+/** A schema-valid manifest transmit request (groups come from `shipments.getGroups()`). */
+export function buildTransmitRequest(requestId: string): RestTransmitRequest {
+  return {
+    customerRequestId: requestId,
+    groupIds: ["SDKLIVE-GROUP"],
+    detailedManifests: true,
+    methodOfPayment: "CreditCard",
+    manifestAddress: {
+      manifestCompany: "Example Sender Ltd",
+      manifestName: "Example Sender",
+      phoneNumber: "555-555-0100",
+      addressDetails: {
+        addressLine1: "1 Example Street",
+        city: "Ottawa",
+        provState: "ON",
+        postalZipCode: "K1A0B1",
+      },
+    },
+  };
 }
