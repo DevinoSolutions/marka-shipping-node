@@ -1,8 +1,10 @@
 # CLAUDE.md — agent instructions for this repo
 
-TypeScript monorepo: `packages/canada-post` (`@joinmarka/canada-post`, the SDK) and
+TypeScript monorepo: `packages/canada-post` (`@joinmarka/canada-post`, the SDK),
+`packages/canada-post-mcp` (`@joinmarka/canada-post-mcp`, a stdio MCP server on the REST client) and
 `packages/shipping` (`@joinmarka/shipping`, the Marka Shipping umbrella that re-exports every carrier;
-no logic of its own). Each package has its own release tag (`canada-post-vX.Y.Z`, `shipping-vX.Y.Z`). npm workspaces,
+no logic of its own). Each package has its own release tag (`canada-post-vX.Y.Z`,
+`canada-post-mcp-vX.Y.Z`, `shipping-vX.Y.Z`). npm workspaces,
 ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Program REST APIs
 (XML with versioned vendor media types). Not affiliated with Canada Post.
 
@@ -17,7 +19,11 @@ ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Progr
    **Test** app are fine. Never use the Production app credentials
    (`CANADAPOST_PROD_CLIENT_ID`/`_SECRET`) for anything, not even a token request, without that
    authorization.
-2. **There are two live suites, and exactly one of them may write.**
+   The MCP server follows the same rule: write tools exist only with
+   `CANADAPOST_MCP_ALLOW_WRITES=true` (plus `CANADAPOST_MCP_ALLOW_PRODUCTION_WRITES=true` for a
+   Production app), go through preview then apply (`docs/adr/0004-canada-post-mcp-server.md`), and
+   a new mutating tool follows the same gate.
+2. **There are three live suites, and only the Test-app ones may write.**
    - `packages/canada-post/test/live/` (XML sandbox) is **READ-ONLY and SANDBOX-ONLY**. Never add
      a mutating call (`create`, `void`, `transmit`, `requestRefund`, any raw POST/DELETE) and never
      reference the production environment there.
@@ -31,7 +37,11 @@ ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Progr
      `CANADAPOST_CUSTOMER_NUMBER`. `setup.ts` is the only place a client is built and it
      hard-codes `app: "test"`. Only Test-app credentials ever go into the `canada-post-test`
      GitHub Environment.
-     `npm run check:live-readonly` enforces both and derives its forbidden list from
+   - `packages/canada-post-mcp/test/live-test-app/` (the MCP server smoke, on the Test app) obeys
+     every rule of the previous point: its `setup.ts` is the only place a client or an MCP server
+     is built (the server always gets the explicit Test-app client), and every test file awaits
+     `assertTestApp()` in `beforeAll`.
+     `npm run check:live-readonly` enforces all of them and derives its forbidden list from
      `packages/canada-post/src/operations.ts` — to extend it, add the operation to that table with
      `access: "write"`; do not weaken the guard to make a test pass (`scripts/live-guard.test.ts`
      proves what it rejects; extend it with the guard). `test/operations.test.ts` fails if a public
@@ -67,13 +77,15 @@ ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Progr
   of the contracts doc records where the Test app deviates from them. The contract tests validate
   against them.
 - `docs/adr/` — indeterminate writes (0001), REST/OAuth transport and the Test-app interlock
-  (0002). Follow them.
+  (0002), the REST full-surface classification and card data (0003), the MCP server (0004).
+  Follow them.
 
 ## Toolchain pins (do not upgrade without owner sign-off)
 
 TypeScript `~6.0.3` · vitest `^4` · ESLint flat config + typescript-eslint · knip `5.88.1` ·
-typedoc with `treatWarningsAsErrors` · fast-xml-parser is the only runtime dependency (the
-REST client adds none).
+typedoc with `treatWarningsAsErrors` · fast-xml-parser is the only runtime dependency of the SDK
+(the REST client adds none) · `@modelcontextprotocol/sdk` `^1.29` and zod `^4` (zod-4 API) are
+allowed in `packages/canada-post-mcp` ONLY.
 
 ## Conventions
 
@@ -107,6 +119,7 @@ npm run pack:dry
 CANADAPOST_LIVE_TESTS=true npm run test:live   # READ-ONLY sandbox smoke tests (needs .env)
 CANADAPOST_TEST_APP_LIVE=true npm run test:live:test-app   # REST Test-app suite, may write (needs
                          # CANADAPOST_CLIENT_ID/_SECRET/CUSTOMER_NUMBER of the TEST app in .env)
+CANADAPOST_TEST_APP_LIVE=true npm run test:live:mcp        # MCP smoke on the Test app (same creds)
 ```
 
 All of these must exit 0 before claiming work is done. Trust exit codes, not output prettiness.

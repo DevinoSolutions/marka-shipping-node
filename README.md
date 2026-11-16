@@ -2,10 +2,11 @@
 
 Shipping SDKs from [Marka](https://joinmarka.com). Each carrier ships as its own focused npm package, and `@joinmarka/shipping` bundles every carrier in one install.
 
-| Package                                                                                                           | What it is                                                                   |
-| ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [`@joinmarka/canada-post`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/canada-post) | Canada Post REST APIs: rates, shipments, PDF/ZPL labels, manifests, tracking |
-| [`@joinmarka/shipping`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/shipping)       | Every Marka carrier SDK in one package (currently Canada Post)               |
+| Package                                                                                                                   | What it is                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`@joinmarka/canada-post`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/canada-post)         | Canada Post REST APIs: rates, shipments, PDF/ZPL labels, manifests, tracking |
+| [`@joinmarka/canada-post-mcp`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/canada-post-mcp) | MCP server (stdio) for Canada Post: quotes, tracking, labels; opt-in writes  |
+| [`@joinmarka/shipping`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/shipping)               | Every Marka carrier SDK in one package (currently Canada Post)               |
 
 `@joinmarka/canada-post` is an unofficial TypeScript SDK for the [Canada Post Developer Program](https://www.canadapost-postescanada.ca/information/app/drc/home) REST APIs: rating, non-contract and contract shipping, manifests, labels (PDF and ZPL) and tracking.
 
@@ -243,6 +244,16 @@ const offices = await canadaPost.postOffices.find({ postalCode: "K1A 0B1", maxim
 Run the live suite against your own Test app with
 `CANADAPOST_TEST_APP_LIVE=true npm run test:live:test-app` (needs `CANADAPOST_CLIENT_ID`,
 `CANADAPOST_CLIENT_SECRET` and `CANADAPOST_CUSTOMER_NUMBER` of the **Test** app in `.env`).
+
+### MCP server
+
+[`@joinmarka/canada-post-mcp`](https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/canada-post-mcp)
+exposes this REST client to an AI assistant over the Model Context Protocol (stdio): 20 read tools
+(quote, tracking, shipment lookups, labels saved to a file, payment readiness, post offices,
+pickups) always, and 8 write tools (create or void a shipment, refund, transmit a manifest, book or
+cancel a pickup, create a return) only with `CANADAPOST_MCP_ALLOW_WRITES=true`, always through
+preview then apply with a single-use confirm token. A Production app additionally needs
+`CANADAPOST_MCP_ALLOW_PRODUCTION_WRITES=true`. See `docs/adr/0004-canada-post-mcp-server.md`.
 
 ## API surface
 

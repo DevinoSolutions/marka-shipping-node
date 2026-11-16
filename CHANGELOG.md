@@ -8,6 +8,15 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 
 ### Added
 
+- New package `@joinmarka/canada-post-mcp` (`packages/canada-post-mcp`, its own release tag
+  `canada-post-mcp-vX.Y.Z`): a stdio MCP server on the REST client. 20 read tools; 8 write tools
+  registered only with `CANADAPOST_MCP_ALLOW_WRITES=true` (and `CANADAPOST_MCP_ALLOW_PRODUCTION_WRITES=true`
+  for a Production app), always preview then apply with a single-use, short-lived, HMAC-sealed
+  confirm token; startup `assertTestApp()` before writes on a Test app; labels saved to files;
+  mocked tests for every tool and the gating, a live Test-app smoke in the daily canary
+  (`npm run test:live:mcp`). ADR 0004. Not published yet: it needs a release of
+  `@joinmarka/canada-post` that contains the REST surface first.
+
 - REST client, full surface: `shipments.getReceipt`, `getQrCode`, `getGroups`, `requestRefund`,
   `transmit`; `manifests` (`list`, `get`, `getDetails`); `tracking` (summaries and details by
   PIN, DNC and reference, `createCertificate`); `customers` (`get`, `getMobo`,
