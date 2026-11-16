@@ -261,8 +261,9 @@ const shipmentsListTool = defineTool({
   name: "canadapost_shipments_list",
   title: "List shipments",
   description:
-    "Finds shipments by customerRequestId, tracking PIN, group, manifest, date, or those not " +
-    "yet on a manifest. At least one filter is required.",
+    "Finds shipments by customerRequestId, tracking PIN, group, manifest, or those not yet on " +
+    "a manifest. At least one of requestId, trackingPin, groupId, manifestId or noManifest is " +
+    "required; date and limit only narrow another filter.",
   annotations: { title: "List shipments", ...READ_ONLY },
   inputSchema: z.strictObject({
     requestId: z.string().min(1).max(32).optional(),
@@ -293,9 +294,9 @@ const groupsListTool = defineTool({
 const manifestsListTool = defineTool({
   name: "canadapost_manifests_list",
   title: "List manifests",
-  description: "Links to the manifests of a date range (both dates optional).",
+  description: "Links to the manifests of a date range (`from` is required, `to` optional).",
   annotations: { title: "List manifests", ...READ_ONLY },
-  inputSchema: z.strictObject({ from: isoDate.optional(), to: isoDate.optional() }),
+  inputSchema: z.strictObject({ from: isoDate, to: isoDate.optional() }),
   handler: (input, ctx) =>
     guarded(ctx, async () => ({ manifests: linkViews(await ctx.client.manifests.list(input)) })),
 });

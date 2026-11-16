@@ -9,6 +9,7 @@ import {
   CanadaPostApiError,
   CanadaPostConfigurationError,
   CanadaPostIndeterminateError,
+  CanadaPostParseError,
   CanadaPostValidationError,
   type CanadaPostDebugEvent,
   type RestFollowedLink,
@@ -98,6 +99,15 @@ describe("shipments: receipt, qr code, groups", () => {
       `${ACCOUNT}/shipments/${FAKE_SHIPMENT_ID}/qr-code`,
       `${ACCOUNT}/groups`,
     ]);
+  });
+
+  it("treats a null body (production, no groups) as an empty list, nothing else", async () => {
+    const empty = makeRestClient({ status: 200, body: "null" });
+    expect(await empty.client.shipments.getGroups()).toEqual([]);
+    for (const body of [JSON.stringify({ groupId: "g1" }), "[1", '"x"', "0"]) {
+      const h = makeRestClient({ status: 200, body });
+      expect(await caught(h.client.shipments.getGroups())).toBeInstanceOf(CanadaPostParseError);
+    }
   });
 
   it("retries reads on a 503 (they change nothing)", async () => {
@@ -199,9 +209,22 @@ describe("shipments.transmit and manifests", () => {
     const h = makeRestClient(json(FAKE_MANIFEST_LINKS));
     await h.client.manifests.list({ from: "2026-11-01", to: "20261116" });
     expect(firstApi(h).url).toBe(`${ACCOUNT}/manifests?from=20261101&to=20261116`);
-    const none = makeRestClient(json([]));
-    await none.client.manifests.list();
-    expect(firstApi(none).url).toBe(`${ACCOUNT}/manifests`);
+    const fromOnly = makeRestClient(json([]));
+    await fromOnly.client.manifests.list({ from: "20261101" });
+    expect(firstApi(fromOnly).url).toBe(`${ACCOUNT}/manifests?from=20261101`);
+  });
+
+  it("requires `from` (production errorCode 9105) before any request", async () => {
+    const h = makeRestClient(json([]));
+    const bad: unknown[] = [undefined, {}, { to: "2026-11-16" }];
+    for (const input of bad) {
+      expect(
+        await caught(
+          h.client.manifests.list(input as Parameters<typeof h.client.manifests.list>[0]),
+        ),
+      ).toBeInstanceOf(CanadaPostValidationError);
+    }
+    expect(h.mock.requests).toHaveLength(0);
   });
 
   it("refuses impossible dates", async () => {
@@ -209,9 +232,9 @@ describe("shipments.transmit and manifests", () => {
     expect(await caught(h.client.manifests.list({ from: "2026-02-31" }))).toBeInstanceOf(
       CanadaPostValidationError,
     );
-    expect(await caught(h.client.manifests.list({ to: "yesterday" }))).toBeInstanceOf(
-      CanadaPostValidationError,
-    );
+    expect(
+      await caught(h.client.manifests.list({ from: "2026-11-01", to: "yesterday" })),
+    ).toBeInstanceOf(CanadaPostValidationError);
   });
 
   it("gets a manifest and its details by id or by link", async () => {
@@ -593,6 +616,20 @@ describe("pickup", () => {
     await expectNeverRetried((h) => h.client.pickup.create(FAKE_PICKUP_REQUEST));
     await expectNeverRetried((h) => h.client.pickup.update(FAKE_PICKUP_ID, FAKE_PICKUP_UPDATE));
     await expectNeverRetried((h) => h.client.pickup.cancel(FAKE_PICKUP_ID));
+  });
+
+  it("pickup.list surfaces the production 400 for an account with no open pickups as an API error", async () => {
+    // ASSUMPTION (contracts doc, section 11): not special-cased, the cause is unconfirmed.
+    const h = makeRestClient({
+      status: 400,
+      body: JSON.stringify({
+        errors: [{ errorCode: "400", message: "Invalid input provided. Please verify." }],
+      }),
+    });
+    const error = await caught(h.client.pickup.list());
+    expect(error).toBeInstanceOf(CanadaPostApiError);
+    expect(error).toMatchObject({ status: 400 });
+    expect(h.apiRequests()).toHaveLength(1);
   });
 
   it("reads list, details, price and availability", async () => {

@@ -798,3 +798,55 @@ All reads. Not subscribed on the Test app. **Vendor document bug:** in `postoffi
 `officeId` and opening-hours `pattern`s are double-escaped (`^\\d{10}$`), so as written they match
 only a literal backslash. The committed document is kept verbatim; the test validator repairs the
 patterns in memory, and a test fails when Canada Post fixes the document.
+
+### 10.8 Production verification (2026-11-16, read-only)
+
+The owner's **Production** app was probed with read operations only (no create, void, transmit,
+refund or pickup request was sent). The account is linked: the empty `403` of open item 5 was not
+observed. Facts below are authoritative for Production; the Test app keeps answering static stubs
+(section 10.4). No customer numbers, PINs, addresses or postal codes are recorded here.
+
+**Verified OK in Production** (the SDK method worked as written):
+
+- `customers.get`, `customers.getMobo` (own account), `customers.getPaymentReadiness`. `customers.get`
+  exposes the `creditCardCount` / authorized payers shape with `methodsOfPayment`
+  `["supplierAccount", "creditCard"]` (card values are never exposed by the SDK).
+- `rating.getPrices` with a **commercial** quote (domestic and US destination), `rating.listServices`
+  (Canada: 17 services, United States: 4), `rating.getService`, `rating.getOption`.
+- `shipments.list` by `trackingPin`, and with `noManifest`; `manifests.list` with `from`.
+- `tracking.getSummaryByPin`, `tracking.getDetailsByPin`, `tracking.getSummaryByReference` (an
+  unknown reference answers HTTP 404, errorCode `004`, "No PIN History").
+- `returns.listOpen` (`[]` when there are none), `pickup.getAvailability`, `pickup.getPrice`.
+- `postOffices.find`, `postOffices.getDetails`, `serviceInfo.getMessages` (`[]` when there are
+  none).
+
+**Deviations from the OpenAPI documents and the Test app, and how the SDK handles them:**
+
+1. `rating.getPrices` with `quoteType: "counter"`: HTTP 400, errorCode `9114`: _To get "counter"
+   rates, the elements of customer number and contract number should be omitted. If a
+   "commercial" quote is desired, the quote-type element can be omitted._ The SDK used to inject
+   `customerNumber` in every quote. **Fix:** a counter quote is sent with neither
+   `customerNumber` nor `contractId`; passing either explicitly together with
+   `quoteType: "counter"` throws `CanadaPostValidationError` before any request. Commercial
+   quotes are unchanged (`customerNumber` still defaults to the client's).
+2. `shipments.getGroups` (`GET /shipping/v1/{mailedBy}/{mobo}/groups`): HTTP 200 with the JSON body
+   literally `null` when the account has no groups (the document specifies an array). **Fix:** a
+   `null` body is `[]`; any other non-array body still throws `CanadaPostParseError`.
+3. `shipments.list`: `?date=YYYYMMDD` alone is HTTP 400, errorCode `9156`, "At least one search
+   parameter must be provided." `date` together with `no-manifest=true` is 200, and
+   `no-manifest=true` alone is 200. So `date` (and `limit`) only narrow another filter. **Fix:**
+   at least one of `requestId`, `trackingPin`, `groupId`, `manifestId` or `noManifest` is required;
+   a call with only `date` and/or `limit` throws `CanadaPostValidationError`.
+4. `manifests.list`: without `from` it is HTTP 400, errorCode `9105`, "A required query parameter
+   was not provided in the request."; `?from=YYYYMMDD` alone and `from` + `to` are 200 (`[]`).
+   **Fix:** `from` is required (type and runtime `CanadaPostValidationError`), `to` stays
+   optional. The MCP tool `canadapost_manifests_list` requires `from` too.
+5. `pickup.list` (`GET /pickup/v1/{customer}/pickup-request`): HTTP 400
+   `{"errors":[{"errorCode":"400","message":"Invalid input provided. Please verify."}]}` for an
+   account that has no open pickups, with and without leading zeros in the customer number;
+   `pickup.getPrice` on the same customer path answers 200. **ASSUMPTION:** the cause is "no open
+   pickups" (unconfirmed; it could also be a permission or contract condition). The SDK does not
+   special-case it: the 400 surfaces as `CanadaPostApiError`, and the `pickup.list` JSDoc says so.
+
+Open items 3, 4, 8 and 9 of section 10.6 (details/price shape, dimension limits, string-vs-number
+fields, `returns.getOpenArtifact`) were not decided by these probes.

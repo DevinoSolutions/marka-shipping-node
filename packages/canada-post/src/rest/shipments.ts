@@ -35,7 +35,11 @@ export interface RestCreateShipmentOptions {
   zonosKey?: string;
 }
 
-/** Filters of {@link RestShipmentsApi.list}. At least one is required. */
+/**
+ * Filters of {@link RestShipmentsApi.list}. At least one of `requestId`, `trackingPin`,
+ * `groupId`, `manifestId` or `noManifest` is required: `date` and `limit` only narrow
+ * another filter (a Production app rejects `date` alone with HTTP 400, errorCode 9156).
+ */
 export interface RestShipmentListInput {
   /** The `customerRequestId` you sent on create (max 32 characters). */
   requestId?: string;
@@ -44,9 +48,9 @@ export interface RestShipmentListInput {
   manifestId?: string;
   /** Only shipments that are not on a manifest yet. */
   noManifest?: boolean;
-  /** `YYYYMMDD` or `YYYY-MM-DD`. */
+  /** `YYYYMMDD` or `YYYY-MM-DD`. Only narrows another filter; never sufficient alone. */
   date?: string;
-  /** 1-99999. */
+  /** 1-99999. Only narrows another filter; never sufficient alone. */
   limit?: number;
 }
 
@@ -184,18 +188,24 @@ export class RestShipmentsApi {
    * {@link CanadaPostApiError} with `isPending === true`.
    */
   async list(input: RestShipmentListInput): Promise<RestLink[]> {
-    const query = queryString({
+    const searchFilters = {
       "request-id": input.requestId,
       "tracking-pin": input.trackingPin,
       "group-id": input.groupId,
       "manifest-id": input.manifestId,
       "no-manifest": input.noManifest,
+    };
+    if (queryString(searchFilters) === "") {
+      throw new CanadaPostValidationError(
+        "shipments.list needs at least one of requestId, trackingPin, groupId, manifestId or " +
+          "noManifest (date and limit only narrow another filter)",
+      );
+    }
+    const query = queryString({
+      ...searchFilters,
       date: input.date?.replaceAll("-", ""),
       limit: input.limit,
     });
-    if (query === "") {
-      throw new CanadaPostValidationError("shipments.list needs at least one filter");
-    }
     const url = `${accountPrefix(this.ctx)}/shipments${query}`;
     const result = await this.ctx.http.execute({
       operation: "shipments.list",
@@ -265,7 +275,11 @@ export class RestShipmentsApi {
     return jsonObjectOrSingleton(result, "shipments.getQrCode") as unknown as RestPublicKeyInfo;
   }
 
-  /** The shipment groups of the account (a group is what a manifest transmits). */
+  /**
+   * The shipment groups of the account (a group is what a manifest transmits). A Production
+   * app answers HTTP 200 with the body `null` when the account has no groups; that is
+   * returned as `[]`.
+   */
   async getGroups(): Promise<RestShipmentGroup[]> {
     const result = await this.ctx.http.execute({
       operation: "shipments.getGroups",
@@ -273,6 +287,7 @@ export class RestShipmentsApi {
       url: `${accountPrefix(this.ctx)}/groups`,
       accept: "application/json",
     });
+    if (parseJsonBody(result, "shipments.getGroups") === null) return [];
     return jsonArray(result, "shipments.getGroups") as RestShipmentGroup[];
   }
 

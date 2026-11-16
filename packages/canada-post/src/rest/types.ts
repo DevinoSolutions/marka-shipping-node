@@ -287,11 +287,15 @@ export type RestQuoteDestination =
 
 /** Body of `POST /rating/v1/prices`. */
 export interface RestPriceRequest {
-  /** Defaults to the client's customer number. */
+  /** Defaults to the client's customer number. Must be omitted for a `counter` quote. */
   customerNumber?: string;
+  /** Must be omitted for a `counter` quote. */
   contractId?: string;
   promoCode?: string;
-  /** `commercial` (contract rates, default) or `counter` (retail). */
+  /**
+   * `commercial` (contract rates, default) or `counter` (retail). A `counter` quote is sent
+   * without `customerNumber` and `contractId`; passing either throws a validation error.
+   */
   quoteType?: "commercial" | "counter";
   /** `YYYY-MM-DD`. */
   expectedMailingDate?: string;
