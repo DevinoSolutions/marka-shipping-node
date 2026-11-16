@@ -1,0 +1,63 @@
+{
+  "name": "@joinmarka/canada-post-mcp",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server (stdio) for Canada Post: quotes, tracking, shipments, labels, manifests, pickups and returns on top of @joinmarka/canada-post. Writes are opt-in and go through preview then apply.",
+  "license": "MIT",
+  "author": "Devino Solutions",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "keywords": [
+    "canada-post",
+    "canadapost",
+    "postes-canada",
+    "mcp",
+    "model-context-protocol",
+    "shipping",
+    "shipping-labels",
+    "tracking",
+    "marka"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DevinoSolutions/marka-shipping-node.git",
+    "directory": "packages/canada-post-mcp"
+  },
+  "homepage": "https://github.com/DevinoSolutions/marka-shipping-node/tree/main/packages/canada-post-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/DevinoSolutions/marka-shipping-node/issues"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "canada-post-mcp": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@joinmarka/canada-post": "^0.1.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

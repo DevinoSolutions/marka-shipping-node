@@ -12,7 +12,7 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @joinmarka/canada-post && npm run build -w @joinmarka/shipping",
+    "build": "npm run build -w @joinmarka/canada-post && npm run build -w @joinmarka/shipping && npm run build -w @joinmarka/canada-post-mcp",
     "typecheck": "tsc -p tsconfig.scripts.json && npm run build -w @joinmarka/canada-post && npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -22,12 +22,13 @@
     "test:coverage": "vitest run --coverage",
     "test:live": "vitest run --config packages/canada-post/vitest.live.config.ts",
     "test:live:test-app": "vitest run --config packages/canada-post/vitest.live-test-app.config.ts",
+    "test:live:mcp": "vitest run --config packages/canada-post-mcp/vitest.live-test-app.config.ts",
     "docs:api": "typedoc",
     "verify:exports": "tsx scripts/verify-exports.ts",
     "check:secrets": "tsx scripts/check-secrets.ts",
     "check:live-readonly": "tsx scripts/check-live-readonly.ts",
     "check:deadcode": "knip",
-    "pack:dry": "npm pack --dry-run -w @joinmarka/canada-post -w @joinmarka/shipping"
+    "pack:dry": "npm pack --dry-run -w @joinmarka/canada-post -w @joinmarka/shipping -w @joinmarka/canada-post-mcp"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
