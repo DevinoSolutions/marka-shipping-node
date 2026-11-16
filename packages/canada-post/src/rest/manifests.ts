@@ -1,3 +1,4 @@
+import { CanadaPostValidationError } from "../errors.js";
 import { queryString } from "../http.js";
 import {
   accountUrl,
@@ -14,9 +15,12 @@ import type { RestLink, RestManifestDetails, RestManifestInfo } from "./types.js
 
 /** Filters of {@link RestManifestsApi.list}. */
 export interface RestManifestListInput {
-  /** Start of the date range (`YYYY-MM-DD` or `YYYYMMDD`). */
-  from?: string;
-  /** End of the date range (`YYYY-MM-DD` or `YYYYMMDD`). */
+  /**
+   * Start of the date range (`YYYY-MM-DD` or `YYYYMMDD`). Required: a Production app rejects
+   * a request without it with HTTP 400 (errorCode 9105).
+   */
+  from: string;
+  /** End of the date range (`YYYY-MM-DD` or `YYYYMMDD`). Optional. */
   to?: string;
 }
 
@@ -27,10 +31,14 @@ export interface RestManifestListInput {
 export class RestManifestsApi {
   constructor(private readonly ctx: RestContext) {}
 
-  /** Links to the manifests of a date range. */
-  async list(input: RestManifestListInput = {}): Promise<RestLink[]> {
+  /** Links to the manifests of a date range (`from` is required, `to` optional). */
+  async list(input: RestManifestListInput): Promise<RestLink[]> {
+    // The type requires `from`, but plain JavaScript callers and the MCP bridge can omit it.
+    if ((input as { from?: string } | undefined)?.from === undefined) {
+      throw new CanadaPostValidationError("manifests.list requires `from` (YYYY-MM-DD)");
+    }
     const query = queryString({
-      from: input.from === undefined ? undefined : toCompactDate(input.from, "from"),
+      from: toCompactDate(input.from, "from"),
       to: input.to === undefined ? undefined : toCompactDate(input.to, "to"),
     });
     const result = await getJson(

@@ -70,7 +70,7 @@ describe.skipIf(!liveEnabled)("Canada Post Test app: receipts, groups, manifests
     const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
     const ranged = await client.manifests.list({ from: weekAgo, to: today });
     expectValid("GetManifests 200", validateResponse(shipping, "GetManifests", 200, ranged));
-    const all = await client.manifests.list();
+    const all = await client.manifests.list({ from: "2020-01-01" });
     expectValid("GetManifests 200", validateResponse(shipping, "GetManifests", 200, all));
     const first = all[0];
     if (first === undefined) throw new Error("the Test app listed no manifests");

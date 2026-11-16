@@ -105,7 +105,15 @@ export class RestPickupApi {
     });
   }
 
-  /** All on-demand pickup requests of the account. */
+  /**
+   * All on-demand pickup requests of the account.
+   *
+   * **ASSUMPTION:** a Production app answers HTTP 400 `{"errors":[{"errorCode":"400","message":
+   * "Invalid input provided. Please verify."}]}` (thrown as a `CanadaPostApiError`) for
+   * an account with no open pickups, while `pickup.getPrice` on the same customer path
+   * returns 200. The cause is unconfirmed ("no open pickups" is the likely one), so it is not
+   * special-cased: treat that 400 as "nothing to list" only after checking the account.
+   */
   async list(): Promise<RestPickupRequestsResponse> {
     const result = await getJson(this.ctx, "pickup.list", pickupUrl(this.ctx));
     return jsonObjectOrSingleton(result, "pickup.list") as RestPickupRequestsResponse;

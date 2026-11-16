@@ -205,9 +205,25 @@ describe("shipments.list", () => {
     });
   });
 
-  it("needs a filter, and surfaces HTTP 202 as a pending API error", async () => {
+  it("needs a search filter: date and limit only narrow another filter", async () => {
+    const h = makeRestClient(json([]));
+    for (const input of [
+      {},
+      { date: "2026-12-01" },
+      { limit: 5 },
+      { date: "20261201", limit: 5 },
+    ]) {
+      await expect(h.client.shipments.list(input)).rejects.toBeInstanceOf(
+        CanadaPostValidationError,
+      );
+    }
+    expect(h.mock.requests).toHaveLength(0);
+    await h.client.shipments.list({ noManifest: true, date: "2026-12-01" });
+    expect(new URL(firstApi(h).url).search).toBe("?no-manifest=true&date=20261201");
+  });
+
+  it("surfaces HTTP 202 as a pending API error", async () => {
     const h = makeRestClient({ status: 202, body: "" });
-    await expect(h.client.shipments.list({})).rejects.toBeInstanceOf(CanadaPostValidationError);
     const error = (await h.client.shipments
       .list({ requestId: "R" })
       .catch((e: unknown) => e)) as CanadaPostApiError;
