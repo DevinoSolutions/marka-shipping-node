@@ -509,6 +509,7 @@ this work; they are marked as such. Everything else the documents do not state i
 | Shipping       | `{base}/shipping/v1` (OpenAPI `servers[0].url`)                                                                              |
 | Rating         | `{base}/rating/v1` (OpenAPI `servers[0].url`)                                                                                |
 | Token endpoint | `POST {base}/cpc-api-native-oauth-provider/oauth2/token` (OpenAPI `securitySchemes.Oauth2.flows.clientCredentials.tokenUrl`) |
+| Other APIs     | `{base}/tracking/v1`, `/customerinfo/v1`, `/returns/v1`, `/pickup/v1`, `/postoffice/v1`, `/serviceinfo/v1` (see 10.7)        |
 
 The Test app and the Production app use the **same host and the same token URL** (the token
 URL was confirmed for the Test app and reported identical for Production); the app
@@ -554,7 +555,7 @@ behalf of someone else).
 | `shipments.void`       | `DELETE /{mailedBy}/{mobo}/shipments/{id}`                  | `emptyShipment`        | 204     |
 | `shipments.getLabel`   | `GET /artifacts/{consumerId}/shipping/{artifactId}/{index}` | `shipmentArtifact`     | 200     |
 
-Not wrapped: receipt, QR code, refund, groups, manifests (documented in the OpenAPI file).
+Receipt, QR code, groups, refund, transmit and manifests are in 10.7. Not wrapped: pre-authorized payment and `returnSpec` on create.
 
 Create request (`createShipmentRequest`, `additionalProperties: false`): exactly one of
 `transmitShipment: true` (no manifest needed) or `groupId`; `deliverySpec` required
@@ -647,3 +648,153 @@ different zones and weights).
 6. Label rendering delay: the OpenAPI document lists no `202` for artifacts (the SDK reports a
    `202` as a pending `CanadaPostApiError`).
 7. Gateway status for a half-completed `POST /shipments` (same as open item 9 above).
+8. Whether Production answers the receipt `authCode`, the customer `contracts` and
+   `payerNumber` as strings (per OpenAPI) or numbers (as the Test app does).
+9. Whether a `returns.getOpenArtifact` download really consumes a label and bills in Production
+   (classified as a write on that assumption).
+10. The `{customer}` of the Pickup paths is assumed to be the customer number.
+11. Behaviour of Pickup, Returns, Post Office and Service Information on any app: the Test app is
+    not subscribed (HTTP 401), so only the OpenAPI documents and mocked tests exist.
+12. Test-app subscriptions (Pickup, Returns, Post Office, Service Information) are Canada Post's
+    to grant; when they are, add live tests (read-only ones first).
+
+### 10.7 The other Developer Portal APIs (added 2026-11-16)
+
+OpenAPI documents (public downloads from the portal, sanitized as described in
+`docs/research/openapi/README.md`): `tracking-v1`, `customerinfo-v1`, `returns-v1`, `pickup-v1`,
+`postoffice-v1`, `serviceinfo-v1`. Same host, token and `Authorization: Bearer`/`Accept-Language`
+conventions as 10.1; every document lists `security: [{ Oauth2: ["merchant"] }]`.
+
+**Subscriptions and what was verified live (2026-11-16, read-only unless stated).** An app is
+subscribed API by API. The **Test app** is subscribed to Shipping, Rating, Tracking and Customer
+Information; it is **not** subscribed to Pickup, Returns, Post Office or Service Information.
+Calling an API the app is not subscribed to answers HTTP **`401`**
+`{ "httpCode": "401", "httpMessage": "Unauthorized", "moreInformation": "Cannot find valid
+subscription for the incoming API request." }` (verified live, 4 of 4 unsubscribed APIs). So
+Pickup, Returns, Post Office and Service Information have **mocked and OpenAPI contract tests
+only**; the live suite has no test for them and does not skip anything silently (a live test
+for an API that always answers `401` would only prove the missing subscription). The
+**Production app** (reported by the account owner, 2026-11-16): Tracking works today (an
+unknown PIN answers `200` `{ pin, error }`, an object where the document specifies a list);
+Customer Information and Rating answer an empty `403` until Canada Post links the organization
+(open item 5), i.e. everything bound to the customer number is blocked and tracking is not.
+
+#### Shipping v1: later endpoints (paths relative to `{base}/shipping/v1/{mailedBy}/{mobo}`)
+
+| SDK method                | Verb and path                 | OpenAPI `operationId`       | Class                                            | Success |
+| ------------------------- | ----------------------------- | --------------------------- | ------------------------------------------------ | ------- |
+| `shipments.getReceipt`    | `GET /shipments/{id}/receipt` | `GetShipmentReceipt`        | read                                             | 200     |
+| `shipments.getQrCode`     | `GET /shipments/{id}/qr-code` | `getShipmentQRCode`         | read                                             | 200     |
+| `shipments.getGroups`     | `GET /groups`                 | `getShipmentGroups`         | read                                             | 200     |
+| `shipments.requestRefund` | `POST /shipments/{id}/refund` | `RequestShipmentRefund`     | write, `charges: false` (opens a service ticket) | 200     |
+| `shipments.transmit`      | `POST /manifests`             | `TransmitShipmentsManifest` | write, `charges: true` (bills the shipments)     | 200     |
+| `manifests.list`          | `GET /manifests?from=&to=`    | `GetManifests`              | read                                             | 200     |
+| `manifests.get`           | `GET /manifests/{id}`         | `GetManifestById`           | read                                             | 200     |
+| `manifests.getDetails`    | `GET /manifests/{id}/details` | `GetManifestIdDetails`      | read                                             | 200     |
+
+- `manifests.list` takes **`YYYYMMDD`** dates (the document says so; `2026-11-01` answers `400
+Schema validation failed`, verified live). The SDK accepts `YYYY-MM-DD` too and converts.
+- Refund request body is `{ email }` (≤ 60 characters); the answer is a service ticket
+  `{ serviceTicketDate, serviceTicketId }`. Transmit takes `groupIds` (≥ 1), `detailedManifests`,
+  `methodOfPayment`, `manifestAddress` and answers a list of manifest links.
+- Both writes are never retried or replayed; an ambiguous failure is
+  `CanadaPostIndeterminateError` whose `recovery` names `manifests.list` / the refund e-mail.
+- **Test app (verified live 2026-11-16):** accepts both writes and answers canned data
+  (`requestRefund` a ticket, `transmit` three manifest links). `getGroups` answers 121 canned
+  groups, `getReceipt` a card receipt, `getQrCode` a public URL with a QR PNG, `manifests.get` and
+  `getDetails` canned manifests, for any id. Deviation: the receipt's `authCode` comes back as a
+  JSON **number** (document: string); the live suite pins exactly that field.
+
+#### Tracking v1 (`{base}/tracking/v1`)
+
+| SDK method                       | Verb and path                                                               | OpenAPI `operationId`      | Class                                           |
+| -------------------------------- | --------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------- |
+| `tracking.getSummaryByPin`       | `GET /pins/{pin}/summaries`                                                 | `trackingSummaryPin`       | read                                            |
+| `tracking.getSummaryByDnc`       | `GET /dncs/{dnc}/summaries`                                                 | `trackingSummaryDNC`       | read                                            |
+| `tracking.getSummaryByReference` | `GET /refs/summaries?reference-number=&mailing-date-from=&mailing-date-to=` | `TrackingSummaryReference` | read                                            |
+| `tracking.getDetailsByPin`       | `GET /pins/{pin}/details`                                                   | `trackingDetailsByPin`     | read                                            |
+| `tracking.getDetailsByDnc`       | `GET /dncs/{dnc}/details`                                                   | `trackingDetailsByDNC`     | read                                            |
+| `tracking.createCertificate`     | `POST /create-certificate`                                                  | `createCertificateDNC`     | read (renders a PDF; creates and bills nothing) |
+
+- PIN 11-16 alphanumerics (12, 13 or 16 per the document), DNC 15 digits. The reference search
+  needs both mailing dates (`YYYY-MM-DD`, not earlier than two months ago).
+- `create-certificate` is a POST whose body is `{ pin: <integer>, language: "en"|"fr" }`; the
+  answer is `{ image: <base64 PDF> }`. It does not create, change or bill anything, so it is
+  classified as a read (like `rating.getPrices`); being a POST it is never retried. The wire
+  wants the PIN as a JSON **integer**, so the SDK refuses a PIN that is not a safe integer.
+- Test app: every PIN, DNC and reference answers the same stub (a one-element list, events,
+  `customerRef1`); `create-certificate` answers a real PDF (about 15 KB). Production: an unknown
+  PIN answers `200` `{ pin, error: { code, descEn, descFr } }`; the SDK wraps a single object into
+  a one-element list (`jsonArrayOrSingleton`).
+
+#### Customer Information v1 (`{base}/customerinfo/v1`)
+
+| SDK method                      | Verb and path                               | OpenAPI `operationId`  | Class |
+| ------------------------------- | ------------------------------------------- | ---------------------- | ----- |
+| `customers.get`                 | `GET /customers/{mailedBy}`                 | `CustomerMailedBy`     | read  |
+| `customers.getMobo`             | `GET /customers/{mailedBy}/behalfof/{mobo}` | `CustomerMailedByMOBO` | read  |
+| `customers.getPaymentReadiness` | same call as `customers.get`                | `CustomerMailedBy`     | read  |
+
+- **Card data rule.** `customerInfo.creditCardAliases` lists the aliases of the cards on file.
+  The SDK deletes them on receipt: `customers.get()` returns the profile plus
+  `creditCardCount`, `followLink` strips any `creditCardAliases` from JSON it returns, and each
+  alias is registered with the secret redactor so it is scrubbed from errors and debug events.
+  `customers.getPaymentReadiness()` returns `{ hasCreditCard, contracts, authorizedPayers,
+paymentMethods }` only. Never log or return the raw answer.
+- Test app (verified live 2026-11-16): `customers.get` answers a profile with one card alias,
+  two contracts, one payer with two methods and eight links. Deviation: `contracts[]` and
+  `authorizedPayers[].payerNumber` come back as JSON **numbers** (document: digit strings) on the
+  profile, as strings on the MOBO answer; the live suite pins this.
+- Production: an empty `403` until the organization is linked (open item 5). `hasCreditCard`
+  is how to see whether a newly added card has propagated.
+
+#### Returns v1 (`{base}/returns/v1/{mailedBy}/{mobo}`, plus `/artifacts/...`)
+
+| SDK method                   | Verb and path                                                   | OpenAPI `operationId`      | Class                         |
+| ---------------------------- | --------------------------------------------------------------- | -------------------------- | ----------------------------- |
+| `returns.createAuthorized`   | `POST /authorized-returns`                                      | `authorizeReturn`          | write, `charges: true`        |
+| `returns.createOpen`         | `POST /open-returns`                                            | `createOpenReturn`         | write, `charges: true`        |
+| `returns.listOpen`           | `GET /open-returns`                                             | `getOpenReturn`            | read                          |
+| `returns.getOpen`            | `GET /open-returns/{id}`                                        | `openReturnById`           | read                          |
+| `returns.getOpenDetails`     | `GET /open-returns/{id}/details`                                | `openReturnDetails`        | read                          |
+| `returns.deleteOpen`         | `DELETE /open-returns/{id}`                                     | `deleteOpenReturnById`     | write, `charges: false` (204) |
+| `returns.getOpenArtifact`    | `GET /open-returns/{id}/artifact`                               | `openReturnArtifact`       | **write**, `charges: true`    |
+| `returns.getAuthorizedLabel` | `GET /artifacts/{consumerId}/authorized-returns/{artifactId}/0` | `authorizedReturnArtifact` | read                          |
+
+- `openReturnArtifact` is titled "Retrieve **Next** Open Return Artifact" and the template
+  carries `artifactsRemaining`: each download consumes one label. A GET on the wire, but
+  classified as a **write** (never retried, never replayed, indeterminate when ambiguous). That
+  a download decrements the count and may bill in Production is **ASSUMPTION** (inferred from the
+  document's wording); the conservative classification costs nothing.
+- Authorized returns and open-return templates can bill labels in Production; both are writes.
+- Not subscribed on the Test app: no live test, no live observations.
+
+#### Pickup v1 (`{base}/pickup/v1`)
+
+| SDK method               | Verb and path                                        | OpenAPI `operationId`   | Class                         |
+| ------------------------ | ---------------------------------------------------- | ----------------------- | ----------------------------- |
+| `pickup.create`          | `POST /{customer}/pickup-request`                    | `createPickup`          | write, `charges: true` (201)  |
+| `pickup.update`          | `PUT /{customer}/pickup-request/{requestId}`         | `updatePickup`          | write, `charges: false` (204) |
+| `pickup.cancel`          | `DELETE /{customer}/pickup-request/{requestId}`      | `deletePickup`          | write, `charges: false` (204) |
+| `pickup.list`            | `GET /{customer}/pickup-request`                     | `getAllPickups`         | read                          |
+| `pickup.getDetails`      | `GET /{customer}/pickup-request/{requestId}/details` | `getPickupDetails`      | read                          |
+| `pickup.getPrice`        | `GET /{customer}/pickup-request/price?date=`         | `getPickupPrice`        | read                          |
+| `pickup.getAvailability` | `GET /pickup-availability/{postalCode}`              | `getPickupAvailability` | read                          |
+
+- The `{customer}` path segment is the client's customer number (**ASSUMPTION**: the document
+  only names it `customer`). Phone numbers are `999-999-9999`, times `HH:MM`, `pickupVolume` and
+  `pickupInstructions` at most 40 characters; the SDK checks these before sending.
+- Not subscribed on the Test app.
+
+#### Post Office v1 (`{base}/postoffice/v1`) and Service Information v1 (`{base}/serviceinfo/v1`)
+
+| SDK method                | Verb and path                            | OpenAPI `operationId`   |
+| ------------------------- | ---------------------------------------- | ----------------------- |
+| `postOffices.find`        | `GET /post-offices?postal-code=&…`       | `findNearestPostOffice` |
+| `postOffices.getDetails`  | `GET /post-offices/{id}/details`         | `findPostOfficeDetails` |
+| `serviceInfo.getMessages` | `GET /shipments-service?message-type=SO` | `serviceInfo`           |
+
+All reads. Not subscribed on the Test app. **Vendor document bug:** in `postoffice-v1.json` the
+`officeId` and opening-hours `pattern`s are double-escaped (`^\\d{10}$`), so as written they match
+only a literal backslash. The committed document is kept verbatim; the test validator repairs the
+patterns in memory, and a test fails when Canada Post fixes the document.

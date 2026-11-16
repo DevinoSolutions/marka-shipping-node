@@ -151,8 +151,9 @@ Every response keeps its `links`. `canadaPost.followLink(link)` performs a GET w
 ## REST/OAuth client (new Developer Portal)
 
 Canada Post's new Developer Portal serves JSON over OAuth2. `createCanadaPostRestClient` covers
-it: contract shipments (Shipping v1) and quotes (Rating v3). It is an additional transport; the
-XML client above is unchanged.
+it: contract shipments (Shipping v1), quotes (Rating v3), tracking, customer information, returns,
+pickups, post offices and service messages. It is an additional transport; the XML client above is
+unchanged.
 
 ```ts
 import { createCanadaPostRestClient } from "@joinmarka/canada-post";
@@ -205,6 +206,39 @@ await canadaPost.shipments.void(shipment.links.find((l) => l.rel === "self")!);
 - The Test app's stubs deviate from Canada Post's OpenAPI documents in a few places (for example
   `details` and `price` come back as one-element arrays); the SDK accepts both shapes. See section 10
   of the contracts document.
+
+### The rest of the Developer Portal
+
+The same client also covers the other portal APIs (`docs/research/canadapost-api-contracts.md`,
+section 10.7). **Writes** are marked; every other call is a read.
+
+| Namespace     | Methods                                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shipments`   | also `getReceipt`, `getQrCode`, `getGroups`, **`requestRefund`**, **`transmit`** (bills the shipments)                                                              |
+| `manifests`   | `list`, `get`, `getDetails`                                                                                                                                         |
+| `tracking`    | `getSummaryByPin`, `getSummaryByDnc`, `getSummaryByReference`, `getDetailsByPin`, `getDetailsByDnc`, `createCertificate` (a read: it only renders a PDF)            |
+| `customers`   | `get`, `getMobo`, `getPaymentReadiness`                                                                                                                             |
+| `returns`     | **`createAuthorized`**, **`createOpen`**, `listOpen`, `getOpen`, `getOpenDetails`, **`deleteOpen`**, **`getOpenArtifact`** (consumes a label), `getAuthorizedLabel` |
+| `pickup`      | **`create`** (can bill), **`update`**, **`cancel`**, `list`, `getDetails`, `getPrice`, `getAvailability`                                                            |
+| `postOffices` | `find`, `getDetails`                                                                                                                                                |
+| `serviceInfo` | `getMessages`                                                                                                                                                       |
+
+```ts
+// Is the account ready to pay for labels? Card data is never exposed: only counts and flags.
+const readiness = await canadaPost.customers.getPaymentReadiness();
+// { hasCreditCard: true, contracts: 2, authorizedPayers: 1, paymentMethods: ["Account", "CreditCard"] }
+
+const [latest] = await canadaPost.tracking.getSummaryByPin("7023210215628702");
+const offices = await canadaPost.postOffices.find({ postalCode: "K1A 0B1", maximum: 3 });
+```
+
+- Tracking works without a linked customer number; everything else needs the account to be linked
+  to the app. An app is subscribed API by API: calling one it is not subscribed to answers HTTP 401
+  ("Cannot find valid subscription").
+- `customers.*` drops the credit-card aliases Canada Post returns (only `creditCardCount` and
+  `getPaymentReadiness()` survive) and scrubs them from errors and debug events.
+- All writes follow the same rule as `shipments.create`: sent once, never replayed, and an ambiguous
+  failure is `CanadaPostIndeterminateError` with a hint on how to look the object up.
 
 Run the live suite against your own Test app with
 `CANADAPOST_TEST_APP_LIVE=true npm run test:live:test-app` (needs `CANADAPOST_CLIENT_ID`,

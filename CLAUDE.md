@@ -11,8 +11,9 @@ ESM/NodeNext, Node >= 22.12. A community SDK for the Canada Post Developer Progr
 1. **Never create, void, transmit or request a refund against PRODUCTION** (SDK call, curl,
    probe script, example) without the owner explicitly authorizing that specific action in the
    current session. In production `shipments.create`, `shipments.transmit` and
-   `ncShipments.create` charge real postage, and so does `shipments.create` of the REST client
-   with a Production app. Sandbox (`environment: "development"`) and the Developer Portal
+   `ncShipments.create` charge real postage, and so do the REST client's `shipments.create`,
+   `shipments.transmit`, `pickup.create`, `returns.createAuthorized`, `returns.createOpen` and
+   `returns.getOpenArtifact` with a Production app (refunds open a service ticket). Sandbox (`environment: "development"`) and the Developer Portal
    **Test** app are fine. Never use the Production app credentials
    (`CANADAPOST_PROD_CLIENT_ID`/`_SECRET`) for anything, not even a token request, without that
    authorization.
