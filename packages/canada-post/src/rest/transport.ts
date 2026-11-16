@@ -19,7 +19,7 @@ import { retryAfterMs, safeUrl, sleep, type SecretRedactor } from "./redact.js";
 interface RestRequestSpec {
   /** SDK operation name, used in errors and debug events (e.g. `shipments.create`). */
   operation: string;
-  method: "GET" | "POST" | "DELETE";
+  method: "GET" | "POST" | "PUT" | "DELETE";
   url: string;
   accept: string;
   /** JSON-serialisable request body. */

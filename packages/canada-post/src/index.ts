@@ -129,6 +129,13 @@ export type { CanadaPostRestClientOptions } from "./rest/config.js";
 export { findRestLink, requireRestLink } from "./rest/links.js";
 export type { RestTarget } from "./rest/context.js";
 export type { RestRatingApi, RestListServicesInput } from "./rest/rating.js";
+export type { RestManifestsApi, RestManifestListInput } from "./rest/manifests.js";
+export type { RestTrackingApi } from "./rest/tracking.js";
+export type { RestCustomersApi } from "./rest/customers.js";
+export type { RestReturnsApi, RestReturnLabelSource } from "./rest/returns.js";
+export type { RestPickupApi } from "./rest/pickup.js";
+export type { RestPostOfficeApi } from "./rest/post-office.js";
+export type { RestServiceInfoApi } from "./rest/service-info.js";
 export type {
   RestCreateShipmentOptions,
   RestLabelSource,
@@ -137,6 +144,7 @@ export type {
 } from "./rest/shipments.js";
 export type { TestAppProbeResult } from "./rest/test-app.js";
 export type * from "./rest/types.js";
+export type * from "./rest/types-services.js";
 
 export { OPERATIONS } from "./operations.js";
 export type { OperationSpec } from "./operations.js";
