@@ -3,7 +3,9 @@ name: Release
 # One release pipeline per package, picked by the tag prefix:
 #   canada-post-vX.Y.Z  -> publishes @joinmarka/canada-post (packages/canada-post)
 #   shipping-vX.Y.Z     -> publishes @joinmarka/shipping    (packages/shipping)
-# Publish @joinmarka/canada-post first when @joinmarka/shipping needs its new version.
+#   canada-post-mcp-vX.Y.Z -> publishes @joinmarka/canada-post-mcp (packages/canada-post-mcp)
+# Publish @joinmarka/canada-post first when @joinmarka/shipping or @joinmarka/canada-post-mcp
+# needs its new version.
 #
 # Authentication: npm trusted publishing (OIDC). Configure each package on npmjs.com under
 # Settings -> Trusted Publisher -> GitHub Actions (repository DevinoSolutions/marka-shipping-node,
@@ -13,6 +15,7 @@ on:
     tags:
       - "canada-post-v*"
       - "shipping-v*"
+      - "canada-post-mcp-v*"
 
 permissions:
   id-token: write # OIDC token for npm trusted publishing and provenance
@@ -51,6 +54,7 @@ jobs:
           case "${GITHUB_REF_NAME}" in
             canada-post-v*) DIR=packages/canada-post; PREFIX=canada-post-v ;;
             shipping-v*) DIR=packages/shipping; PREFIX=shipping-v ;;
+            canada-post-mcp-v*) DIR=packages/canada-post-mcp; PREFIX=canada-post-mcp-v ;;
             *) echo "Unknown release tag ${GITHUB_REF_NAME}"; exit 1 ;;
           esac
           NAME="$(node -p "require('./${DIR}/package.json').name")"

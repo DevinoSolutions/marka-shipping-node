@@ -1,6 +1,7 @@
 name: Canada Post Test-app canary
 
-# Runs the live suite in packages/canada-post/test/live-test-app/ against the Canada Post
+# Runs the live suites in packages/canada-post/test/live-test-app/ (SDK) and
+# packages/canada-post-mcp/test/live-test-app/ (MCP server smoke) against the Canada Post
 # Developer Portal TEST app (free, static stub answers, no postage). It proves the REST/OAuth
 # transport still works against the real gateway, and catches a drift of the stubs or of
 # Canada Post's OpenAPI documents. It is a canary: a broken run is a signal, never silenced.
@@ -95,6 +96,28 @@ jobs:
             console.log(`passed=${r.numPassedTests} failed=${r.numFailedTests} skipped=${r.numPendingTests}`);
             if (r.numPassedTests < 1 || bad !== 0) {
               console.error("::error::the live Test-app suite did not run in full (skipped or too few tests)");
+              process.exit(1);
+            }
+          '
+
+      - name: MCP smoke suite (in-process server on the Test app)
+        env:
+          CANADAPOST_TEST_APP_LIVE: "true"
+          CANADAPOST_CLIENT_ID: ${{ secrets.CANADAPOST_CLIENT_ID }}
+          CANADAPOST_CLIENT_SECRET: ${{ secrets.CANADAPOST_CLIENT_SECRET }}
+          CANADAPOST_CUSTOMER_NUMBER: ${{ secrets.CANADAPOST_CUSTOMER_NUMBER }}
+        run: |
+          set -o pipefail
+          npm run test:live:mcp -- --reporter=default --reporter=json --outputFile.json="$GITHUB_WORKSPACE/live-mcp-results.json"
+      - name: Fail if the MCP smoke suite passed vacuously
+        run: |
+          set -o pipefail
+          node -e '
+            const r = JSON.parse(require("node:fs").readFileSync("live-mcp-results.json", "utf8"));
+            const bad = r.numFailedTests + r.numPendingTests + r.numTodoTests + r.numFailedTestSuites;
+            console.log(`mcp passed=${r.numPassedTests} failed=${r.numFailedTests} skipped=${r.numPendingTests}`);
+            if (r.numPassedTests < 4 || bad !== 0) {
+              console.error("::error::the MCP smoke suite did not run in full (skipped or too few tests)");
               process.exit(1);
             }
           '
