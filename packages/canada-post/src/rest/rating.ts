@@ -26,7 +26,11 @@ export class RestRatingApi {
    * Prices a parcel for one or more services. A `POST` that only quotes, so it is classified
    * as a read; like every POST it is never retried.
    *
-   * `customerNumber` defaults to the client's customer number.
+   * A `commercial` quote (the default) sends `customerNumber`, which defaults to the client's.
+   * A `counter` quote (retail rates) sends neither `customerNumber` nor `contractId`: a
+   * Production app answers HTTP 400 (errorCode 9114) when either is present, so the client
+   * leaves the default out and refuses an explicit one with a {@link CanadaPostValidationError}
+   * before any request.
    */
   async getPrices(input: RestPriceRequest): Promise<RestPriceQuote[]> {
     const { ctx } = this;
@@ -35,12 +39,26 @@ export class RestRatingApi {
         "originPostalCode must be an upper case Canadian postal code without a space (K1A0B1)",
       );
     }
+    let body: RestPriceRequest;
+    if (input.quoteType === "counter") {
+      if (input.customerNumber !== undefined || input.contractId !== undefined) {
+        throw new CanadaPostValidationError(
+          'A "counter" quote must not carry customerNumber or contractId (Canada Post rejects ' +
+            'them with errorCode 9114); omit them, or use quoteType "commercial"',
+        );
+      }
+      body = { ...input };
+      delete body.customerNumber;
+      delete body.contractId;
+    } else {
+      body = { ...input, customerNumber: input.customerNumber ?? ctx.config.customerNumber };
+    }
     const result = await ctx.http.execute({
       operation: "rating.getPrices",
       method: "POST",
       url: `${REST_BASE_URL}/rating/v1/prices`,
       accept: "application/json",
-      body: { ...input, customerNumber: input.customerNumber ?? ctx.config.customerNumber },
+      body,
     });
     return jsonArray(result, "rating.getPrices") as RestPriceQuote[];
   }

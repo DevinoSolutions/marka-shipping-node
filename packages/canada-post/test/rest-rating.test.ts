@@ -46,6 +46,43 @@ describe("rating.getPrices", () => {
     expect(bodyOf(firstApi(h))).toMatchObject({ customerNumber: TEST_CUSTOMER });
   });
 
+  it("a counter quote sends neither customerNumber nor contractId (production errorCode 9114)", async () => {
+    const h = makeRestClient(json(FAKE_QUOTES));
+    await h.client.rating.getPrices({ ...fakePriceRequest(), quoteType: "counter" });
+    const body = bodyOf(firstApi(h));
+    expect(body).toEqual({ ...fakePriceRequest(), quoteType: "counter" });
+    expect(body).not.toHaveProperty("customerNumber");
+    expect(body).not.toHaveProperty("contractId");
+    // explicit undefined is "not passed"
+    const h2 = makeRestClient(json(FAKE_QUOTES));
+    await h2.client.rating.getPrices({
+      ...fakePriceRequest(),
+      quoteType: "counter",
+      customerNumber: undefined,
+      contractId: undefined,
+    });
+    expect(bodyOf(firstApi(h2))).not.toHaveProperty("customerNumber");
+  });
+
+  it("refuses a counter quote that carries customerNumber or contractId before any request", async () => {
+    const h = makeRestClient(json(FAKE_QUOTES));
+    for (const extra of [{ customerNumber: "7654321" }, { contractId: "0012345678" }]) {
+      await expect(
+        h.client.rating.getPrices({ ...fakePriceRequest(), quoteType: "counter", ...extra }),
+      ).rejects.toBeInstanceOf(CanadaPostValidationError);
+    }
+    expect(h.mock.requests).toHaveLength(0);
+  });
+
+  it("a commercial quote still defaults customerNumber", async () => {
+    const h = makeRestClient(json(FAKE_QUOTES));
+    await h.client.rating.getPrices({ ...fakePriceRequest(), quoteType: "commercial" });
+    expect(bodyOf(firstApi(h))).toMatchObject({
+      quoteType: "commercial",
+      customerNumber: TEST_CUSTOMER,
+    });
+  });
+
   it("rejects a malformed origin postal code before sending", async () => {
     const h = makeRestClient(json(FAKE_QUOTES));
     for (const originPostalCode of ["k1a0b1", "K1A 0B1", "K1A0B", "12345", ""]) {
