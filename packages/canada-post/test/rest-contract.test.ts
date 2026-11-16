@@ -24,6 +24,11 @@ import {
   type RestHarness,
 } from "./support/rest.js";
 import {
+  CALLS_SERVICES,
+  EXPECTED_SERVICES,
+  replyForServices,
+} from "./support/contract-services.js";
+import {
   documentsStatus,
   expectValid,
   findOperation,
@@ -48,6 +53,7 @@ const EXPECTED: Record<string, [SpecName, string]> = {
   "rest.rating.listServices": ["rating-v1", "service"],
   "rest.rating.getService": ["rating-v1", "serviceCode"],
   "rest.rating.getOption": ["rating-v1", "optionCode"],
+  ...EXPECTED_SERVICES,
 };
 
 const pdfReply = { status: 200, body: fakePdf(1), headers: PDF_HEADERS };
@@ -65,6 +71,7 @@ const CALLS: Record<string, (h: RestHarness) => Promise<unknown>> = {
   "rest.rating.listServices": (h) => h.client.rating.listServices({ country: "CA" }),
   "rest.rating.getService": (h) => h.client.rating.getService("DOM.EP", { country: "CA" }),
   "rest.rating.getOption": (h) => h.client.rating.getOption("DC"),
+  ...CALLS_SERVICES,
 };
 
 function replyFor(id: string): Parameters<typeof makeRestClient>[0] {
@@ -90,7 +97,7 @@ function replyFor(id: string): Parameters<typeof makeRestClient>[0] {
     case "rest.rating.getService":
       return json(FAKE_SERVICE_DETAILS);
     default:
-      return json(FAKE_OPTION);
+      return replyForServices(id) ?? json(FAKE_OPTION);
   }
 }
 
