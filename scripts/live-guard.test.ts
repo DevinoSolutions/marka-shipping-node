@@ -304,6 +304,31 @@ describe("test-app suite (test/live-test-app/)", () => {
       ).not.toEqual([]);
     });
 
+    it("lets only setup.ts create an MCP server, and only with an explicit client", () => {
+      const call = (options: string): string =>
+        [
+          "export async function open(config: unknown, client: unknown) {",
+          "  return createCanadaPostMcpServer(" + options + ");",
+          "}",
+        ].join(NL);
+      const NL = String.fromCharCode(10);
+      expect(
+        mentions(testApp(GOOD_TEST + NL + call("{ config, client }")), "creates an MCP server"),
+      ).toBe(true);
+      expect(
+        testApp(GOOD_SETUP + NL + call("{ config, client }"), "d/live-test-app/setup.ts"),
+      ).toEqual([]);
+      for (const options of [
+        "{ config }",
+        "{ config, ...rest }",
+        "options",
+        "{ config, clients: [] }",
+      ]) {
+        const findings = testApp(GOOD_SETUP + NL + call(options), "d/live-test-app/setup.ts");
+        expect(mentions(findings, "without an explicit client"), options).toBe(true);
+      }
+    });
+
     it("does not mistake prose that contains 'app:' for the app option", () => {
       expect(testApp(GOOD_TEST.replace('"suite"', '"Canada Post Test app: auth"'))).toEqual([]);
     });
