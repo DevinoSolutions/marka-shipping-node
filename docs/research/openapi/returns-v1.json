@@ -1,0 +1,1685 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Returns",
+    "description": "",
+    "version": "1.0.0",
+    "x-ibm-name": "returns-service",
+    "x-pathalias": "returns-api-2.0.0",
+    "x-ibm-languages": {
+      "title": {
+        "fr": "Retours"
+      }
+    }
+  },
+  "paths": {
+    "/{mailedBy}/{mobo}/authorized-returns": {
+      "post": {
+        "tags": ["authorized return"],
+        "summary": "Create Authorized Return",
+        "description": "Creates a return shipping label with sender and receiver address details.\n",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Créer un retour autorisé"
+          },
+          "description": {
+            "fr": "Crée une étiquette de retour avec les renseignements sur l'adresse d'origine et de destination.\n"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "requestBody": {
+          "description": "<p><strong>Request &ndash; Fields</strong></p>\n<table>\n  <thead>\n    <tr>\n      <th>Field Name</th>\n      <th>Type</th>\n      <th>Required / Optional</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>createPublicKey</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>\n        <p>{true}</p>\n        <p>If flag is present and set to \"true\", it will enable a generation of public URL to retrieve a PDF version of shipping label and inclusion of this URL along with expiry date in service response. That functionality can be leveraged if shipper prefers to send customer a link to the label rather than a label as attachment. Also, shipper can send to customer QR code encoding public URL, that would allow customer to use QR code for printing out label in any CPC retail location. Expiry date indicates when such link to retrieve the label will no longer be accessible.</p>\n        <p>Note: 'retailOnly = true' will always take precedence over 'createPublicKey'. It is mutually exclusive with 'retailOnly' flag.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>createQrCode</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>\n        <p>(true|false)</p>\n        <p>If flag is present and set to \"true\", and createPublicKey is also true, the QR code encoding of the public URL is automatically generated and returned in the response.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>boxFree</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>\n        <p>(true|false)</p>\n        <p>If flag is present and set to true, Box-free / Sans emballage verbiage is added on the image containing the QR code and green coloured QR code is generated. Note: There are eligibility requirements for box-free returns. If items are not eligible, they will not be accepted as a box-free return at the post office. See the <a href=\"https://www.canadapost-postescanada.ca/cpc/doc/en/support/customer-guide/amalgamated-parcel-services-guide.pdf\">Parcel Services Customer Guide</a> 2.4.2. Packaging is provided at the post office only when you authorize the return. All items combined for a single return must fit into a maximum 47 cm x 61 cm x 5cm lip (18.5 in. x 24 in. x 2 in. lip) mailer and weigh less than 22 kg.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>retailOnly</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>\n        <p>(True)</p>\n        <p>if flag is present and set to 'true', service will not return an artifact link.</p>\n        <p>Note:</p>\n        <ul>\n          <li>If &lsquo;retailOnly&rsquo; flag is present, it will always be true.</li>\n          <li>If &lsquo;retailOnly&rsquo; flag is not present, pdf label will be given when 2D barcode is scanned by a customer.</li>\n          <li>&lsquo;retailOnly = true&rsquo; will always take precedence over &lsquo;createPublicKey&rsquo;, they both are mutually exclusive.</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>customerBarcode</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(16 alphanumeric)</p>\n        <p>Value of the&nbsp;barcode.</p>\n        <p>If present, the&nbsp;barcode will be rendered in the customer info area of the authorized return label.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>ccustomerBarcodeType</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(LINEAR|2D)</p>\n        <p>Type of the barcode. Mandatory if customerBarcode is specified.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>serviceCode</td>\n      <td>String</td>\n      <td>required</td>\n      <td>\n        <p>May occur 1 &hellip; 20 times.</p>\n        <p>A specific service to be rated. If no instances of serviceCode are included in the request, all services applicable to the shipment and destination will be rated and returned.</p>\n        <table border=\"1\">\n          <thead>\n            <tr>\n              <th>Service Code</th>\n              <th>Description</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>DOM.RP</td>\n              <td>Regular Parcel</td>\n            </tr>\n            <tr>\n              <td>DOM.EP</td>\n              <td>Expedited Parcel</td>\n            </tr>\n            <tr>\n              <td>DOM.XP</td>\n              <td>Xpresspost</td>\n            </tr>\n            <tr>\n              <td>DOM.PC</td>\n              <td>Priority</td>\n            </tr>\n          </tbody>\n        </table>\n      </td>\n    </tr>\n    <tr>\n      <td>returner</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>This structure contains data about the sender that will appear in the &ldquo;From&rdquo; address of the label. Blank fields will be removed in the address formatting.</td>\n    </tr>\n    <tr>\n      <td>name</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(44 alphanumeric)</p>\n        <p>Contact name of the corresponding returner.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>company</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(44 alphanumeric)</p>\n        <p>Contact name of the corresponding returner.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>domesticAddress</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>This structure contains the address data about the returner of the shipment. Blank fields will be removed in address fields for formatting the labels.</td>\n    </tr>\n    <tr>\n      <td>addressLine1</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(44 alphanumeric)</td>\n    </tr>\n    <tr>\n      <td>addressLine2</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>(44 alphanumeric)</td>\n    </tr>\n    <tr>\n      <td>City</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(40 alphanumeric)</td>\n    </tr>\n    <tr>\n      <td>province</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(2 characters)</td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(6-digit code in Canadian Postal Code pattern: A9A9A9)</td>\n    </tr>\n    <tr>\n      <td>receiver</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>This structure contains data about the destination and will appear in the &ldquo;To&rdquo; address of the label. Blank fields will be removed in the address formatting.</td>\n    </tr>\n    <tr>\n      <td>name</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(44 alphanumeric)</p>\n        <p>Contact name of the corresponding receiver</p>\n      </td>\n    </tr>\n    <tr>\n      <td>company</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(44 alphanumeric)</p>\n        <p>Company name of the corresponding receiver</p>\n      </td>\n    </tr>\n    <tr>\n      <td>email</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(60 characters - must be a valid email pattern)</p>\n        <p>For future use.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>receiverVoiceNumber</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(Character String &ndash; up to 25 characters)</p>\n        <p>Phone number of the receiver.</p>\n        <p>Will not appear on shipping label.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>domesticAddress</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>Required if the corresponding parent field &ldquo;receiver&rdquo; exists. This structure contains the address data about the receiver of the shipment. Blank fields will be removed in address fields for formatting the labels.</td>\n    </tr>\n    <tr>\n      <td>addressLine1</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(44 alphanumeric)</td>\n    </tr>\n    <tr>\n      <td>addressLine2</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>(44 alphanumeric)</td>\n    </tr>\n    <tr>\n      <td>City</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(40 alphanumeric)</td>\n    </tr>\n    <tr>\n      <td>province</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(2 characters)</td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(6-digit code in Canadian Postal Code pattern: A9A9A9)</td>\n    </tr>\n    <tr>\n      <td>parcelCharacteristics</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>This structure contains the information about the physical characteristics of the parcel.</td>\n    </tr>\n    <tr>\n      <td>weight</td>\n      <td>Number</td>\n      <td>Optional</td>\n      <td>\n        <p>(Numeric field of pattern 3.3 e.g. 999.999)</p>\n        <p>Total package weight in kg.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>dimensions</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>This structure contains information specifying the dimensions of a parcel.</td>\n    </tr>\n    <tr>\n      <td>length</td>\n      <td>Number</td>\n      <td>Conditionally Required</td>\n      <td>\n        <p>(Numeric field of pattern 3.1 e.g. 999.9 pattern)</p>\n        <p>Required if the corresponding parent field &ldquo;dimensions&rdquo; exists.</p>\n        <p>Length of parcel in cm.</p>\n        <p>If length is specified, a more accurate price can be derived.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>width</td>\n      <td>Number</td>\n      <td>Conditionally Required</td>\n      <td>\n        <p>(Numeric field of pattern 3.1 e.g. 999.9 pattern)</p>\n        <p>Required if the corresponding parent field &ldquo;dimensions&rdquo; exists.</p>\n        <p>width of parcel in cm.</p>\n        <p>If width is specified, a more accurate price can be derived.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>height</td>\n      <td>Number</td>\n      <td>Conditionally Required</td>\n      <td>\n        <p>(Numeric field of pattern 3.1 e.g. 999.9 pattern)</p>\n        <p>Required if the corresponding parent field &ldquo;dimensions&rdquo; exists.</p>\n        <p>height of parcel in cm.</p>\n        <p>If height is specified, a more accurate price can be derived.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>printPreferences</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>This structure contains print preferences for the labels.</td>\n    </tr>\n    <tr>\n      <td>outputFormat</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(7 alphanumeric)</p>\n        <p>Valid values are:</p>\n        <ul>\n          <li>8.5x11</li>\n          <li>4x6</li>\n        </ul>\n        <p>If this field is not present, 8.5x11 is the default.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>encoding</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>{PDF, ZPL}</p>\n        <p>Use this field to specify the output format for your return label: PDF or&nbsp;ZPL II. If not provided, PDF will be selected by default.</p>\n        <p>If you choose&nbsp;ZPL, the response from a Get Artifact call will include a file containing ZPL II printer commands. You will then need to either code a solution or use an application to stream the commands directly to a thermal printer</p>\n        <p>For&nbsp;ZPL II labels, your printer must support truncation. Use <a href=\"../../../printing-labels\">our sample code to test your printer&rsquo;s ability to truncate text</a>.</p>\n        <p>ZPL is only available on thermal paper. The output format must therefore be 4x6.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>showPackingInstructions</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>\n        <p>{true, false}&nbsp;Defaults to True</p>\n        <p>This field indicates whether packing instructions are to be rendered on the label.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>settlementInfo</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>This structure is analogous to the structure from Create Shipment; however, here the contents are optional and recommended to be omitted..</td>\n    </tr>\n    <tr>\n      <td>paidByCustomer</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(10-digit numeric)</p>\n        <p>For future use.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>contractId</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(10-digit numeric)</p>\n        <p>For future use.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>references</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>This structure contains reference fields that you can assign. These alternate (possibly unique) identification numbers are assigned to the return, and can be used for tracking or for any other purpose you deem useful.</td>\n    </tr>\n    <tr>\n      <td>customerRef1</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(Character string &ndash; up to 35 characters)</p>\n        <p>This is a user-defined value available for use by your applications. The value you enter here will appear on the shipping label, in Track and &ndash; for customers who subscribe to our Automated Parcel Tracking service &ndash; in your APT file.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>customerRef2</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(Character string &ndash; up to 35 characters)</p>\n        <p>This is a user-defined value available for use by your applications. The value you enter here will appear on the shipping label, in Track and &ndash; for customers who subscribe to our Automated Parcel Tracking service &ndash; in your APT file.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>notifications</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>This structure holds email notification settings for receiving parcel tracking information.</td>\n    </tr>\n    <tr>\n      <td>notification</td>\n      <td>Object</td>\n      <td>Mandatory</td>\n      <td>If the notifications structure is present, at least one notification instance is required and up to 4 are allowed. This structure holds one email address and the kinds of notifications to be sent to the email address.</td>\n    </tr>\n    <tr>\n      <td>email</td>\n      <td>String</td>\n      <td>Mandatory</td>\n      <td>\n        <p>(Email string up to 60 characters)</p>\n        <p>Email address to receive automatic tracking updates.<br>Must be a valid email address, i.e., pattern of (['_A-Za-z0-9\\-\\+])(\\.['_A-Za-z0-9\\-\\+])@([A-Za-z0-9-])(\\.[A-Za-z0-9-])(\\.[A-Za-z]{2,})</p>\n        <p>If the notification structure is present, the email address element must be provided.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>onShipment</td>\n      <td>Boolean</td>\n      <td>Mandatory</td>\n      <td>\n        <p>{true, false}</p>\n        <p>If the notification structure is present, this field must be provided. If set to &ldquo;true&rdquo;, all shipment related tracking updates will be sent to the email addressed.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>onException</td>\n      <td>Boolean</td>\n      <td>Mandatory</td>\n      <td>\n        <p>{true, false}</p>\n        <p>If the notification structure is present, this field must be provided. If set to &ldquo;true&rdquo;, all exception related tracking updates will be sent to the email addressed.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>onDelivery</td>\n      <td>Boolean</td>\n      <td>Mandatory</td>\n      <td>\n        <p>{true, false}</p>\n        <p>If the notification structure is present, this field must be provided. If set to &ldquo;true&rdquo;, all delivery related tracking updates will be sent to the email addressed.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>emailSubject</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>{tracking,customer-ref-1,customer-ref-2}</p>\n        <p>Email subject lines have the following general forms depending on type of notification</p>\n        <ul>\n          <li>Ship Notification for Item / Avis d&rsquo;exp&eacute;dition pour l&rsquo;article :</li>\n          <li>Exception Notification for Item / Avis d&rsquo;exception pour l&rsquo;article :</li>\n          <li>Delivery Notification for Item / Avis de livraison pour l&rsquo;article :</li>\n        </ul> The value following the colon&nbsp;defaults to &ldquo;TRACKING&rdquo; and the Canada Post tracking number. Or you can set it to &ldquo;REFERENCE&rdquo; and one of the customer reference numbers.\n      </td>\n    </tr>\n  </tbody>\n</table>",
+          "x-ibm-languages": {
+            "description": {
+              "fr": "<p><strong>Demande &ndash; Champs</strong></p>\n<table>\n  <thead>\n    <tr>\n      <th>Nom du champ</th>\n      <th>Type</th>\n      <th>Requis/Facultatif</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>\n        <p>createPublicKey</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>{true}</p>\n        <p>Si&nbsp;l&rsquo;indicateur est pr&eacute;sent et qu&rsquo;il est r&eacute;gl&eacute; &agrave; &laquo; true &raquo;, une d&rsquo;URL publique sera g&eacute;n&eacute;r&eacute;e pour qu&rsquo;une version PDF de l&rsquo;&eacute;tiquette d&rsquo;exp&eacute;dition soit r&eacute;cup&eacute;r&eacute;e et incluse dans la r&eacute;ponse au service avec la date d&rsquo;expiration. Cette fonction peut &ecirc;tre utilis&eacute;e si l&rsquo;exp&eacute;diteur pr&eacute;f&egrave;re envoyer au client un lien vers l&rsquo;&eacute;tiquette plut&ocirc;t qu&rsquo;une &eacute;tiquette comme pi&egrave;ce jointe. De plus, l&rsquo;exp&eacute;diteur peut envoyer au client un code QR encodant l&rsquo;URL publique, ce qui permettrait au client d&rsquo;utiliser le code QR pour imprimer l&rsquo;&eacute;tiquette dans n&rsquo;importe quel emplacement de vente au d&eacute;tail de la SCP.<br>La date d&rsquo;expiration indique quand le lien pour r&eacute;cup&eacute;rer l&rsquo;&eacute;tiquette ne sera plus accessible.</p>\n        <p>Remarque : &laquo; retailOnly = true &raquo; aura toujours la priorit&eacute; sur &laquo; createPublicKey &raquo;. L'option &laquo; retailOnly &raquo; est mutuellement exclusive.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>createQrCode</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(true|false)</p>\n        <p>Si&nbsp;un indicateur est pr&eacute;sent et qu&rsquo;il est r&eacute;gl&eacute; &agrave; &laquo; true &raquo;, ET que le champ create-public-key a &eacute;galement cette valeur, l&rsquo;encodage du code QR de l&rsquo;URL publique est automatiquement g&eacute;n&eacute;r&eacute; et retourn&eacute; dans la r&eacute;ponse..</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>boxFree</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(True/False)</p>\n        <p>Si&nbsp;un indicateur est pr&eacute;sent et r&eacute;gl&eacute; &agrave; &laquo; true &raquo;, le libell&eacute; &laquo; Box-free / Sans emballage &raquo; est ajout&eacute; sur l&rsquo;image contenant le code QR, et un code QR vert est g&eacute;n&eacute;r&eacute;. Remarque : Il y a des exigences d&rsquo;admissibilit&eacute; pour les retours sans bo&icirc;te. Si les articles ne sont pas admissibles, ils ne seront pas accept&eacute;s comme des retours sans emballage au bureau de poste. Consultez le <a href=\"https://www.canadapost-postescanada.ca/scp/doc/fr/soutien/guide-client/guide-services-colis-fusionne.pdf\">Guide du client pour les services de colis</a> pour obtenir plus de renseignements.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>retailOnly</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(True)</p>\n        <p>si l'indicateur est pr&eacute;sent et d&eacute;fini sur &laquo; true &raquo;, le service ne renverra pas de lien d'artefact.</p>\n        <p>Remarque :</p>\n        <ul>\n          <li>Si l'indicateur &laquo; retailOnly &raquo; est pr&eacute;sent, il sera toujours vrai.</li>\n          <li>Si l'indicateur &laquo; retailOnly &raquo; n'est pas pr&eacute;sent, l'&eacute;tiquette PDF sera donn&eacute;e lorsque le code-barres 2D est scann&eacute; par un client.</li>\n          <li>&laquo; retailOnly = true &raquo; aura toujours la priorit&eacute; sur &laquo; createPublicKey &raquo;, les deux s'excluant mutuellement.</li>\n        </ul>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>customerBarcode</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>(16 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Valeur du code &agrave; barres.</p>\n        <p>S&rsquo;il est pr&eacute;sent, le code &agrave; barres sera rendu dans la section de renseignements client de l&rsquo;&eacute;tiquette de retour autoris&eacute;e (habituellement en bas).</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>customerBarcodeType</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Optional</p>\n      </td>\n      <td>\n        <p>(LIN&Eacute;AIRE|2D)</p>\n        <p>Type&nbsp;de code &agrave; barres. Obligatoire si le code &agrave; barres du client est sp&eacute;cifi&eacute;.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>serviceCode</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 32 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Les &eacute;tiquettes du Service de retour peuvent seulement &ecirc;tre cr&eacute;&eacute;es si l'envoi est d&eacute;pos&eacute; au Canada et qu'il doit &ecirc;tre livr&eacute; &agrave; l'int&eacute;rieur de ce pays.</p>\n        <table summary=\"service-code\" cellspacing=\"0\">\n          <thead>\n            <tr>\n              <th class=\"center\">Code de service</th>\n              <th class=\"center\">Description</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>DOM.RP</td>\n              <td>Colis standard</td>\n            </tr>\n            <tr>\n              <td>DOM.EP</td>\n              <td>Colis acc&eacute;l&eacute;r&eacute;s</td>\n            </tr>\n            <tr>\n              <td>DOM.XP</td>\n              <td>Xpresspost</td>\n            </tr>\n            <tr>\n              <td>DOM.PC</td>\n              <td>Priorit&eacute;</td>\n            </tr>\n          </tbody>\n        </table>\n        <p>Il s'agit du service de livraison de Postes Canada utilis&eacute; pour exp&eacute;dier l'article.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>returner</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>Cette structure contient des donn&eacute;es sur l'exp&eacute;diteur correspondant &agrave; l'adresse de l'exp&eacute;diteur figurant sur l'&eacute;tiquette. Les champs vides seront retir&eacute;s du formatage des adresses.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>name</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Nom de la personne retournant l'envoi avec qui il faut communiquer.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>company</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Nom de l'entreprise de la personne retournant l'envoi.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>domesticAddress</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>Cette structure contient les donn&eacute;es d'adressage de la personne retournant l'envoi. Les champs vides seront retir&eacute;s des champs relatifs &agrave; l'adresse aux fins de formatage des &eacute;tiquettes.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>addressLine1</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>addressLine2</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>city</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(40 caract&egrave;res alphanum&eacute;riques)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>province</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(2 caract&egrave;res)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>postalCode</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(Mod&egrave;le du code postal canadien &agrave; six caract&egrave;res : A9A9A9)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>receiver</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>Cette structure contient des donn&eacute;es sur la destination correspondant &agrave; l'adresse du destinataire figurant sur l'&eacute;tiquette. Les champs vides seront retir&eacute;s du formatage des adresses.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>name</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Nom du destinataire correspondant avec qui il faut communiquer.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>company</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Nom de l'entreprise du destinataire correspondant.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>email</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(60 caract&egrave;res &ndash; Il doit s'agit d'une adresse &eacute;lectronique valide.)</p>\n        <p>Pour&nbsp;utilisation future.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>receiverVoiceNumber</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 25 caract&egrave;res)</p>\n        <p>Il s'agit du num&eacute;ro de t&eacute;l&eacute;phone du destinataire.</p>\n        <p>Ce&nbsp;num&eacute;ro n'appara&icirc;tra pas sur l'&eacute;tiquette d'exp&eacute;dition.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>domesticAddress</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>Requis si le champ&nbsp;parent correspondant &laquo; Destinataire &raquo; existe.</p>\n        <p>Cette structure contient les donn&eacute;es d'adressage du destinataire de l'envoi. Les champs vides seront retir&eacute;s des champs relatifs &agrave; l'adresse aux fins de formatage des &eacute;tiquettes.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>addressLine1</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>addressLine2</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(44 caract&egrave;res alphanum&eacute;riques)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>city</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(40 caract&egrave;res alphanum&eacute;riques)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>province</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(2 caract&egrave;res)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>postalCode</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(Mod&egrave;le du code postal canadien &agrave; six caract&egrave;res : A9A9A9)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>parcelCharacteristics</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>Cette structure contient des renseignements sur les caract&eacute;ristiques physiques du colis.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>weight</p>\n      </td>\n      <td>\n        <p>Nombre</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(Champ num&eacute;rique de trois chiffres, suivis de trois d&eacute;cimales [p. ex. format 999.999])</p>\n        <p>Poids total du colis en kilogrammes.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>dimensions</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>Cette structure contient des renseignements pr&eacute;cisant les dimensions du colis.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>length</p>\n      </td>\n      <td>\n        <p>Nombre</p>\n      </td>\n      <td>\n        <p>Requis sous condition</p>\n      </td>\n      <td>\n        <p>(Champ num&eacute;rique de trois chiffres, suivis d&rsquo;une d&eacute;cimale [p. ex. format 999.9])</p>\n        <p>Requis si le champ&nbsp;parent correspondant &laquo; Dimensions &raquo; existe.</p>\n        <p>Il s'agit de la longueur du colis en centim&egrave;tres.</p>\n        <p>Si la longueur est&nbsp;pr&eacute;cis&eacute;e, un prix plus exact peut &ecirc;tre d&eacute;fini.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>width</p>\n      </td>\n      <td>\n        <p>Nombre</p>\n      </td>\n      <td>\n        <p>Requis sous condition</p>\n      </td>\n      <td>\n        <p>(Champ num&eacute;rique de trois chiffres, suivis d&rsquo;une d&eacute;cimale [p. ex. format 999.9])</p>\n        <p>Requis si le champ&nbsp;parent correspondant &laquo; Dimensions &raquo; existe.</p>\n        <p>Il s'agit de la longueur du colis en centim&egrave;tres.</p>\n        <p>Si la&nbsp;largeur est pr&eacute;cis&eacute;e, un prix plus exact peut &ecirc;tre d&eacute;fini.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>height</p>\n      </td>\n      <td>\n        <p>Nombre</p>\n      </td>\n      <td>\n        <p>Requis sous condition</p>\n      </td>\n      <td>\n        <p>(Champ num&eacute;rique de trois chiffres, suivis d&rsquo;une d&eacute;cimale [p. ex. format 999.9])</p>\n        <p>Requis si le champ&nbsp;parent correspondant &laquo; Dimensions &raquo; existe.</p>\n        <p>Il s'agit de la hauteur du colis en centim&egrave;tres.</p>\n        <p>Si la hauteur est&nbsp;pr&eacute;cis&eacute;e, un prix plus exact peut &ecirc;tre d&eacute;fini.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>printPreferences</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>Cette structure contient les pr&eacute;f&eacute;rences d'impression pour les &eacute;tiquettes.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>outputFormat</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(7 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Les&nbsp;valeurs valides sont les suivantes :</p>\n        <ul>\n          <li>8.5x11</li>\n          <li>4x6</li>\n        </ul>\n        <p>Si ce champ&nbsp;n'est pas pr&eacute;cis&eacute;, la valeur &laquo; 8.5x11 &raquo; s'affiche par d&eacute;faut.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>encoding</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>{PDF, ZPL}</p>\n        <p>Servez-vous de ce champ pour pr&eacute;ciser le format de sortie pour votre &eacute;tiquette du Service de retour : PDF ou ZPL II. Si le champ est vide, le format PDF sera s&eacute;lectionn&eacute; par d&eacute;faut.</p>\n        <p>Si vous choisissez le format ZPL, la r&eacute;ponse du service &laquo; Obtenir l'artefact &raquo; inclura un fichier contenant des commandes d'impression ZPL II. Vous devrez ensuite coder une solution ou utiliser une application afin d'envoyer les commandes directement &agrave; une imprimante thermique.</p>\n        <p>Pour les &eacute;tiquettes de format ZPL II, votre imprimante doit permettre la troncature. Utilisez notre <a href=\"../../../printing-labels\">exemple de code pour tester la capacit&eacute; de votre imprimante &agrave; tronquer du texte.</a></p>\n        <p>Le format ZPL est uniquement disponible sur du papier thermosensible. Le champ&nbsp;&laquo; outputFormat &raquo; doit alors &ecirc;tre de 4 po sur 6 po.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>showPackingInstructions</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>{Vrai ou faux} La valeur par d&eacute;faut est &laquo; Vrai &raquo;.</p>\n        <p>Ce champ&nbsp;indique si les directives d'emballage doivent &ecirc;tre inscrites sur l'&eacute;tiquette.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>settlementInfo</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>Cette structure est semblable &agrave; celle du service &laquo; Cr&eacute;er un envoi &raquo;, mais son contenu est facultatif. Il est recommand&eacute; d'omettre ce contenu.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>paidBycustomer</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(10 caract&egrave;res num&eacute;riques)</p>\n        <p>Pour&nbsp;utilisation future.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>contractId</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(10 caract&egrave;res num&eacute;riques)</p>\n        <p>Pour&nbsp;utilisation future.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>references</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>Cette structure contient des champs de r&eacute;f&eacute;rence que vous pouvez attribuer. Ces autres num&eacute;ros d'identification (pouvant &ecirc;tre uniques) sont attribu&eacute;s aux envois retourn&eacute;s. Ils peuvent &ecirc;tre utilis&eacute;s pour le rep&eacute;rage ou pour une raison quelconque que vous jugez utile.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>customerRef1</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 35 caract&egrave;res)</p>\n        <p>Il s'agit d'une valeur d&eacute;finie par l'utilisateur disponible pour vos applications. La valeur que vous saisissez ici appara&icirc;tra sur l'&eacute;tiquette d'exp&eacute;dition, dans l'outil Rep&eacute;rer et, pour les clients qui sont inscrits &agrave; notre service de suivi automatis&eacute; des colis, dans votre fichier SAC.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>customerRef2</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>(Cha&icirc;ne de caract&egrave;res &ndash; Jusqu'&agrave; 35 caract&egrave;res)</p>\n        <p>Il s'agit d'une valeur d&eacute;finie par l'utilisateur disponible pour vos applications. La valeur que vous saisissez ici appara&icirc;tra sur l'&eacute;tiquette d'exp&eacute;dition, dans l'outil Rep&eacute;rer et, pour les clients qui sont inscrits &agrave; notre service de suivi automatis&eacute; des colis, dans votre fichier SAC.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>notifications</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>Cette structure contient les param&egrave;tres propres aux avis &eacute;lectroniques pour recevoir les renseignements sur le rep&eacute;rage des colis.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>notification</p>\n      </td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>Si la structure li&eacute;e aux avis est pr&eacute;sente, au moins un avis est requis et jusqu'&agrave; quatre avis sont permis. Cette structure contient une adresse &eacute;lectronique ainsi que les types d'avis qu'il faut envoyer &agrave; l'adresse &eacute;lectronique en question.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>email</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>(S&eacute;rie de courriels &ndash; Jusqu'&agrave; 60 caract&egrave;res)</p>\n        <p>Adresse &eacute;lectronique pour recevoir des mises &agrave; jour de suivi automatiques.</p>\n        <p>L'adresse &eacute;lectronique doit &ecirc;tre valide. Par exemple, elle doit respecter le format suivant : (['_A-Za-z0-9\\-\\+])(\\.['_A-Za-z0-9\\-\\+])@([A-Za-z0-9-])(\\.[A-Za-z0-9-])(\\.[A-Za-z]{2,})</p>\n        <p>Si la structure li&eacute;e aux avis est pr&eacute;sente, l'adresse &eacute;lectronique doit &ecirc;tre fournie.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>onShipment</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>Si la structure li&eacute;e aux avis est pr&eacute;sente, ce champ&nbsp;doit &ecirc;tre fourni. Si la valeur est <br>&laquo; Vrai &raquo;, toutes les mises &agrave; jour concernant le rep&eacute;rage des envois seront envoy&eacute;es &agrave; l'adresse &eacute;lectronique indiqu&eacute;e.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>onException</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>Si la structure li&eacute;e aux avis est pr&eacute;sente, ce champ&nbsp;doit &ecirc;tre fourni. Si la valeur est <br>&laquo; Vrai &raquo;, toutes les mises &agrave; jour concernant le rep&eacute;rage des exceptions seront envoy&eacute;es &agrave; l'adresse &eacute;lectronique indiqu&eacute;e.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>onDelivery</p>\n      </td>\n      <td>\n        <p>Bool&eacute;en</p>\n      </td>\n      <td>\n        <p>Requis</p>\n      </td>\n      <td>\n        <p>{vrai, faux}</p>\n        <p>Si la structure li&eacute;e aux avis est pr&eacute;sente, ce champ&nbsp;doit &ecirc;tre fourni. Si la valeur est <br>&laquo; Vrai &raquo;, toutes les mises &agrave; jour concernant le rep&eacute;rage des livraisons seront envoy&eacute;es &agrave; l'adresse &eacute;lectronique indiqu&eacute;e.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>\n        <p>emailSubject</p>\n      </td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>\n        <p>Facultatif</p>\n      </td>\n      <td>\n        <p>{tracking,customer-ref-1,customer-ref-2}</p>\n        <p>Voici le format g&eacute;n&eacute;ral de la ligne d'objet d'un courriel selon le type d'avis :</p>\n        <ul>\n          <li>Ship Notification for Item / Avis d&rsquo;exp&eacute;dition pour l&rsquo;article :</li>\n          <li>Exception Notification for Item / Avis d&rsquo;exception pour l&rsquo;article :</li>\n          <li>Delivery Notification for Item / Avis de livraison pour l&rsquo;article :</li>\n        </ul>\n        <p>La mention &laquo; TRACKING &raquo;&nbsp;et le num&eacute;ro de rep&eacute;rage de Postes Canada s'affichent par d&eacute;faut apr&egrave;s le deux-points. Vous pouvez &eacute;galement r&eacute;gler les param&egrave;tres pour que la mention &laquo; REFERENCE &raquo; et l'un des num&eacute;ros de r&eacute;f&eacute;rence du client s'affichent.</p>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+            }
+          },
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/authReturnRequest"
+              },
+              "example": {
+                "createPublicKey": false,
+                "createQrCode": false,
+                "boxFree": false,
+                "customerBarcode": "0000000003",
+                "customerBarcodeType": "2D",
+                "serviceCode": "DOM.XP",
+                "returner": {
+                  "name": "Bulma",
+                  "company": "Capsule Corp.",
+                  "domesticAddress": {
+                    "addressLine1": "502 MAIN ST N",
+                    "city": "MONTREAL",
+                    "province": "QC",
+                    "postalCode": "H2B1A0"
+                  }
+                },
+                "receiver": {
+                  "name": "Ryuko Saito",
+                  "company": "Kubere",
+                  "email": "user@example.com",
+                  "receiverVoiceNumber": "555-555-0100",
+                  "domesticAddress": {
+                    "addressLine1": "23 jardin private",
+                    "city": "Ottawa",
+                    "province": "ON",
+                    "postalCode": "K1K4T3"
+                  }
+                },
+                "parcelCharacteristics": {
+                  "weight": 15,
+                  "dimensions": {
+                    "length": 10,
+                    "width": 10,
+                    "height": 10
+                  }
+                },
+                "printPreferences": {
+                  "outputFormat": "8.5x11",
+                  "encoding": "PDF",
+                  "showPackingInstructions": true
+                },
+                "settlementInfo": {
+                  "paidByCustomer": "7271592",
+                  "contractId": "41596528"
+                },
+                "references": {
+                  "customerRef1": "ref1",
+                  "customerRef2": "ref2"
+                },
+                "notifications": {
+                  "notificationsList": [
+                    {
+                      "email": "user@example.com",
+                      "onShipment": true,
+                      "onException": true,
+                      "onDelivery": true
+                    }
+                  ],
+                  "emailSubject": "tracking"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authReturnInfo"
+                },
+                "example": {
+                  "trackingPin": 12345678901,
+                  "customerBarcode": 2,
+                  "publicKeyInfo": {
+                    "expiryDate": "2018-11-13T20:20:39.000Z",
+                    "url": "http://test.com/thisisaurl",
+                    "qrCode": "4E/QIOo6aRCi2AgAKzAwnQ=="
+                  },
+                  "links": [
+                    {
+                      "href": "test",
+                      "rel": "test",
+                      "index": 1,
+                      "mediaType": "application/json"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-E00010"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "authorizeReturn"
+      }
+    },
+    "/{mailedBy}/{mobo}/open-returns": {
+      "post": {
+        "tags": ["open return"],
+        "summary": "Create Open Return Template",
+        "description": "Creates generic labels for retrieval and printing. The sender address and package weight are unknown.\n",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Créer un modèle générique pour les envois retournés"
+          },
+          "description": {
+            "fr": "Crée des étiquettes génériques aux fins de récupération et d'impression. L'adresse de l'expéditeur et le poids du colis sont inconnus.\n"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/openReturnRequest"
+              },
+              "example": {
+                "maxNumberOfArtifacts": 1,
+                "serviceCode": "DOM.EP",
+                "receiver": {
+                  "name": "Ed Smith",
+                  "company": "EdCo",
+                  "domesticAddress": {
+                    "addressLine1": "123 Main St",
+                    "addressLine2": "Ste 17",
+                    "city": "Ottawa",
+                    "province": "ON",
+                    "postalCode": "K1K1K1"
+                  }
+                },
+                "printPreferences": {
+                  "outputFormat": "4x6",
+                  "customerInputType": "order",
+                  "encoding": "PDF",
+                  "showPackingInstructions": true
+                },
+                "settlementInfo": {
+                  "paidByCustomer": "0000000001",
+                  "contractId": "0041596528",
+                  "intendedMethodOfPayment": "Account"
+                }
+              }
+            }
+          },
+          "description": "<p><strong>Request &ndash; Fields</strong></p>\n<table>\n  <thead>\n    <tr>\n      <th>Field Name</th>\n      <th>Type</th>\n      <th>Required / Optional</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>maxNumberOfArtifacts</td>\n      <td>Number</td>\n      <td>Required</td>\n      <td>Indicates the maximum number of artifacts (return labels) you can generate and retrieve using this template. Must be numeric in the range of 1 - 100,000.</td>\n    </tr>\n    <tr>\n      <td>serviceCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(32 alphanumeric).</p>\n        <p>The returns service is appropriate for domestic returns only.</p>\n        <table>\n          <thead>\n            <tr>\n              <th>Service Code</th>\n              <th>Description</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>DOM.RP</td>\n              <td>Regular Parcel</td>\n            </tr>\n            <tr>\n              <td>DOM.EP</td>\n              <td>Expedited Parcel</td>\n            </tr>\n            <tr>\n              <td>DOM.XP</td>\n              <td>Xpresspost</td>\n            </tr>\n            <tr>\n              <td>DOM.PC</td>\n              <td>Priority</td>\n            </tr>\n          </tbody>\n        </table>\n      </td>\n    </tr>\n    <tr>\n      <td>receiver</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>This structure contains data about the destination that will appear in the \"To\" address of the label. Blank fields will be removed during address formatting.</td>\n    </tr>\n    <tr>\n      <td>name</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(44 characters)</td>\n    </tr>\n    <tr>\n      <td>company</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>(44 characters)</td>\n    </tr>\n    <tr>\n      <td>domesticAddress</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>\n        <p>This structure contains address data about the receiver of the shipment.</p>\n        <p>Blank fields will be removed during address formatting.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>addressLine1</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(44 characters)</p>\n        <p>Address line 1 of receiver.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>addressLine2</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(44 characters)</p>\n        <p>Address line 2 of receiver.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>city</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(40 characters)</p>\n        <p>City of receiver.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>province</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(2 characters)</p>\n        <p>Province of the receiver.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>(6-digit code in Canadian Postal Code pattern: A9A9A9)</td>\n    </tr>\n    <tr>\n      <td>printPreferences</td>\n      <td>Object</td>\n      <td>Optional</td>\n      <td>This structure contains print preferences for the labels.</td>\n    </tr>\n    <tr>\n      <td>outputFormat</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(7 alphanumeric)</p>\n        <p>Valid values are</p>\n        <ul>\n          <li>8.5x11</li>\n          <li>4x6</li>\n        </ul>\n        <p>If this field is not present, 8.5x11 is the default.</p>\n        <p>Note: The 3x5 format was discontinued in June 2016, but for an interim period will still be accepted and converted to 4x6.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>encoding</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>{PDF, ZPL}</p>\n        <p>Use this field to specify the output format for your return label: PDF or&nbsp;ZPL II. If not provided, PDF will be selected by default. If you choose ZPL, the response from a Get Artifact call will include a file containing ZPL II printer commands.&nbsp;You will then need to either code a solution or use an application to stream the commands directly to a thermal printer.</p>\n        <p>For&nbsp;ZPL II labels, your printer must support truncation. Use our sample code to test your printer's ability to truncate text.</p>\n        <p>ZPL is only available on thermal paper. The output format must therefore be 4x6.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>customerInputType</td>\n      <td>String</td>\n      <td>Optional</td>\n      <td>\n        <p>(20 alphanumeric)</p>\n        <p>Use this field to create return labels that contain a spot for your customers to enter data such as a part number, SKU number, etc.</p>\n        <p>This field only applies to 4x6 and 8.5x11 label sizes. Valid values are as follows:</p>\n        <table border=\"1\">\n          <thead>\n            <tr>\n              <th>Code</th>\n              <th>Label Description</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>INVOICE</td>\n              <td>Invoice No / No de facture</td>\n            </tr>\n            <tr>\n              <td>ITEM</td>\n              <td>Item No / No d'article</td>\n            </tr>\n            <tr>\n              <td>ORDER</td>\n              <td>Order No / No de commande</td>\n            </tr>\n            <tr>\n              <td>PART</td>\n              <td>Part No / No de pi&egrave;ce</td>\n            </tr>\n            <tr>\n              <td>PO</td>\n              <td>PO No / No de bon de comm.</td>\n            </tr>\n            <tr>\n              <td>RETURN</td>\n              <td>Return No / No de retour</td>\n            </tr>\n            <tr>\n              <td>RSA</td>\n              <td>RSA No / No d'ARM</td>\n            </tr>\n            <tr>\n              <td>SERIAL</td>\n              <td>Serial No / No de s&eacute;rie</td>\n            </tr>\n            <tr>\n              <td>SKU</td>\n              <td>SKU No / No UGS</td>\n            </tr>\n          </tbody>\n        </table>\n      </td>\n    </tr>\n    <tr>\n      <td>showPackingInstructions</td>\n      <td>Boolean</td>\n      <td>Optional</td>\n      <td>\n        <p>{true, false}</p>\n        <p>This field indicates whether packing instructions are to be rendered on the label.</p>\n        <p>If this field is not present, the default value is false.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>settlementInfo</td>\n      <td>Object</td>\n      <td>Required</td>\n      <td>This structure contains your regular outgoing parcel contract number for verification purposes.</td>\n    </tr>\n    <tr>\n      <td>contractId</td>\n      <td>String</td>\n      <td>Required</td>\n      <td>\n        <p>(10-digit numeric)</p>\n        <p>Required to use the Open Returns service. Only Canada Post commercial customers with a volume-based agreement can use the service.</p>\n      </td>\n    </tr>\n  </tbody>\n</table>",
+          "x-ibm-languages": {
+            "description": {
+              "fr": "<p><strong>Demande &ndash; Champs</strong></p>\n<table>\n  <thead>\n    <tr>\n      <th>Nom du champ</th>\n      <th>Type</th>\n      <th>Requis/Facultatif</th>\n      <th>Description</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>maxNumberOfArtifacts</td>\n      <td>\n        <p>Nombre</p>\n      </td>\n      <td>Requis</td>\n      <td>Indique le nombre maximal d'artefacts (&eacute;tiquettes du Service de retour) que vous pouvez g&eacute;n&eacute;rer et r&eacute;cup&eacute;rer &agrave; l'aide de ce mod&egrave;le. Il doit s'agir d'une valeur num&eacute;rique se situant entre &laquo; 1 &raquo; et &laquo; 100 000 &raquo;.</td>\n    </tr>\n    <tr>\n      <td>serviceCode</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>(32&nbsp;caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Le Service de retour convient seulement pour les envois retourn&eacute;s du r&eacute;gime int&eacute;rieur.</p>\n        <table summary=\"service-code\" cellspacing=\"0\">\n          <thead>\n            <tr>\n              <th class=\"center\">Code de service</th>\n              <th class=\"center\">Description</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>DOM.RP</td>\n              <td>Colis standard</td>\n            </tr>\n            <tr>\n              <td>DOM.EP</td>\n              <td>Colis acc&eacute;l&eacute;r&eacute;s</td>\n            </tr>\n            <tr>\n              <td>DOM.XP</td>\n              <td>Xpresspost</td>\n            </tr>\n            <tr>\n              <td>DOM.PC</td>\n              <td>Priorit&eacute;</td>\n            </tr>\n          </tbody>\n        </table>\n      </td>\n    </tr>\n    <tr>\n      <td>receiver</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>Cette structure contient des donn&eacute;es sur la destination correspondant &agrave; l'adresse du destinataire figurant sur l'&eacute;tiquette. Les champs vides seront retir&eacute;s pendant le formatage des adresses.</td>\n    </tr>\n    <tr>\n      <td>name</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>(44 caract&egrave;res)</td>\n    </tr>\n    <tr>\n      <td>company</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>(44 caract&egrave;res)</td>\n    </tr>\n    <tr>\n      <td>domesticAddress</td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>Requis</td>\n      <td>\n        <p>Cette structure contient les donn&eacute;es d'adressage du destinataire.</p>\n        <p>Les champs&nbsp;vides seront retir&eacute;s pendant le formatage des adresses.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>addressLine1</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(44 caract&egrave;res)</p>\n        <p>Ligne d'adresse 1 du destinataire.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>addressLine2</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>(44 caract&egrave;res)</p>\n        <p>Ligne d'adresse 2 du destinataire.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>city</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(40 caract&egrave;res)</p>\n        <p>Ville du destinataire.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>province</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(2 caract&egrave;res)</p>\n        <p>Province&nbsp;du destinataire.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>postalCode</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(Mod&egrave;le du code postal canadien &agrave; six caract&egrave;res : A9A9A9)</p>\n      </td>\n    </tr>\n    <tr>\n      <td>printPreferences</td>\n      <td>\n        <p>Objet</p>\n      </td>\n      <td>Facultatif</td>\n      <td>\n        <p>Cette structure contient les pr&eacute;f&eacute;rences d'impression pour les &eacute;tiquettes.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>outputFormat</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>(7 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Les valeurs valides sont les suivantes :</p>\n        <ul>\n          <li>8.5x11</li>\n          <li>4x6</li>\n        </ul>\n        <p>Si ce champ&nbsp;n'est pas pr&eacute;cis&eacute;, la valeur &laquo; 8.5x11 &raquo; s'affiche par d&eacute;faut.</p>\n        <p><strong>Remarque :</strong> Le format 3 po sur 5 po a &eacute;t&eacute; &eacute;limin&eacute; en juin 2016, mais pendant une p&eacute;riode provisoire, il sera accept&eacute; et converti en format 4 po sur 6 po.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>encoding</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Facultatif</td>\n      <td>\n        <p>{PDF, ZPL}</p>\n        <p>Servez-vous de ce champ pour pr&eacute;ciser le format de sortie pour votre &eacute;tiquette du Service de retour : PDF ou ZPL II. Si le champ est vide, le format PDF sera s&eacute;lectionn&eacute; par d&eacute;faut.</p>\n        <p>Si vous choisissez le format ZPL, la r&eacute;ponse du service &laquo; Obtenir l'artefact &raquo; inclura un fichier contenant des commandes d'impression ZPL II. Vous devrez ensuite coder une solution ou utiliser une application afin d'envoyer les commandes directement &agrave; une imprimante thermique.</p>\n        <p>Pour les &eacute;tiquettes de format ZPL II, votre imprimante doit permettre la troncature. Utilisez notre <a href=\"../../../../info/cg/entreprise/produitsservices/developpeurs/services/principesdebase.jsf#zpl\">exemple de code pour tester la capacit&eacute; de votre imprimante &agrave; tronquer du texte.</a></p>\n        <p>Le format ZPL est uniquement disponible sur du papier thermosensible. Le champ &laquo; outputFormat&nbsp;&raquo;&nbsp;doit alors &ecirc;tre de 4 po sur 6 po.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>customerInputType</td>\n      <td>\n        <p>Cha&icirc;ne de caract&egrave;res</p>\n      </td>\n      <td>Facultatif</td>\n      <td>\n        <p>(20 caract&egrave;res alphanum&eacute;riques)</p>\n        <p>Utiliser ces champs pour cr&eacute;er des &eacute;tiquettes de retour qui contiennent un espace dans lequel vos clients peuvent entrer des donn&eacute;es, comme un num&eacute;ro de pi&egrave;ce, un num&eacute;ro d'UGS, etc.</p>\n        <p>Ce champ ne s'applique qu'aux &eacute;tiquettes de 4 x 6 et de 8,5 x 11.</p>\n        <p>Les valeurs valides sont les suivantes :</p>\n        <table summary=\"customer-input-type\" cellspacing=\"0\">\n          <thead>\n            <tr>\n              <th class=\"center\">Code</th>\n              <th class=\"center\">Description de l'&eacute;tiquette</th>\n            </tr>\n          </thead>\n          <tbody>\n            <tr>\n              <td>INVOICE</td>\n              <td>Invoice No / No de facture</td>\n            </tr>\n            <tr>\n              <td>ITEM</td>\n              <td>Item No / No d'article</td>\n            </tr>\n            <tr>\n              <td>ORDER</td>\n              <td>Order No / No de commande</td>\n            </tr>\n            <tr>\n              <td>PART</td>\n              <td>Part No / No de pi&egrave;ce</td>\n            </tr>\n            <tr>\n              <td>PO</td>\n              <td>PO No / No de bon de comm.</td>\n            </tr>\n            <tr>\n              <td>RETURN</td>\n              <td>Return No / No de retour</td>\n            </tr>\n            <tr>\n              <td>RSA</td>\n              <td>RSA No / No d'ARM</td>\n            </tr>\n            <tr>\n              <td>SERIAL</td>\n              <td>Serial No / No de s&eacute;rie</td>\n            </tr>\n            <tr>\n              <td>SKU</td>\n              <td>SKU No / No UGS</td>\n            </tr>\n          </tbody>\n        </table>\n      </td>\n    </tr>\n    <tr>\n      <td>showPackingInstructions</td>\n      <td>Bool&eacute;en</td>\n      <td>Facultatif</td>\n      <td>\n        <p>{Vrai ou faux}</p>\n        <p>Ce champ&nbsp;indique si les directives d'emballage doivent &ecirc;tre inscrites sur l'&eacute;tiquette.</p>\n        <p>Si&nbsp;ce champ&nbsp;n'est pas pr&eacute;cis&eacute;, la valeur &laquo; Faux &raquo; s'affiche par d&eacute;faut.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>settlementInfo</td>\n      <td>Objet</td>\n      <td>Requis</td>\n      <td>\n        <p>Cette structure contient le num&eacute;ro de convention de colis de d&eacute;part standard aux fins de v&eacute;rification.</p>\n      </td>\n    </tr>\n    <tr>\n      <td>contractId</td>\n      <td>Cha&icirc;ne de caract&egrave;res</td>\n      <td>Requis</td>\n      <td>\n        <p>(10 caract&egrave;res num&eacute;riques)</p>\n        <p>Requis pour utiliser le service de retour g&eacute;n&eacute;rique. Seuls les clients commerciaux de Postes Canada titulaires d'une convention &eacute;tablie en fonction du volume peuvent utiliser le service.</p>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/openReturnInfo"
+                },
+                "example": {
+                  "artifactsRemaining": 1,
+                  "links": [
+                    {
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1/0000002/0000002/open-returns/787261753438331627",
+                      "rel": "self",
+                      "mediaType": "application/json"
+                    },
+                    {
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1/0000002/0000002/open-returns/787261753438331627/details\n",
+                      "rel": "details",
+                      "mediaType": "application/json"
+                    },
+                    {
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1/0000002/0000002/open-returns/787261753438331627/artifact\n",
+                      "rel": "nextArtifact",
+                      "mediaType": "application/pdf"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-E00010"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "createOpenReturn"
+      },
+      "get": {
+        "tags": ["open return"],
+        "summary": "Get Open Return Templates",
+        "description": "Gets the list of active open return templates based on the mailed-on-behalf-of customer number.\n",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir les modèles génériques pour les envois retournés"
+          },
+          "description": {
+            "fr": "Obtenir la liste des modèles de retour ouverts en fonction du numéro de client « Expédié au nom de ».\n"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/openReturnList"
+                },
+                "example": [
+                  {
+                    "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1/0000002/0000002/open-returns/687311739533050600",
+                    "rel": "template",
+                    "mediaType": "application/json"
+                  }
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-E00010"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "getOpenReturn"
+      }
+    },
+    "/{mailedBy}/{mobo}/open-returns/{id}/artifact": {
+      "get": {
+        "tags": ["open return"],
+        "operationId": "openReturnArtifact",
+        "summary": "Retrieve Next Open Return Artifact",
+        "description": "Retrieves the PDF or ZPL II data for a Return Label Artifact that was pre-established using Create Open Return Template.  \n",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Récupérer le prochain artefact générique pour les envois retournés"
+          },
+          "description": {
+            "fr": "Récupère les données en format PDF ou ZPL II pour une étiquette de retour préétablie à l'aide du modèle Créer un modèle générique pour les envois retournés.\n"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/templateId"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/zpl": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+              }
+            },
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                }
+              },
+              "application/zpl": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      }
+    },
+    "/{mailedBy}/{mobo}/open-returns/{id}": {
+      "get": {
+        "tags": ["open return"],
+        "summary": "Get Open Return Template",
+        "description": "Retrieves the information that allows access to the Retrieve Next Open Return Artifact service associated with the template.\n",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir le modèle générique pour les envois retournés"
+          },
+          "description": {
+            "fr": "Récupère l'information qui permet d'accéder au service Récupérer le prochain artefact générique pour les envois retournés associé au modèle.\n"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/templateId"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/openReturnInfo"
+                },
+                "example": {
+                  "artifactsRemaining": 1,
+                  "links": [
+                    {
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1/0000002/0000002/open-returns/78726175343832",
+                      "rel": "self",
+                      "mediaType": "application/json"
+                    },
+                    {
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1/0000002/0000002/open-returns/78726175343832/details\n",
+                      "rel": "details",
+                      "mediaType": "application/json"
+                    },
+                    {
+                      "href": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1/0000002/0000002/open-returns/78726175343832/artifact\n",
+                      "rel": "nextArtifact",
+                      "mediaType": "application/pdf"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "openReturnById"
+      },
+      "delete": {
+        "tags": ["open return"],
+        "summary": "Delete Open Return Template",
+        "description": "Deletes an existing active Open Return Template.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Supprimer le modèle générique pour les envois retournés"
+          },
+          "description": {
+            "fr": "Supprime un modèle générique pour les envois retournés existant."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/templateId"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204"
+          },
+          "400": {
+            "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/messages"
+                },
+                "examples": {
+                  "English": {
+                    "value": {
+                      "title": "Validation failed",
+                      "detail": "Errors occurred while processing the request.",
+                      "errors": [
+                        {
+                          "errorCode": "8064",
+                          "message": "A shipment can only be void if it is in a PROCESSED or PRINTED state.\n"
+                        }
+                      ]
+                    }
+                  },
+                  "Français": {
+                    "value": {
+                      "title": "Validation échouée",
+                      "detail": "Une erreur est survenue lors du traitement de la demande.",
+                      "errors": [
+                        {
+                          "errorCode": "8064",
+                          "message": "Un envoi ne peut être annulé que s’il est dans l’état TRAITÉ ou IMPRIMÉ."
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "deleteOpenReturnById"
+      }
+    },
+    "/{mailedBy}/{mobo}/open-returns/{id}/details": {
+      "get": {
+        "tags": ["open return"],
+        "summary": "Get Open Return Template Details",
+        "description": "Retrieves the original information provided when Create Open Return Template was called.\n",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir les détails sur le modèle générique pour les envois retournés\n"
+          },
+          "description": {
+            "fr": "Récupère les renseignements originaux fournis lorsque l'on a appelé un modèle Créer un modèle générique pour les envois retournés.\n"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/templateId"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/openReturnDetails"
+                },
+                "example": {
+                  "artifactsRemaining": 1,
+                  "openReturn": {
+                    "maxNumberOfArtifacts": 1,
+                    "serviceCode": "DOM.XP",
+                    "receiver": {
+                      "name": "Joe Smith",
+                      "company": "JoeCo",
+                      "domesticAddress": {
+                        "addressLine1": "123 Main St",
+                        "addressLine2": "Ste 17",
+                        "city": "Ottawa",
+                        "province": "ON",
+                        "postalCode": "A1A1A1"
+                      }
+                    },
+                    "printPreferences": {
+                      "outputFormat": "4x6",
+                      "customerInputType": 1234567,
+                      "encoding": "PDF",
+                      "showPackingInstructions": true
+                    },
+                    "settlementInfo": {
+                      "contractId": 40662505
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-E00010"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "openReturnDetails"
+      }
+    },
+    "/artifacts/{consumerId}/authorized-returns/{artifactId}/{index}": {
+      "get": {
+        "tags": ["authorized return"],
+        "summary": "Get Artifact",
+        "description": "Retrieves the PDF or ZPL II data for the authorized return label.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir l'artefact"
+          },
+          "description": {
+            "fr": "Récupère les données en format PDF ou ZPL II pour l'étiquette de retour autorisée.\n"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "name": "consumerId",
+            "in": "path",
+            "description": "A unique identifier for the mailed by customer using the API. This ID is automatically provided as part of the resource URLs in API responses.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Un numéro d'identification unique de l'envoi par le client à l'aide de l'API. Ce numéro d'identification est automatiquement fourni dans les adresses URL des ressources dans les réponses de l'API."
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "test"
+          },
+          {
+            "name": "artifactId",
+            "in": "path",
+            "description": "A unique identifier for the artifact (label or manifest) that was generated as part of a previous call. You can only retrieve artifacts for shipments, manifests or returns that you created.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Il s'agit du numéro d'identification unique de l'artefact (étiquette ou manifeste) généré dans le cadre d'une demande de service précédente. Vous pouvez seulement récupérer les artefacts pour les envois, les manifestes ou les envois retournés que vous avez créés."
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 18
+            },
+            "example": "10001605769"
+          },
+          {
+            "name": "index",
+            "in": "path",
+            "description": "To retrieve pdf documents, this field is not required or must be zero.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Ce champ n'est pas requis ou doit être à zéro pour récupérer les documents PDF."
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["0"]
+            },
+            "example": "0"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/zpl": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "501": {
+            "$ref": "#/components/responses/501"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "authorizedReturnArtifact"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "mailedBy": {
+        "name": "mailedBy",
+        "in": "path",
+        "description": "Your customer number.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Votre numéro de client."
+          }
+        },
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/workgroupID"
+        }
+      },
+      "platformID": {
+        "name": "platform-id",
+        "in": "header",
+        "description": "ID associated with the platform.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Identifiant associé à la plateforme."
+          }
+        },
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/customerNumber"
+        }
+      },
+      "mobo": {
+        "name": "mobo",
+        "in": "path",
+        "description": "The mailed on behalf of customer number or repeat your customer number.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le numéro de client « Expédié au nom de » ou indiquez de nouveau votre numéro de client."
+          }
+        },
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/customerNumber"
+        }
+      },
+      "language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Indicates your language preference for receiving error messages.\n\n- en-CA = English\n- fr-CA = French",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Indique votre langue de préférence pour recevoir les messages d'erreur.\n- en-CA = Anglais - fr-CA = Français"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "enum": ["en-CA", "fr-CA"],
+          "example": "en-CA",
+          "default": "en-CA"
+        }
+      },
+      "templateId": {
+        "name": "id",
+        "in": "path",
+        "description": "The identifier of the previously created template for which the artifact is being retrieved.\n",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Identificateur du modèle créé précédemment pour lequel un artefact est récupéré."
+          }
+        },
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": "976731742911222800"
+      }
+    },
+    "responses": {
+      "202": {
+        "description": "The 202 (Accepted) status code indicates that the request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 202 (Acceptée) indique que la demande a été acceptée aux fins de traitement, mais que le traitement n’a pas été effectué. La demande pourrait éventuellement être traitée ou non, car elle pourrait être refusée au moment du traitement."
+          }
+        }
+      },
+      "204": {
+        "description": "The 204 (No Content) status code indicates that the server has successfully fulfilled the request and that there is no additional content to send in the response content.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 204 (Aucun contenu) indique que le serveur a bien traité la demande et qu’il n’y a pas de contenu supplémentaire à envoyer dans le contenu de la réponse."
+          }
+        }
+      },
+      "400": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "The 401 (Unauthorized) status code indicates that the server understood the request but refuses to fulfill it.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 401 (Non autorisé) indique que le serveur a compris la requête mais refuse de la satisfaire."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorizedError"
+            },
+            "example": [
+              {
+                "httpCode": 401,
+                "httpMessage": "Unauthorized",
+                "moreInformation": "Cannot pass the security checks that are required by the target API or operation, Enable debug headers for more details."
+              }
+            ]
+          }
+        }
+      },
+      "403": {
+        "description": "The HTTP 403 (Forbidden) error means the web server received your request but denies you access to the requested resource because you don't have permission.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "L'erreur HTTP 403 (Interdit) signifie que le serveur Web a reçu votre requête mais vous refuse l'accès à la ressource demandée car vous n'en avez pas l'autorisation."
+          }
+        }
+      },
+      "404": {
+        "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "412": {
+        "description": "The 412 (Precondition Failed) status code indicates that one or more conditions given in the request header fields evaluated to false when tested on the server (Section 13).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 412 (Échec de la condition préalable) indique qu'une ou plusieurs conditions données dans les champs d'en-tête de la requête ont été évaluées à faux lors du test sur le serveur (Section 13)."
+          }
+        }
+      },
+      "500": {
+        "description": "The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 500 (Erreur interne du serveur) indique que le serveur a rencontré une condition inattendue l'empêchant de traiter la requête. Transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "501": {
+        "description": "The 501 (Not Implemented) status code indicates that the server does not support the functionality required to fulfill the request.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 501 (non mis en œuvre) indique que le serveur ne prend pas en charge les fonctions nécessaires pour traiter la demande."
+          }
+        }
+      },
+      "503": {
+        "description": "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 503 (Service indisponible) indique que le serveur est actuellement indisponible en raison d'une surcharge temporaire ou d'une maintenance planifiée, qui devrait être résolue après un certain délai. Message transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "504": {
+        "description": "The 504 (Gateway Timeout) status code indicates that the server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. May be passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 504 (Délai d'attente de la passerelle) indique que le serveur, agissant comme passerelle ou proxy, n'a pas reçu de réponse dans un délai raisonnable d'un serveur en amont auquel il devait accéder pour traiter la requête. Ce code peut provenir du serveur principal."
+          }
+        }
+      },
+      "400-E00010": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            },
+            "examples": {
+              "English": {
+                "value": {
+                  "title": "Validation failed",
+                  "detail": "Errors occurred while processing the request.",
+                  "errors": [
+                    {
+                      "errorCode": "E00010",
+                      "message": "Post Offices Not Found"
+                    }
+                  ]
+                }
+              },
+              "Français": {
+                "value": {
+                  "title": "Validation échouée",
+                  "detail": "Une erreur est survenue lors du traitement de la demande.",
+                  "errors": [
+                    {
+                      "errorCode": "E00010",
+                      "message": "Bureaux de poste non trouvés"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "customerNumber": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10,
+        "pattern": "^[0-9]+$",
+        "example": "0000000001"
+      },
+      "workgroupID": {
+        "type": "string",
+        "pattern": "^[0-9]{1,10}(-[0-9]{1,10})?$",
+        "example": "0000000001"
+      },
+      "serviceCode": {
+        "description": "Return labels can only be created if the shipment originates in Canada and is destined for delivery in Canada.\n\nService Code  | Description\n--------------|------------\nDOM.RP        | Regular Parcel\nDOM.EP        | Expedited Parcel\nDOM.XP        | Xpresspost\nDOM.PC        | Priority\n\nThis is the Canada Post delivery service used for shipping the item.\n\n---\n\nLes étiquettes du Service de retour peuvent seulement être créées si l'envoi est déposé au Canada et qu'il doit être livré à l'intérieur de ce pays.\n\nCode de service | Description\n----------------|------------\nDOM.RP          | Colis standard\nDOM.EP          | Colis accélérés\nDOM.XP          | Xpresspost\nDOM.PC          | Priorité\n\nIl s'agit du service de livraison de Postes Canada utilisé pour expédier l'article.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 32
+      },
+      "contractID": {
+        "description": "Required to use the Open Returns service. Only Canada Post commercial customers with a volume-based agreement can use the service.\n\n---\n\nRequis pour utiliser le service de retour générique. Seuls les clients commerciaux de Postes Canada titulaires d'une convention établie en fonction du volume peuvent utiliser le service.",
+        "type": "string",
+        "pattern": "^\\d{1,10}$"
+      },
+      "dimensionMeasurement": {
+        "description": "Details of the parcel dimensions in centimeters\n\n---\n\nDétails liés aux dimensions du colis en centimètres.",
+        "type": "number",
+        "exclusiveMinimum": true,
+        "minimum": 0,
+        "maximum": 999.9,
+        "multipleOf": 0.01
+      },
+      "email": {
+        "description": "Email address to receive automatic tracking updates.\n\n---\n\nAdresse électronique pour recevoir des mises à jour de suivi automatiques.",
+        "type": "string",
+        "maxLength": 60,
+        "pattern": "^(['_A-Za-z0-9\\-+]+)(\\.[_'A-Za-z0-9\\-+]+)*@([A-Za-z0-9-]+)(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$"
+      },
+      "domesticAddress": {
+        "description": "This structure contains the address data about the receiver of the shipment.\n\nBlank fields will be removed in address fields for formatting the labels.\n\n---\n\nCette structure contient les données d'adressage de la personne retournant l'envoi.\n\nLes champs vides seront retirés des champs relatifs à l'adresse aux fins de formatage des étiquettes.",
+        "type": "object",
+        "properties": {
+          "addressLine1": {
+            "description": "Address line 1.\n\n---\n\nLigne d'adresse 1.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 44
+          },
+          "addressLine2": {
+            "description": "Address line 2.\n\n---\n\nLigne d'adresse 2.                           ",
+            "type": "string",
+            "maxLength": 44
+          },
+          "city": {
+            "description": "City.\n\n---\n\nVille.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "province": {
+            "description": "Standard Canadian province code.            \n\n---\n\nCode de province standard pour les provinces au Canada.",
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Canadian Postal Code.\n\n---\n\nCode postal canadien.",
+            "pattern": "^[A-Z]\\d[A-Z]\\d[A-Z]\\d$"
+          }
+        },
+        "required": ["addressLine1", "city", "province", "postalCode"]
+      },
+      "returner": {
+        "description": "This structure contains data about the sender that will appear in the \"From\" address of the label. Blank fields will be removed in the address formatting.\n\n---\n\nCette structure contient des données sur l'expéditeur correspondant à l'adresse de l'expéditeur figurant sur l'étiquette. Les champs vides seront retirés du formatage des adresses.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Contact name.\n\n---\n\nNom du contact.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 44
+          },
+          "company": {
+            "description": "Company name.\n\n---\n\nNom de l'entreprise.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 44
+          },
+          "domesticAddress": {
+            "$ref": "#/components/schemas/domesticAddress"
+          }
+        },
+        "required": ["name", "domesticAddress"]
+      },
+      "receiver": {
+        "description": "This structure contains data about the destination and will appear in the \"To\" address of the label.\n\nBlank fields will be removed in the address formatting.\n\n---\n\nCette structure contient des données sur la destination correspondant à l'adresse du destinataire figurant sur l'étiquette.\n\nLes champs vides seront retirés du formatage des adresses.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/returner"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "email": {
+                "$ref": "#/components/schemas/email"
+              },
+              "receiverVoiceNumber": {
+                "description": "Phone number of the receiver.\n\nWill not appear on shipping label.\n\n---\n\nIl s'agit du numéro de téléphone du destinataire.\n\nCe numéro n'apparaîtra pas sur l'étiquette d'expédition.",
+                "type": "string",
+                "maxLength": 25
+              }
+            }
+          }
+        ]
+      },
+      "link": {
+        "description": "The link structure contains one template link for each active template.\n\nEach link has three fields as follows.\n\n- **href** - This is the endpoint that can be called using an https GET to retrieve the information.\n- **rel** - This indicates the purpose of the link and the type of information that will be retrieved – in this case all of the links will have rel=\"template\".\n- **mediaType** - The mediaType field indicates the format of the graphics file (PDF).\n\n---\n\nLa structure du lien contient un lien vers chacun des modèles actifs.\n\nChaque lien compte les trois champs suivants :\n\n- **href** - Il s'agit du point final pouvant être utilisé pour présenter une demande de service à l'aide du code HTTP GET pour récupérer de l'information.\n- **rel** - Il désigne l'objectif du lien et le type de renseignements qui y seront récupérés. Dans ce cas, tous les liens auront « rel=\"template\" ».\n- **mediaType** - Le champ lié au type de média désigne le format du fichier graphique (PDF).",
+        "type": "object",
+        "properties": {
+          "href": {
+            "description": "Indicates the endpoint to be used to call the web service. It contains the URL and may also contain a query string.\n\n---\n\nDésigne le point final à utiliser pour présenter une demande de service en ligne. Il contient l'adresse URL et peut également contenir une chaîne de requête.",
+            "type": "string"
+          },
+          "rel": {
+            "description": "Indicates the resource related to the current response.\n\n---\n\nIndique la ressource associée à la réponse actuelle.",
+            "type": "string"
+          },
+          "index": {
+            "description": "Present on links to formatted output such as labels. The value starts at 0 for the first page and subsequent pages (if extant) count up by 1.\n\n---\n\nFait partie des liens vers les données de sortie formatées, comme les étiquettes. La valeur de la première page est de « 0 », et cette valeur augmente de un pour chaque page subséquente (le cas échéant).",
+            "type": "integer",
+            "minimum": 0
+          },
+          "mediaType": {
+            "description": "A character string that indicates the format and version of the data to expect when the web service is invoked. The value in this field should be copied to the HTTP header variable \"Accept\" when the href link is invoked.\n\n---\n\nIl s'agit d'une chaîne de caractères indiquant le format et la version des données prévus lorsqu'un service Internet est utilisé.\nLa valeur de ce champ doit être copiée dans la variable de l'en-tête HTTP « Accept » lorsque le lien href est utilisé.",
+            "type": "string"
+          }
+        },
+        "required": ["href", "rel", "mediaType"]
+      },
+      "links": {
+        "description": "This structure represents a list of links to information relating to the shipment that was created.\n\n---\n\nCette structure représente une liste de liens vers les renseignements concernant l'envoi créé.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/link"
+        },
+        "minItems": 1
+      },
+      "messages": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Type of error.\n\n---\n\nType d'erreur."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Detailed description of type of error.\n\n---\n\nDescription détaillée du type d'erreur."
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors.\n\n---\n\nListe des erreurs.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errorCode": {
+                  "type": "string",
+                  "description": "Error code related to error.\n\n---\n\nCode d'erreur lié à l'erreur."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Detailed message for the error that occured.\n\n---\n\nMessage détaillé concernant l'erreur survenue."
+                }
+              },
+              "required": ["message", "errorCode"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["title", "detail", "errors"],
+        "additionalProperties": false,
+        "example": {
+          "title": "Validation failed",
+          "detail": "Errors occurred while processing the request.",
+          "errors": [
+            {
+              "errorCode": "002",
+              "message": "Duplicate Pin."
+            }
+          ]
+        }
+      },
+      "unauthorizedError": {
+        "type": "object",
+        "properties": {
+          "httpCode": {
+            "type": "string",
+            "description": "Code associated with the unauthorized error.\n  ---\n\nCode associé à l'erreur d'autorisation."
+          },
+          "httpMessage": {
+            "type": "string",
+            "description": "Error message.\n  ---\n\nmessage d'erreur."
+          },
+          "moreInformation": {
+            "type": "string",
+            "description": "Detailed error message.\n  ---\n\nMessage d'erreur détaillé."
+          }
+        }
+      },
+      "customerBarcode": {
+        "description": "Value of the barcode.\n\nIf present, the barcode will be rendered in the customer info area of the authorized return label (usually at the bottom).\n\n---\n\nValeur du code à barres.\n\nS'il est présent, le code à barres sera rendu dans la section de renseignements client de l'étiquette de retour autorisée (habituellement en bas).",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16
+      },
+      "encoding": {
+        "description": "Use this field to specify the output format for your return label: PDF or ZPL II. If not provided, PDF will be selected by default.\n\nIf you choose ZPL, the response from a Get Artifact call will include a file containing ZPL II printer commands. You will then need to either code a solution or use an application to stream the commands directly to a thermal printer.\n\nFor ZPL II labels, your printer must support truncation. Use our sample code to test your printer's ability to truncate text.\n\nZPL is only available on thermal paper so \"outputFormat\" must be 4x6.\n\n---\n\nServez-vous de ce champ pour préciser le format de sortie pour votre étiquette du Service de retour : PDF ou ZPL II. Si le champ est vide, le format PDF sera sélectionné par défaut.\n\nSi vous choisissez le format ZPL, la réponse du service « Obtenir l'artefact » inclura un fichier contenant des commandes d'impression ZPL II. Vous devrez ensuite coder une solution ou utiliser une application afin d'envoyer les commandes directement à une imprimante thermique.\n\nPour les étiquettes de format ZPL II, votre imprimante doit permettre la troncature. Utilisez notre exemple de code pour tester la capacité de votre imprimante à tronquer du texte.\n\nLe format ZPL est uniquement disponible sur du papier thermosensible, alors le champ « outputFormat » doit être de 4 po sur 6 po.",
+        "enum": ["PDF", "ZPL"]
+      },
+      "showPackingInstructions": {
+        "description": "Indicates whether packing instructions are to be rendered on the label.\n\n---\n\nIndique si les directives d'emballage doivent être inscrites sur l'étiquette.",
+        "type": "boolean",
+        "default": true
+      },
+      "authReturnRequest": {
+        "description": "This is the overall structure for the request input information. This structure provides a description of the return request details, including receiver, service-code, returner, parcel-characteristics and references.\n\n---\n\nIl s'agit de la structure générale pour les données d'entrée de la demande. Cette structure fournit une description des détails sur la demande de retour, notamment le destinataire, le code de service, la personne retournant l'envoi, les caractéristiques du colis et les références.",
+        "type": "object",
+        "properties": {
+          "createPublicKey": {
+            "description": "If flag is present and set to \"true\", it will enable a generation of public URL to retrieve a PDF version of shipping label and inclusion of this URL along with expiry date in service response. That functionality can be leveraged if shipper prefers to send customer a link to the label rather than a label as attachment. Also, shipper can send to customer QR code encoding public URL, that would allow customer to use QR code for printing out label in any CPC retail location. Expiry date indicates when such link to retrieve the label will no longer be accessible.\n\nNote: ‘retail-only = true' will always take precedence over ‘create-public-key'. It is mutually exclusive is ‘retail-only' flag.\n\n---\n\nSi l'indicateur est présent et qu'il est réglé à « true », une d'URL publique sera générée pour qu'une version PDF de l'étiquette d'expédition soit récupérée et incluse dans la réponse au service avec la date d'expiration. Cette fonction peut être utilisée si l'expéditeur préfère envoyer au client un lien vers l'étiquette plutôt qu'une étiquette comme pièce jointe. De plus, l'expéditeur peut envoyer au client un code QR encodant l'URL publique, ce qui permettrait au client d'utiliser le code QR pour imprimer l'étiquette dans n'importe quel emplacement de vente au détail de la SCP. La date d'expiration indique quand le lien pour récupérer l'étiquette ne sera plus accessible.\n\nRemarque : « retail-only = true » aura toujours la priorité sur « create-public-key ». L'option « retail-only » est mutuellement exclusive.   ",
+            "type": "boolean"
+          },
+          "createQrCode": {
+            "description": "If flag is present and set to \"true\", AND createPublicKey is also true, the QR code encoding of the public URL is automatically generated and returned in the response.\n\n---\n\nSi un indicateur est présent et qu'il est réglé à « true », ET que le champ createPublicKey a également cette valeur, l'encodage du code QR de l'URL publique est automatiquement généré et retourné dans la réponse..",
+            "type": "boolean"
+          },
+          "boxFree": {
+            "description": "if flag is present and set to \"true\", \"Box-free / Sans emballage\" verbiage is added on the image containing the QR code and green colored QR code is generated.\n\nNote: There are eligibility requirements for box-free returns. If items are not eligible, they will not be accepted as a box-free return at the post office. See the [Parcel Services Customer Guide](https://www.canadapost-postescanada.ca/cpc/doc/en/support/customer-guide/amalgamated-parcel-services-guide.pdf) for more information.\n\n---\n\nSi un indicateur est présent et réglé à « true », le libellé « Box-free / Sans emballage » est ajouté sur l'image contenant le code QR, et un code QR vert est généré.\n\nRemarque : Il y a des exigences d'admissibilité pour les retours sans boîte. Si les articles ne sont pas admissibles, ils ne seront pas acceptés comme des retours sans emballage au bureau de poste. Consultez le [Guide du client pour les services de colis](https://www.canadapost-postescanada.ca/scp/doc/fr/soutien/guide-client/guide-services-colis-fusionne.pdf) pour obtenir plus de renseignements.",
+            "type": "boolean"
+          },
+          "customerBarcode": {
+            "$ref": "#/components/schemas/customerBarcode"
+          },
+          "customerBarcodeType": {
+            "description": "Type of the barcode. Mandatory if customerBarcode is specified.\n\n---\n\nType de code à barres. Obligatoire si le code à barres du client est spécifié.",
+            "enum": ["LINEAR", "2D"]
+          },
+          "serviceCode": {
+            "$ref": "#/components/schemas/serviceCode"
+          },
+          "returner": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/returner"
+              }
+            ]
+          },
+          "receiver": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/receiver"
+              }
+            ]
+          },
+          "parcelCharacteristics": {
+            "description": "Describes the characteristics of the parcel.\n\n---\n\nDécrit les caractéristiques du colis.",
+            "type": "object",
+            "properties": {
+              "weight": {
+                "description": "Total package weight in kg.\n\n---\n\nPoids total du colis en kilogrammes.",
+                "type": "number",
+                "exclusiveMinimum": true,
+                "minimum": 0,
+                "maximum": 999.999,
+                "multipleOf": 0.001
+              },
+              "dimensions": {
+                "description": "Contains the physical dimensions of the parcel, which can be used to make a more accurate determination of shipping cost.\n---\nContient les dimensions physiques du colis qui peuvent être utilisées pour déterminer les frais d'expédition de façon plus précise.",
+                "type": "object",
+                "properties": {
+                  "length": {
+                    "description": "Length of parcel in cm.\n\n---\n\nLongueur du colis en centimètres.",
+                    "$ref": "#/components/schemas/dimensionMeasurement"
+                  },
+                  "width": {
+                    "description": "Width of parcel in cm.\n\n---\n\nLargeur du colis en centimètres.",
+                    "$ref": "#/components/schemas/dimensionMeasurement"
+                  },
+                  "height": {
+                    "description": "Height of parcel in cm.\n\n---\n\nHauteur du colis en centimètres.",
+                    "$ref": "#/components/schemas/dimensionMeasurement"
+                  }
+                },
+                "required": ["length", "width", "height"]
+              }
+            }
+          },
+          "printPreferences": {
+            "description": "Contains print preferences for the labels.\n\n---\n\nContient les préférences d'impression pour les étiquettes.",
+            "type": "object",
+            "properties": {
+              "outputFormat": {
+                "description": "8.5x11 indicates paper and 4x6 indicates thermal.\n\n---\n\nLe format du papier ordinaire est de 8 ½ po sur 11 po alors que celui du papier thermosensible est de 4 po sur 6 po.",
+                "enum": ["8.5x11", "4x6"],
+                "default": "8.5x11"
+              },
+              "encoding": {
+                "$ref": "#/components/schemas/encoding"
+              },
+              "showPackingInstructions": {
+                "$ref": "#/components/schemas/showPackingInstructions"
+              }
+            }
+          },
+          "settlementInfo": {
+            "description": "This structure is analogous to the structure from Create Shipment; however, here the contents are optional and recommended to be omitted.\n\n---\n\nCette structure est semblable à celle du service « Créer un envoi », mais son contenu est facultatif. Il est recommandé d'omettre ce contenu.",
+            "type": "object",
+            "properties": {
+              "paidByCustomer": {
+                "description": "For future use.\n\n---\n\nPour utilisation future.",
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10,
+                "pattern": "^[0-9]+$"
+              },
+              "contractId": {
+                "description": "For future use.\n\n---\n\nPour utilisation future.",
+                "type": "string",
+                "pattern": "^\\d{1,10}$"
+              }
+            }
+          },
+          "references": {
+            "description": "This structure contains reference fields that you can assign. These alternate (possibly unique) identification numbers are assigned to the return, and can be used for tracking or for any other purpose you deem useful.\n\n---\n\nCette structure contient des champs de référence que vous pouvez attribuer.Ces autres numéros d'identification (pouvant être uniques) sont attribués aux envois retournés. Ils peuvent être utilisés pour le repérage ou pour une raison quelconque que vous jugez utile.",
+            "type": "object",
+            "properties": {
+              "customerRef1": {
+                "description": "This is a user-defined value available for use by your applications. (e.g. you could use this field as an internal \"order id\"). The value you enter here will appear on the shipping label, in Track and – for customers who subscribe to our Automated Parcel Tracking service – in your APT file.\n\n---\n\nIl s'agit d'une valeur définie par l'utilisateur disponible pour vos applications (p. ex. vous pourriez utiliser ce champ pour le numéro d'identification d'une commande interne). La valeur que vous saisissez ici apparaîtra sur l'étiquette d'expédition, dans l'outil Repérer et, pour les clients qui sont inscrits à notre service de suivi automatisé des colis, dans votre fichier SAC.",
+                "type": "string",
+                "maxLength": 35
+              },
+              "customerRef2": {
+                "description": "This is a user-defined value available for use by your applications. The value you enter here will appear on the shipping label, in Track and – for customers who subscribe to our Automated Parcel Tracking service – in your APT file.\n\n---\n\nIl s'agit d'une valeur définie par l'utilisateur disponible pour vos applications. La valeur que vous saisissez ici apparaîtra sur l'étiquette d'expédition, dans l'outil Repérer et, pour les clients qui sont inscrits à notre service de suivi automatisé des colis, dans votre fichier SAC",
+                "type": "string",
+                "maxLength": 35
+              }
+            }
+          },
+          "notifications": {
+            "description": "This structure holds email notification settings for receiving parcel tracking information.\n\n---\n\nCette structure contient les paramètres propres aux avis électroniques pour recevoir les renseignements sur le repérage des colis.\n",
+            "type": "object",
+            "properties": {
+              "notificationsList": {
+                "description": "If the notifications structure is present, at least one notification instance is required and up to 4 are allowed. This structure holds one email address and the kinds of notifications to be sent to the email address.\n\n---\n\nSi la structure liée aux avis est présente, au moins un avis est requis et jusqu'à quatre avis sont permis. Cette structure contient une adresse électronique ainsi que les types d'avis qu'il faut envoyer à l'adresse électronique en question.\n",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "$ref": "#/components/schemas/email"
+                    },
+                    "onShipment": {
+                      "description": "Indicates whether you wish to receive an email notification upon shipment of the parcel.\n\n---\n\nIndique si vous souhaitez recevoir un avis électronique concernant l'expédition d'un envoi.",
+                      "type": "boolean"
+                    },
+                    "onException": {
+                      "description": "Indicates whether you wish to receive an email notification on exceptions.\n---\nIndique si vous souhaitez recevoir un avis électronique concernant l'expédition d'un envoi.",
+                      "type": "boolean"
+                    },
+                    "onDelivery": {
+                      "description": "Indicates whether you wish to receive an email notification upon delivery of the parcel.\n\n---\n\nIndique si vous souhaitez recevoir un avis électronique concernant l'expédition d'un envoi.",
+                      "type": "boolean"
+                    }
+                  },
+                  "required": ["email", "onShipment", "onException", "onDelivery"]
+                },
+                "minItems": 1,
+                "maxItems": 4
+              },
+              "emailSubject": {
+                "description": "Email subject lines have the following general forms depending on type of notification:  \n\n- Ship Notification for Item / Avis d’expédition pour l’article :\n- Exception Notification for Item / Avis d’exception pour l’article :\n- Delivery Notification for Item / Avis de livraison pour l’article :\n\nThe value following the colon defaults to “TRACKING” and the Canada Post tracking number. Or you can set it to “REFERENCE” and one of the customer reference numbers.\n\n---\n\nVoici le format général de la ligne d'objet d'un courriel selon le type d'avis :  \n\n- Ship Notification for Item / Avis d’expédition pour l’article :\n- Exception Notification for Item / Avis d’exception pour l’article :\n- Delivery Notification for Item / Avis de livraison pour l’article :\n\nLa mention « TRACKING » et le numéro de repérage de Postes Canada s'affichent par défaut après le deux-points. Vous pouvez également régler les paramètres pour que la mention « REFERENCE » et l'un des numéros de référence du client s'affichent.",
+                "enum": ["tracking", "customer-ref-1", "customer-ref-2"]
+              }
+            },
+            "required": ["notificationsList"]
+          }
+        },
+        "required": ["serviceCode", "returner", "receiver"],
+        "example": "{\n  \"createPublicKey\": false,\n  \"createQrCode\": false,\n  \"boxFree\": false,\n  \"customerBarcode\": \"0000000003\",\n  \"customerBarcodeType\": \"2D\",\n  \"serviceCode\": \"DOM.XP\",\n  \"returner\": {\n    \"name\": \"Bulma\",\n    \"company\": \"Capsule Corp.\",\n    \"domesticAddress\": {\n      \"addressLine1\": \"502 MAIN ST N\",\n      \"city\": \"MONTREAL\",\n      \"province\": \"QC\",\n      \"postalCode\": \"H2B1A0\"\n    }\n  },\n  \"receiver\": {\n    \"name\": \"Ryuko Saito\",\n    \"company\": \"Kubere\",\n    \"email\": \"user@example.com\",\n    \"receiverVoiceNumber\": \"555-555-0100\",\n    \"domesticAddress\": {\n      \"addressLine1\": \"23 jardin private\",\n      \"city\": \"Ottawa\",\n      \"province\": \"ON\",\n      \"postalCode\": \"K1K4T3\"\n    }\n  },\n  \"parcelCharacteristics\": {\n    \"weight\": 15,\n    \"dimensions\": {\n      \"length\": 10,\n      \"width\": 10,\n      \"height\": 10\n    }\n  },\n  \"printPreferences\": {\n    \"outputFormat\": \"8.5x11\",\n    \"encoding\": \"PDF\",\n    \"showPackingInstructions\": true\n  },\n  \"settlementInfo\": {\n    \"paidByCustomer\": \"0000002\",\n    \"contractId\": \"40662505\"\n  },\n  \"references\": {\n    \"customerRef1\": \"ref1\",\n    \"customerRef2\": \"ref2\"\n  },\n  \"notifications\": {\n    \"notificationsList\": [\n      {\n        \"email\": \"user@example.com\",\n        \"onShipment\": true,\n        \"onException\": true,\n        \"onDelivery\": true\n      }\n    ],\n    \"emailSubject\": \"tracking\"\n  }\n}"
+      },
+      "authReturnInfo": {
+        "description": "Create Authorized Return - Response\n\n---\n\nCréer un retour autorisé - Réponse",
+        "type": "object",
+        "properties": {
+          "trackingPin": {
+            "description": "This is the tracking PIN for the shipment. The tracking PIN can be used as input to other web service calls such as Get Tracking Details.\n\n---\n\nIl s'agit du numéro d'identification du produit (NIP) pour l'envoi. Le NIP de repérage peut être utilisé en tant que donnée d'entrée pour toute autre demande de service pour les colis, notamment le service Obtenir les détails de repérage.",
+            "type": "string",
+            "minLength": 11,
+            "maxLength": 16
+          },
+          "customerBarcode": {
+            "$ref": "#/components/schemas/customerBarcode"
+          },
+          "publicKeyInfo": {
+            "description": "This structure represents data pertaining to label public URL – the URL to retrieve a PDF version of shipping label along with expiry date of the URL.\n---\nCette structure représente les données relatives à l'URL publique de l'étiquette – l'URL pour récupérer une version PDF de l'étiquette d'expédition avec la date d'expiration de l'URL.",
+            "type": "object",
+            "properties": {
+              "expiryDate": {
+                "description": "The expiry date of label public URL.\n\n---\n\nLa date d'expiration du URL publique de l'étiquette.",
+                "type": "string",
+                "format": "date-time"
+              },
+              "url": {
+                "description": "Actual URL to retrieve PDF version of the label in format http://est.canadapost.ca/esto/app/bypass/label?key={generated_key}\n\n---\n\nURL pour récupérer la version PDF de l'étiquette au format http://est.postescanada.ca/esto/app/bypass/label?key={generated_key}",
+                "type": "string",
+                "format": "uri"
+              },
+              "qrCode": {
+                "description": "The Base64 encoding of the actual image of the QR code that represents the public URL (if createQrCode and createPublicKey are both present in the request and set to true).\n\n---\n\nEncodage Base64 de l'image réelle du code QR qui représente l'URL publique (si createQrCode et createPublicKey sont tous deux présents dans la demande et réglés à « true »). – insérer le français",
+                "type": "string"
+              }
+            },
+            "required": ["expiryDate", "url"]
+          },
+          "links": {
+            "$ref": "#/components/schemas/links"
+          }
+        },
+        "required": ["trackingPin", "links"]
+      },
+      "openReturnRequest": {
+        "description": "Create Open Return Template - Request\n\n---\n\nCréer un modèle de retour ouvert - Demande",
+        "type": "object",
+        "properties": {
+          "maxNumberOfArtifacts": {
+            "description": "Indicates the maximum number of artifacts (return labels) you can generate and retrieve using this template. Must be numeric in the range of 1 - 100,000.\n\n---\n\nIndique le nombre maximal d'artefacts (étiquettes du Service de retour) que vous pouvez générer et récupérer à l'aide de ce modèle. Il doit s'agir d'une valeur numérique se situant entre « 1 » et « 100 000 ».",
+            "type": "integer",
+            "minimum": 1
+          },
+          "serviceCode": {
+            "$ref": "#/components/schemas/serviceCode"
+          },
+          "receiver": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/receiver"
+              }
+            ]
+          },
+          "printPreferences": {
+            "description": "This structure contains print preferences for the labels.\n\n\n---\n\n\nCette structure contient les préférences d'impression pour les\nétiquettes.",
+            "type": "object",
+            "properties": {
+              "outputFormat": {
+                "description": "8.5x11 indicates paper and 4x6 indicates thermal.\n\n**Note:** The 3x5 format was discontinued in June 2016, but for an interim period will still be accepted and converted to 4x6.\n\n---\n\nLe format du papier ordinaire est de 8 ½ po sur 11 po alors que celui du papier thermosensible est de 4 po sur 6 po.\n\n**Remarque** : Le format 3 po sur 5 po a été éliminé en juin 2016, mais pendant une période provisoire, il sera accepté et converti en format 4 po sur 6 po.",
+                "enum": ["8.5x11", "4x6", "3x5"],
+                "default": "8.5x11"
+              },
+              "customerInputType": {
+                "description": "Use this field to create return labels that contain a spot for your customers to enter data such as a part number, SKU number, etc.\n\nThis field only applies to 4x6 and 8.5x11 label sizes. Valid values are as follows:\n\nCode    | Description de l'étiquette (Label Description)\n------- | ---\nINVOICE | Invoice No / No de facture\nITEM    | Item No / No d'article\nORDER   | Order No / No de commande\nPART    | Part No / No de pièce\nPO      | PO No / No de bon de comm.\nRETURN  | Return No / No de retour\nRSA     | RSA No / No d'ARM\nSERIAL  | Serial No / No de série\nSKU     | SKU No / No UGS\n\n---\n\nUtiliser ce champ pour créer des étiquettes de retour qui contiennent un espace dans lequel vos clients peuvent entrer des données, comme un numéro de pièce, un numéro d'UGS, etc.\n\nCe champ ne s'applique qu'aux étiquettes de 4 x 6 et de 8,5 x 11.\n\nLes valeurs valides sont les suivantes :\n\nCode    | Description de l'étiquette (Label Description)\n------- | ---\nINVOICE | Invoice No / No de facture\nITEM    | Item No / No d'article\nORDER   | Order No / No de commande\nPART    | Part No / No de pièce\nPO      | PO No / No de bon de comm.\nRETURN  | Return No / No de retour\nRSA     | RSA No / No d'ARM\nSERIAL  | Serial No / No de série\nSKU     | SKU No / No UGS",
+                "type": "string",
+                "maxLength": 20
+              },
+              "encoding": {
+                "$ref": "#/components/schemas/encoding"
+              },
+              "showPackingInstructions": {
+                "$ref": "#/components/schemas/showPackingInstructions"
+              }
+            }
+          },
+          "settlementInfo": {
+            "type": "object",
+            "properties": {
+              "contractId": {
+                "$ref": "#/components/schemas/contractID"
+              }
+            }
+          }
+        },
+        "required": ["maxNumberOfArtifacts", "serviceCode", "receiver"],
+        "example": "{\n  \"maxNumberOfArtifacts\": 10,\n  \"serviceCode\": \"DOM.EP\",\n  \"receiver\": {\n    \"name\": \"Ed Smith\",\n    \"company\": \"EdCo\",\n    \"domesticAddress\": {\n      \"addressLine1\": \"123 Main St\",\n      \"addressLine2\": \"Ste 17\",\n      \"city\": \"Ottawa\",\n      \"province\": \"ON\",\n      \"postalCode\": \"K1K1K1\"\n    }\n  },\n  \"printPreferences\": {\n    \"outputFormat\": \"4x6\",\n    \"customerInputType\": \"order\",\n    \"encoding\": \"PDF\",\n    \"showPackingInstructions\": true\n  },\n  \"settlementInfo\": {\n    \"contractId\": \"40662505\"\n  }\n}"
+      },
+      "artifactsRemaining": {
+        "description": "Indicates the current remaining number of artifacts (return labels) allowed to be generated and retrieved using this template.\n\n---\n\nIndique le nombre actuel d'artefacts restants (étiquettes de retour) pouvant être générés et récupérés à l'aide de ce modèle.",
+        "type": "integer",
+        "minimum": 0
+      },
+      "openReturnInfo": {
+        "description": "Get Open Return Template - Response\n\n---\n\nObtenir un modèle de retour ouvert - Réponse",
+        "type": "object",
+        "properties": {
+          "artifactsRemaining": {
+            "$ref": "#/components/schemas/artifactsRemaining"
+          },
+          "links": {
+            "$ref": "#/components/schemas/links"
+          }
+        },
+        "required": ["artifactsRemaining", "links"]
+      },
+      "openReturnDetails": {
+        "description": "Get Open Return Template Details - Response\n\n---\n\nObtenir les détails du modèle de retour ouvert - Réponse",
+        "type": "object",
+        "properties": {
+          "artifactsRemaining": {
+            "$ref": "#/components/schemas/artifactsRemaining"
+          },
+          "openReturn": {
+            "$ref": "#/components/schemas/openReturnRequest"
+          }
+        },
+        "required": ["artifactsRemaining", "openReturn"]
+      },
+      "openReturnList": {
+        "description": "Get Open Return Templates - Response\n\n---\n\nObtenir des modèles de retour ouverts - Réponse",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/link"
+        },
+        "minItems": 0
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "type": "oauth2",
+        "x-ibm-oauth-provider": "cpc-api-native-oauth-provider",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token",
+            "scopes": {
+              "merchant": "default description",
+              "platform": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ibm-configuration": {
+    "cors": {
+      "enabled": true
+    },
+    "type": "rest",
+    "phase": "realized",
+    "enforced": true,
+    "testable": true,
+    "oauth-servers": {
+      "Oauth2": {
+        "clientCredentials": {
+          "tokenUrls": [
+            "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token"
+          ],
+          "authorizationUrls": [],
+          "refreshUrls": []
+        }
+      }
+    }
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1"
+    }
+  ],
+  "security": [
+    {
+      "Oauth2": ["merchant"]
+    }
+  ],
+  "tags": [
+    {
+      "name": "Return Services"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/returns/v1"
+    }
+  ]
+}

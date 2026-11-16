@@ -1,0 +1,785 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CustomerInformationServices",
+    "description": "CustomerInformationServices",
+    "version": "1.0.0",
+    "x-ibm-languages": {
+      "title": {
+        "fr": "Services d'information sur les clients"
+      },
+      "description": {
+        "fr": "Services d'information sur les clients"
+      }
+    },
+    "x-ibm-name": "Customer-Information-v1",
+    "x-pathalias": "Customer-service-api-1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/customerinfo/v1"
+    }
+  ],
+  "paths": {
+    "/customers/{mailedBy}": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/customerInfo"
+                },
+                "example": {
+                  "number": 1234567,
+                  "name": "ACME Inc",
+                  "contactPhone": "555-555-0100",
+                  "addressDetails": {
+                    "addressLine1": "123 Main St.",
+                    "addressLine2": "s.addr l2",
+                    "city": "Ottawa",
+                    "postalZipCode": "ON",
+                    "provState": "K1K1K1",
+                    "countryCode": "CA"
+                  },
+                  "contracts": [98765432, 98765433],
+                  "authorizedPayers": [
+                    {
+                      "payerNumber": 1234567,
+                      "methodsOfPayment": ["account", "creditCard"]
+                    }
+                  ],
+                  "creditCardAliases": [
+                    {
+                      "ccType": "VIS",
+                      "ccAlias": "1234********6789"
+                    }
+                  ],
+                  "links": [
+                    {
+                      "rel": "behalf-of-customer",
+                      "href": "\"https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/customerinfo/v1/customers/0012345678/behalfof/9876543210?service-type=shipment\"",
+                      "mediaType": "application/json"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-8511"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "CustomerMailedBy",
+        "tags": ["Customer"],
+        "summary": "Get Customer Information",
+        "description": "Retrieves information about a customer number. This includes contract numbers, valid payers, methods of payment, and links to MOBO customers.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir des informations client"
+          },
+          "description": {
+            "fr": "Permet de récupérer des informations sur un numéro de client, notamment les numéros de contrat, les payeurs autorisés, les modes de paiement et les liens vers les clients MOBO »."
+          }
+        }
+      }
+    },
+    "/customers/{mailedBy}/behalfof/{mobo}": {
+      "get": {
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mailedBy"
+          },
+          {
+            "$ref": "#/components/parameters/mobo"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/customerMoboInfo"
+                },
+                "example": {
+                  "number": "0000083836",
+                  "name": "Joe Smith",
+                  "contactPhone": "555-555-0100",
+                  "addressDetails": {
+                    "addressLine1": "123 Main St.",
+                    "addressLine2": "s.addr l2",
+                    "city": "Ottawa",
+                    "postalZipCode": "ON",
+                    "provState": "K1K1K1",
+                    "countryCode": "CA"
+                  },
+                  "contracts": ["0098765432", "0098765433"],
+                  "authorizedPayers": [
+                    {
+                      "payerNumber": "0001234567",
+                      "methodsOfPayment": ["account", "creditCard"]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "CustomerMailedByMOBO",
+        "tags": ["Customer"],
+        "summary": "Get MOBO Customer Information",
+        "description": "Retrieves information about a MOBO customer, including contract numbers, valid payers, and allowed methods of payment.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenez des informations sur les clients MOBO »"
+          },
+          "description": {
+            "fr": "Récupère les informations relatives à un client MOBO, notamment les numéros de contrat, les payeurs valides et les modes de paiement autorisés."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "mailedBy": {
+        "name": "mailedBy",
+        "in": "path",
+        "description": "Your customer number.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Votre numéro de client."
+          }
+        },
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/workgroupID"
+        }
+      },
+      "platformID": {
+        "name": "platform-id",
+        "in": "header",
+        "description": "ID associated with the platform.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Identifiant associé à la plateforme."
+          }
+        },
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/customerNumber"
+        }
+      },
+      "mobo": {
+        "name": "mobo",
+        "in": "path",
+        "description": "The mailed on behalf of customer number or repeat your customer number.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le numéro de client « Expédié au nom de » ou indiquez de nouveau votre numéro de client."
+          }
+        },
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/customerNumber"
+        }
+      },
+      "language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Indicates your language preference for receiving error messages.\n\n- en-CA = English\n- fr-CA = French",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Indique votre langue de préférence pour recevoir les messages d'erreur.\n- en-CA = Anglais - fr-CA = Français"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "enum": ["en-CA", "fr-CA"],
+          "example": "en-CA",
+          "default": "en-CA"
+        }
+      }
+    },
+    "responses": {
+      "202": {
+        "description": "The 202 (Accepted) status code indicates that the request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 202 (Acceptée) indique que la demande a été acceptée aux fins de traitement, mais que le traitement n’a pas été effectué. La demande pourrait éventuellement être traitée ou non, car elle pourrait être refusée au moment du traitement."
+          }
+        }
+      },
+      "204": {
+        "description": "The 204 (No Content) status code indicates that the server has successfully fulfilled the request and that there is no additional content to send in the response content.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 204 (Aucun contenu) indique que le serveur a bien traité la demande et qu’il n’y a pas de contenu supplémentaire à envoyer dans le contenu de la réponse."
+          }
+        }
+      },
+      "400": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "The 401 (Unauthorized) status code indicates that the server understood the request but refuses to fulfill it.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 401 (Non autorisé) indique que le serveur a compris la requête mais refuse de la satisfaire."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorizedError"
+            },
+            "example": [
+              {
+                "httpCode": 401,
+                "httpMessage": "Unauthorized",
+                "moreInformation": "Cannot pass the security checks that are required by the target API or operation, Enable debug headers for more details."
+              }
+            ]
+          }
+        }
+      },
+      "403": {
+        "description": "The HTTP 403 (Forbidden) error means the web server received your request but denies you access to the requested resource because you don't have permission.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "L'erreur HTTP 403 (Interdit) signifie que le serveur Web a reçu votre requête mais vous refuse l'accès à la ressource demandée car vous n'en avez pas l'autorisation."
+          }
+        }
+      },
+      "404": {
+        "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "412": {
+        "description": "The 412 (Precondition Failed) status code indicates that one or more conditions given in the request header fields evaluated to false when tested on the server (Section 13).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 412 (Échec de la condition préalable) indique qu'une ou plusieurs conditions données dans les champs d'en-tête de la requête ont été évaluées à faux lors du test sur le serveur (Section 13)."
+          }
+        }
+      },
+      "500": {
+        "description": "The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 500 (Erreur interne du serveur) indique que le serveur a rencontré une condition inattendue l'empêchant de traiter la requête. Transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "501": {
+        "description": "The 501 (Not Implemented) status code indicates that the server does not support the functionality required to fulfill the request.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 501 (non mis en œuvre) indique que le serveur ne prend pas en charge les fonctions nécessaires pour traiter la demande."
+          }
+        }
+      },
+      "503": {
+        "description": "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 503 (Service indisponible) indique que le serveur est actuellement indisponible en raison d'une surcharge temporaire ou d'une maintenance planifiée, qui devrait être résolue après un certain délai. Message transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "504": {
+        "description": "The 504 (Gateway Timeout) status code indicates that the server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. May be passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 504 (Délai d'attente de la passerelle) indique que le serveur, agissant comme passerelle ou proxy, n'a pas reçu de réponse dans un délai raisonnable d'un serveur en amont auquel il devait accéder pour traiter la requête. Ce code peut provenir du serveur principal."
+          }
+        }
+      },
+      "400-8511": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            },
+            "examples": {
+              "English": {
+                "value": {
+                  "title": "Validation failed",
+                  "detail": "Errors occurred while processing the request.",
+                  "errors": [
+                    {
+                      "errorCode": "8511",
+                      "message": "An error occurred while handling the request. Please try again or contact the support line."
+                    }
+                  ]
+                }
+              },
+              "Français": {
+                "value": {
+                  "title": "Validation échouée",
+                  "detail": "Une erreur est survenue lors du traitement de la demande.",
+                  "errors": [
+                    {
+                      "errorCode": "8511",
+                      "message": "Une erreur s'est produite lors du traitement de votre demande. Veuillez réessayer ou contacter l'assistance."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "customerNumber": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10,
+        "example": "0000000001"
+      },
+      "workgroupID": {
+        "type": "string",
+        "pattern": "^[0-9]{1,10}(-[0-9]{1,10})?$",
+        "example": "0000000001"
+      },
+      "methodOfPayment": {
+        "description": "Valid methods of payment are as follows:\n\n- CreditCard = the payment will be by credit card.\n- Account = the payment will be via an existing contract with the paid-by-customer.\n- SupplierAccount = the payment will be through the Supplier Account identified as default in the customer profile (only available to Supplier Account providers).\n\n**Note:** that if a payer has no method of payment, the payer can’t be used to ship at this moment.\n\n---\n\nLes modes de paiement valides sont les suivants :\n\n- CreditCard = Le paiement sera effectué par carte de crédit.\n- Account = Le paiement se fera par l'intermédiaire d'une convention en vigueur qui aura été conclue avec le payeur.\n- SupplierAccount = le paiement se fera par l’intermédiaire du compte de fournisseur désigné comme valeur par défaut dans le profil du client (offert uniquement aux fournisseurs de comptes de fournisseur).\n\n**Nota :** Si un payeur n'a aucun mode de paiement, il ne peut pas effectuer l'expédition en ce moment.",
+        "type": "string",
+        "maxLength": 15
+      },
+      "contactPhone": {
+        "description": "Contact phone number.\n\n---\n\nNuméro de téléphone du contact.",
+        "type": "string",
+        "maxLength": 25
+      },
+      "addressLine1": {
+        "description": "Address line 1.\n\n---\n\nLigne d'adresse 1.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 44
+      },
+      "addressLine2": {
+        "description": "Address line 2.\n\n---\n\nLigne d'adresse 2.                           ",
+        "type": "string",
+        "maxLength": 44
+      },
+      "city": {
+        "description": "City.\n\n---\n\nVille.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 40
+      },
+      "provState": {
+        "description": "Province or state.            \n\n---\n\nProvince ou État.",
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 20
+      },
+      "countryCode": {
+        "description": "Country code.\n\n---\n\nCode de pays.",
+        "type": "string",
+        "pattern": "^[a-zA-Z][a-zA-Z]$"
+      },
+      "postalZipCodeAll": {
+        "type": "string",
+        "description": "Postal Code or zip code:\n\n- 6-character alphanumeric for Canada (A9A9A9).\n- 5-digit or 5-4 digit numeric code for US.\n- Up to 14 characters (free format) for other countries.\n\n---\n\nCode postal ou ZIP:\n\n- Six caractères alphanumériques pour le Canada [A9A9A9].\n- Code numérique à cinq chiffres ou à neuf chiffres [cinq chiffres suivis de quatre autres chiffres] pour les États-Unis.\n- Jusqu'à 14 caractères (tout format) pour les autres pays.",
+        "anyOf": [
+          {
+            "pattern": "^[A-Z]\\d[A-Z]\\d[A-Z]\\d$"
+          },
+          {
+            "pattern": "^\\d{5}(-\\d{4})?$"
+          },
+          {
+            "minLength": 1,
+            "maxLength": 14
+          }
+        ]
+      },
+      "address": {
+        "type": "object",
+        "description": "Domestic address data.\n\n---\n\nDonnées d'adresses du régime intérieur.          ",
+        "properties": {
+          "addressLine1": {
+            "$ref": "#/components/schemas/addressLine1"
+          },
+          "addressLine2": {
+            "$ref": "#/components/schemas/addressLine2"
+          },
+          "city": {
+            "$ref": "#/components/schemas/city"
+          },
+          "provState": {
+            "$ref": "#/components/schemas/provState"
+          },
+          "countryCode": {
+            "$ref": "#/components/schemas/countryCode"
+          },
+          "postalZipCode": {
+            "$ref": "#/components/schemas/postalZipCodeAll"
+          }
+        },
+        "required": ["addressLine1", "city", "provState", "countryCode"],
+        "additionalProperties": false
+      },
+      "link": {
+        "description": "May occur 1 … N times.\n\nThe link structure contains a number of link fields, each allowing the user to separately retrieve the profile of a different behalf-of customer.\n\n`rel=\"behalf-of-customer\"` for these links.\n\n---\n\nOccurrence (1 à N fois).\n\nStructure de liens contenant de nombreux champs de liens, chacun permettant à l'utilisateur de récupérer séparément le profil d'un différent client « Expédié au nom de ».\n\n`rel=\"behalf-of-customer\"` pour ces liens.",
+        "type": "object",
+        "properties": {
+          "href": {
+            "description": "Indicates the endpoint to be used to call the web service. It contains the URL and may also contain a query string.\n\n---\n\nDésigne le point final à utiliser pour présenter une demande de service en ligne. Il contient l'adresse URL et peut également contenir une chaîne de requête.",
+            "type": "string"
+          },
+          "rel": {
+            "description": "Indicates the resource related to the current response.\n\n---\n\nIndique la ressource associée à la réponse actuelle.",
+            "type": "string"
+          },
+          "index": {
+            "description": "Present on links to formatted output such as labels. The value starts at 0 for the first page and subsequent pages (if extant) count up by 1.\n\n---\n\nFait partie des liens vers les données de sortie formatées, comme les étiquettes. La valeur de la première page est de « 0 », et cette valeur augmente de un pour chaque page subséquente (le cas échéant).",
+            "type": "integer",
+            "minimum": 0
+          },
+          "mediaType": {
+            "description": "A character string that indicates the format and version of the data to expect when the web service is invoked. The value in this field should be copied to the HTTP header variable \"Accept\" when the href link is invoked.\n\n---\n\nIl s'agit d'une chaîne de caractères indiquant le format et la version des données prévus lorsqu'un service Internet est utilisé. La valeur de ce champ doit être copiée dans la variable de l'en-tête HTTP « Accept » lorsque le lien href est utilisé.",
+            "type": "string"
+          }
+        },
+        "required": ["href", "rel", "mediaType"],
+        "additionalProperties": false
+      },
+      "contracts": {
+        "description": "Structure that contains the contracts that the customer owns or is authorized to use. Only contracts effective as of the date of the request are listed.\n\n---\n\nIl s'agit d'une structure renfermant les contrats dont le client est titulaire ou ceux qu'il est autorisé à utiliser. Seuls les contrats en vigueur à compter de la date de la demande sont énumérés.",
+        "type": "array",
+        "items": {
+          "description": "Contract Number (also called Agreement Number).\n\n---\n\nNuméro de contrat (également appelé numéro de convention).",
+          "type": "string",
+          "pattern": "^\\d{1,10}$"
+        },
+        "minItems": 0
+      },
+      "authorizedPayers": {
+        "description": "Structure that contains allowable paid-by customer numbers and methods of payment.\n\n---\n\nStructure contenant les modes de paiement et les numéros de payeurs autorisés",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "payerNumber": {
+              "description": "Customer number of a payer which could be used for the mailed-by customer (where the mailed-by and behalf-of numbers are the same).\n\n---\n\nNuméro de client d'un payeur pouvant être utilisé pour le client « Expédié par » (lorsque les numéros « Expédié par » et « Expédié au nom de » sont les mêmes).",
+              "type": "string",
+              "pattern": "^\\d{1,10}$"
+            },
+            "methodsOfPayment": {
+              "description": "Structure that contains the methods of payment that this payer can use.\n\n---\n\nStructure contenant les modes de paiement pouvant être utilisés par ce payeur",
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/methodOfPayment"
+              }
+            }
+          },
+          "required": ["payerNumber"],
+          "additionalProperties": false
+        }
+      },
+      "messages": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Type of error.\n\n---\n\nType d'erreur."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Detailed description of type of error.\n\n---\n\nDescription détaillée du type d'erreur."
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors.\n\n---\n\nListe des erreurs.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errorCode": {
+                  "type": "string",
+                  "description": "Error code related to error.\n\n---\n\nCode d'erreur lié à l'erreur."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Detailed message for the error that occured.\n\n---\n\nMessage détaillé concernant l'erreur survenue."
+                }
+              },
+              "required": ["message", "errorCode"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["title", "detail", "errors"],
+        "additionalProperties": false,
+        "example": {
+          "title": "Validation failed",
+          "detail": "Errors occurred while processing the request.",
+          "errors": [
+            {
+              "errorCode": "002",
+              "message": "Duplicate Pin."
+            }
+          ]
+        }
+      },
+      "unauthorizedError": {
+        "type": "object",
+        "properties": {
+          "httpCode": {
+            "type": "string",
+            "description": "Code associated with the unauthorized error.\n  ---\n\nCode associé à l'erreur d'autorisation."
+          },
+          "httpMessage": {
+            "type": "string",
+            "description": "Error message.\n  ---\n\nmessage d'erreur."
+          },
+          "moreInformation": {
+            "type": "string",
+            "description": "Detailed error message.\n  ---\n\nMessage d'erreur détaillé."
+          }
+        }
+      },
+      "customerInfo": {
+        "description": "Get Customer Information - Response\n\n---\n\nObtenir l'information sur les clients - Réponse",
+        "type": "object",
+        "properties": {
+          "number": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/customerNumber"
+              }
+            ],
+            "description": "Mailed-by customer.\n\n---\n\nClient « Expédié par »."
+          },
+          "name": {
+            "description": "Business name.\n\n---\n\nNom de l'entreprise",
+            "type": "string",
+            "maxLength": 44
+          },
+          "contactPhone": {
+            "$ref": "#/components/schemas/contactPhone"
+          },
+          "addressDetails": {
+            "$ref": "#/components/schemas/address"
+          },
+          "contracts": {
+            "$ref": "#/components/schemas/contracts"
+          },
+          "authorizedPayers": {
+            "$ref": "#/components/schemas/authorizedPayers"
+          },
+          "creditCardAliases": {
+            "description": "Credit card aliases.\n\n---\n\nDes alias de carte de crédit.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ccType": {
+                  "description": "Credit card type.\n\n---\n\nType de carte de crédit.",
+                  "enum": ["MC", "VIS", "AME", "DC", "DIS", "ER"]
+                },
+                "ccAlias": {
+                  "description": "Credit card alias.\n\n---\n\nAlias de carte de crédit.",
+                  "type": "string",
+                  "maxLength": 25
+                }
+              },
+              "required": ["ccType", "ccAlias"],
+              "additionalProperties": false
+            }
+          },
+          "links": {
+            "description": "Structure that contains links to the mailed-on-behalf-of and contract combinations that the mailed-by customer (the customer specified in the request) has used previously.\n\n- The mailed-by (calling customer number) is excluded from these links (i.e. no \"self\" link).\n- If a previously used customer is now closed or blocked, it will not be in the list.\n\n---\n\nStructure contenant des liens vers les combinaisons de contrats et de clients « Expédié au nom de » utilisées précédemment par le client « Expédié par » (client précisé dans la demande).\n\n-   Le client « Expédié par » (numéro du client présentant la demande de service) est exclus de ces liens (p. ex. aucun lien « self »).\n-   Si un numéro de client utilisé précédemment est maintenant fermé ou bloqué, il ne fera pas partie de la liste.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/link"
+            }
+          }
+        },
+        "required": ["number", "name", "addressDetails"],
+        "additionalProperties": false
+      },
+      "customerMoboInfo": {
+        "description": "Get MOBO Customer Information - Response\n\n---\n\nObtenir l’information sur les clients « Expédié au nom de » - Réponse",
+        "type": "object",
+        "properties": {
+          "number": {
+            "$ref": "#/components/schemas/customerNumber"
+          },
+          "name": {
+            "description": "The mailed on behalf of customer number.\n\n---\n\nLe numéro de client « Expédié au nom de ».",
+            "type": "string",
+            "maxLength": 44
+          },
+          "contactPhone": {
+            "$ref": "#/components/schemas/contactPhone"
+          },
+          "addressDetails": {
+            "$ref": "#/components/schemas/address"
+          },
+          "contracts": {
+            "$ref": "#/components/schemas/contracts"
+          },
+          "authorizedPayers": {
+            "description": "Structure that contains authorized payers and the methods of payment each of these payers can use. These payers can be used as payers for the customer-number specified in this response.\n\nNote that if a payer has no method of payment, the payer can't be used to ship at this moment. (e.g. it can't be specified as a MoBo for a shipment)\n\n---\n\nIl s'agit de la structure contenant les payeurs autorisés et les modes de paiement pouvant être utilisés par chacun de ces payeurs. Ces payeurs peuvent servir de payeurs pour le numéro de client précisé dans cette réponse.\n\nNota : Si un payeur n'a aucun mode de paiement, il ne peut pas effectuer l'expédition en ce moment. (Par exemple, il ne peut pas être précisé comme client « Expédié au nom de » pour un envoi.)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/authorizedPayers"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "payerNumber": {
+                      "description": "Customer number of the payer.\n\n---\n\nIl s'agit du numéro de client du payeur."
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "type": "oauth2",
+        "x-ibm-oauth-provider": "cpc-api-native-oauth-provider",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token",
+            "scopes": {
+              "merchant": "default description",
+              "platform": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ibm-configuration": {
+    "cors": {
+      "enabled": true
+    },
+    "type": "rest",
+    "phase": "realized",
+    "enforced": true,
+    "testable": true,
+    "oauth-servers": {
+      "Oauth2": {
+        "clientCredentials": {
+          "tokenUrls": [
+            "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token"
+          ],
+          "authorizationUrls": [],
+          "refreshUrls": []
+        }
+      }
+    }
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/customerinfo/v1"
+    }
+  ],
+  "security": [
+    {
+      "Oauth2": ["merchant"]
+    }
+  ]
+}

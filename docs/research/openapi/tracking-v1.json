@@ -1,0 +1,1257 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Tracking",
+    "description": "",
+    "version": "1.0.0",
+    "x-ibm-name": "tracking-service-v1",
+    "x-pathalias": "tracking-api-1.0.0",
+    "x-ibm-languages": {
+      "title": {
+        "fr": "Suivie"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/tracking/v1"
+    }
+  ],
+  "paths": {
+    "/pins/{pinNumber}/summaries": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "Tracking Summary (PIN)",
+        "description": "Returns the most recent delivery event for a package, including confirmation of package delivery. The package is identified using PIN.",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Résumé du suivi (Pin)"
+          },
+          "description": {
+            "fr": "Retourne l'événement de livraison le plus récent pour un colis, y compris la confirmation de la livraison du colis.Le colis est identifié à l'aide d'un code PIN."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pinNumber"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200-trackSummary"
+          },
+          "400": {
+            "$ref": "#/components/responses/400-track"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "trackingSummaryPin"
+      }
+    },
+    "/dncs/{dncNumber}/summaries": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "Tracking Summary (DNC)",
+        "description": "Returns the most recent delivery event for a package, including confirmation of package delivery. The package is identified using DNC.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Retourne l'événement de livraison le plus récent pour un colis, y compris la confirmation de la livraison du colis.Le colis est identifié à l'aide de DNC."
+          },
+          "summary": {
+            "fr": "Résumé du suivi (Dnc)"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/dncNumber"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200-trackSummary"
+          },
+          "400": {
+            "$ref": "#/components/responses/400-track"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "trackingSummaryDNC"
+      }
+    },
+    "/refs/summaries": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "Tracking Summary (Ref)",
+        "description": "Returns the most recent delivery event for a package, including confirmation of package delivery. The package is identified using reference parameters.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Retourne l'événement de livraison le plus récent pour un colis, y compris la confirmation de la livraison du colis.Le paquet est identifié à l'aide de paramètres de référence."
+          },
+          "summary": {
+            "fr": "Résumé du suivi (Ref)"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "name": "customer-number",
+            "in": "query",
+            "description": "The customer-number query parameter value can be either:\n\n- The customer number for the organization initiating the shipment, or\n- The customer number of the customer on whose behalf the parcel was mailed.\n\nIf the customer-number query parameter is not specified, the customer number of the user that was used to authenticate this request will be used.\n\nIf you ship parcels on behalf of other customers and you specify their customer number in the request, only tracking results of parcels which were mailed \"on behalf of\" that customer (and that match the other query parameter criteria) are returned.\n\nIf you ship parcels on behalf of other customers and you specify your own customer number, you will receive tracking results for any parcels you shipped for yourself, including all parcels you shipped for any other customers (providing it also matches the other query parameter criteria).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "La valeur du paramètre de requête du customerNumber peut être:\n\n- le numéro du client pour l'organisation qui entreprend l'expédition;\n- le numéro du client pour le client au nom duquel le colis a été expédié.\n\nSi le paramètre de requête pour le numéro du client n'est pas précisé, le numéro du client de l'utilisateur qui a été utilisé pour authentifier cette demande sera utilisé.\n\nSi vous expédiez des colis au nom d'autres clients et que vous précisez leur numéro de client dans la demande, seuls les résultats de repérage des colis qui ont été expédiés au nom de ce client (et qui correspondent aux autres critères des paramètres de requête) sont renvoyés.\n\nSi vous expédiez des colis au nom d'autres clients et que vous précisez votre propre numéro de client, vous recevrez des résultats de repérage pour tous les colis que vous avez expédiés vous-même, y compris tous les colis que vous avez expédiés au nom d'autres clients (à condition qu'ils correspondent aux autres critères des paramètres de requête)."
+              }
+            },
+            "schema": {
+              "type": "string",
+              "maxLength": 10
+            },
+            "example": 1027821
+          },
+          {
+            "name": "reference-number",
+            "in": "query",
+            "description": "The value assigned to a parcel by the shipper at the time the shipment was created. This value may have been specified in either \"customer-ref1\" or \"customer-ref2\" fields of the submitted parcel.\n\nThe Get Tracking Summary service only returns tracking results for parcels that match the reference-number query parameter value.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "La valeur attribuée à un colis par l'expéditeur lorsque l'envoi a été créé. Cette valeur peut avoir été indiquée dans les champs « customer-ref1 » ou « customer-ref2 » du colis soumis.\n\nLe service Obtenir un résumé de repérage fournit seulement les résultats du repérage pour les colis qui correspondent à la valeur du paramètre de requête referenceNumber."
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 35
+            },
+            "example": "SPQFZT1V6V4"
+          },
+          {
+            "name": "destination-postal-code",
+            "in": "query",
+            "description": "The destination Postal Code, zip code or postal identifier for the parcel in its destination country. This is the value that would be supplied in the element \"postalZipCode\" in a create shipment request.\n\nFormat is any of the following:\n\n- 6-character alphanumeric for Canada (A9A9A9).\n- 5-digit or 5-4 digit numeric code for US.\n- Up to 14 characters (free format) for other countries.\n\nWhen present, the Get Tracking Summary service only returns tracking results for parcels that match destination-postal-code value.\n\n**Note:** For zip codes in the form 99999-9999, only the first 5 digits are used in the matching.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Code postal de destination, code ZIP ou identificateur postal du colis dans son pays de destination. Il s'agit de la valeur qui serait fournie pour l'élément « postalZipCode » dans une demande de création d'un envoi.\n\nLe format est l'un des suivants :\n\n- Six caractères alphanumériques pour le Canada [A9A9A9].\n- Code numérique à cinq chiffres ou à neuf chiffres [cinq chiffres suivis de quatre autres chiffres] pour les États-Unis.\n- Jusqu'à 14 caractères (tout format) pour les autres pays.\n\nLorsqu'il est offert, le service « Obtenir un résumé du repérage » fournit seulement les résultats du repérage pour les colis correspondant à la valeur de destinationPostalCode.\n\n**Nota :** Pour les codes ZIP dont le format est « 99999-9999 », seulement les cinq premiers caractères sont utilisés dans la mise en correspondance."
+              }
+            },
+            "schema": {
+              "type": "string",
+              "anyOf": [
+                {
+                  "pattern": "^[A-Z]\\d[A-Z]\\d[A-Z]\\d$"
+                },
+                {
+                  "pattern": "^\\d{5}(-\\d{4})?$"
+                },
+                {
+                  "pattern": "^.{1,14}$"
+                }
+              ],
+              "minLength": 1,
+              "maxLength": 14
+            },
+            "example": "M9W1J1"
+          },
+          {
+            "name": "mailing-date-from",
+            "in": "query",
+            "description": "The combination of mailing-date-from and mailing-date-to query parameters defines a range of dates for when the parcel(s) in question were shipped.\n\nFormat is: yyyy-mm-dd\n\nThe mailing-date-from value cannot be earlier than two calendar months from the current date.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "La combinaison des paramètres de requête mailingDateFrom et mailingDateTo définit une plage de dates pendant laquelle les colis en question ont été expédiés.\n\nLe format est : aaaa-mm-jj.\n\nLa valeur mailingDateFrom ne peut pas être antérieure à deux mois civils à partir de la date actuelle."
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2024-01-26"
+          },
+          {
+            "name": "mailing-date-to",
+            "in": "query",
+            "description": "When executing a request by reference parameter, both the mailing-date-from and mailing-date-to query parameters are mandatory and must be included.\n\nThe Get Tracking Summary service only returns tracking results for parcels that were shipped within the range of dates specified by the mailing-date-from and mailing-date-to query parameters.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Lorsque vous exécutez une demande avec un paramètre de référence, les paramètres de requête mailingDateFrom et mailingDateTo sont obligatoires et doivent être inclus.\n\nLe service Obtenir un résumé de repérage fournit seulement les résultats du repérage pour les colis qui ont été expédiés à l'intérieur de la plage de dates précisées par les paramètres de requête mailingDateFrom et mailingDateTo."
+              }
+            },
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            },
+            "example": "2024-01-30"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200-trackSummary"
+          },
+          "400": {
+            "$ref": "#/components/responses/400-track"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "TrackingSummaryReference"
+      }
+    },
+    "/pins/{pinNumber}/details": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "Tracking Details (PIN)",
+        "description": "Returns all tracking events for a package. The package is identified using a PIN.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Retourne tous les événements de suivi pour un package. Le colis est identifié à l'aide d'un code PIN."
+          },
+          "summary": {
+            "fr": "Détails du suivi (NIP)"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pinNumber"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200-trackDetail"
+          },
+          "400": {
+            "$ref": "#/components/responses/400-track"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "trackingDetailsByPin"
+      }
+    },
+    "/dncs/{dncNumber}/details": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "Tracking Details (DNC)",
+        "description": "This call returns all tracking events recorded for a specified parcel. The parcel is identified using a DNC Number.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Cet appel retourne tous les événements de suivi enregistrés pour un colis spécifié. Le colis est identifié à l'aide d'un numéro DNC."
+          },
+          "summary": {
+            "fr": "Détails du suivi (Dnc)"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/dncNumber"
+          },
+          {
+            "$ref": "#/components/parameters/platformID"
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/200-trackDetail"
+          },
+          "400": {
+            "$ref": "#/components/responses/400-track"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "trackingDetailsByDNC"
+      }
+    },
+    "/create-certificate": {
+      "post": {
+        "tags": ["create certificate"],
+        "summary": "Get Delivery Confirmation Certificate",
+        "description": "If the package has been delivered, this call returns a PDF with the tracking number, service used, reference numbers, delivery date, signatory name, and signature image (if available).",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir le Certificat de confirmation de livraison"
+          },
+          "description": {
+            "fr": "Si le colis a été livré, cette fonction affiche un fichier PDF avec le numéro de repérage, le service utilisé, les numéros de référence, la date de livraison, le nom du signataire et l’image de la signature, le cas échéant."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/createCertificateRequest"
+              },
+              "example": {
+                "pin": 8720042296149349,
+                "language": "en"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/createCertificateResponse"
+                },
+                "example": {
+                  "image": "JVBERi0xLjQKJSVFT0YK"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        },
+        "operationId": "createCertificateDNC"
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "platformID": {
+        "name": "platform-id",
+        "in": "header",
+        "description": "ID associated with the platform.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Identifiant associé à la plateforme."
+          }
+        },
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/customerNumber"
+        }
+      },
+      "pinNumber": {
+        "name": "pinNumber",
+        "in": "path",
+        "description": "The PIN (Parcel Identification Number) assigned by Canada Post on creation of the shipping label and used for tracking purposes.\n\n(12, 13 or 16 characters)\n\nWhen executing a request by PIN, this is mandatory and is the only parameter necessary.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le numéro d'identification du produit (NIP) est attribué par Postes Canada au cours de la création de l'étiquette d'expédition et utilisé aux fins de repérage.\n\n(12, 13 ou 16 caractères)\n\nLorsque vous exécutez une demande avec le NIP, il est obligatoire et il s'agit du seul paramètre nécessaire."
+          }
+        },
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": 7023210215628702
+      },
+      "dncNumber": {
+        "name": "dncNumber",
+        "in": "path",
+        "description": "The Delivery Notice Card (DNC) number – The number on the card left by delivery personnel when no one is home to receive the delivery.\n\n(15 numeric characters)\n\nWhen executing a request by DNC number, this is mandatory and is the only parameter necessary.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Numéro de la carte Avis de livraison (CAL) : Le numéro sur la carte laissé par le personnel de livraison lorsqu'il n'y a personne à la maison pour recevoir la livraison.\n\n(15 caractères numériques)\n\nLorsque vous exécutez une demande avec le numéro de la CAL, il est obligatoire et il s'agit du seul paramètre nécessaire."
+          }
+        },
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "example": 168067817265091
+      },
+      "language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Indicates your language preference for receiving error messages.\n\n- en-CA = English\n- fr-CA = French",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Indique votre langue de préférence pour recevoir les messages d'erreur.\n- en-CA = Anglais - fr-CA = Français"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "enum": ["en-CA", "fr-CA"],
+          "example": "en-CA",
+          "default": "en-CA"
+        }
+      }
+    },
+    "responses": {
+      "400": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "The 401 (Unauthorized) status code indicates that the server understood the request but refuses to fulfill it.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 401 (Non autorisé) indique que le serveur a compris la requête mais refuse de la satisfaire."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorizedError"
+            },
+            "example": [
+              {
+                "httpCode": 401,
+                "httpMessage": "Unauthorized",
+                "moreInformation": "Cannot pass the security checks that are required by the target API or operation, Enable debug headers for more details."
+              }
+            ]
+          }
+        }
+      },
+      "403": {
+        "description": "The HTTP 403 (Forbidden) error means the web server received your request but denies you access to the requested resource because you don't have permission.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "L'erreur HTTP 403 (Interdit) signifie que le serveur Web a reçu votre requête mais vous refuse l'accès à la ressource demandée car vous n'en avez pas l'autorisation."
+          }
+        }
+      },
+      "404": {
+        "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 500 (Erreur interne du serveur) indique que le serveur a rencontré une condition inattendue l'empêchant de traiter la requête. Transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "503": {
+        "description": "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 503 (Service indisponible) indique que le serveur est actuellement indisponible en raison d'une surcharge temporaire ou d'une maintenance planifiée, qui devrait être résolue après un certain délai. Message transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "504": {
+        "description": "The 504 (Gateway Timeout) status code indicates that the server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. May be passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 504 (Délai d'attente de la passerelle) indique que le serveur, agissant comme passerelle ou proxy, n'a pas reçu de réponse dans un délai raisonnable d'un serveur en amont auquel il devait accéder pour traiter la requête. Ce code peut provenir du serveur principal."
+          }
+        }
+      },
+      "200-trackSummary": {
+        "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/trackingSummary"
+            },
+            "examples": {
+              "English": {
+                "value": [
+                  {
+                    "pin": 7023210039414604,
+                    "originPostalId": "K1G",
+                    "destinationPostalId": "K0J",
+                    "destinationProvince": "ON",
+                    "serviceName": "Expedited Parcels",
+                    "mailedOnDate": "2023-04-04T00:00:00.000Z",
+                    "expectedDeliveryDate": "2023-04-05T00:00:00.000Z",
+                    "actualDeliveryDate": "2023-04-05T00:00:00.000Z",
+                    "deliveryOptionCompletedInd": 2,
+                    "eventDateTime": "20230404:133457",
+                    "eventDescription": "Electronic information submitted by shipper",
+                    "attemptedDate": "2023-04-05T00:00:00.000Z",
+                    "customerRef1": "APRIL1REF1A",
+                    "customerRef2": "APRIL1REF1C",
+                    "returnPin": null,
+                    "eventType": "INDUCTION",
+                    "eventLocation": "OROMOCTO,NB"
+                  }
+                ]
+              },
+              "Français": {
+                "value": [
+                  {
+                    "pin": 7023210039414604,
+                    "originPostalId": "K1G",
+                    "destinationPostalId": "K0J",
+                    "destinationProvince": "ON",
+                    "serviceName": "Colis accélérés",
+                    "mailedOnDate": "2023-04-04T00:00:00.000Z",
+                    "expectedDeliveryDate": "2023-04-05T00:00:00.000Z",
+                    "actualDeliveryDate": "2023-04-05T00:00:00.000Z",
+                    "deliveryOptionCompletedInd": 2,
+                    "eventDateTime": "20230404:133457",
+                    "eventDescription": "Les renseignements électroniques ont été soumis par l'expéditeur",
+                    "attemptedDate": "2023-04-05T00:00:00.000Z",
+                    "customerRef1": "APRIL1REF1A",
+                    "customerRef2": "APRIL1REF1C",
+                    "returnPin": null,
+                    "eventType": "INDUCTION",
+                    "eventLocation": "OROMOCTO,NB"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "200-trackDetail": {
+        "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/trackingDetail"
+            },
+            "examples": {
+              "English": {
+                "value": {
+                  "pin": 3167437095800812,
+                  "activeExists": true,
+                  "archiveExists": false,
+                  "changedExpectedDate": "2023-12-11T00:00:00.000Z",
+                  "destinationPostalId": "E2V1C0",
+                  "expectedDeliveryDate": "2023-12-08T00:00:00.000Z",
+                  "changedExpectedDeliveryReason": "Friday",
+                  "originalPin": 7022137378507402,
+                  "serviceName": "Expedited Parcels",
+                  "serviceName2": "Colis accélérés",
+                  "customerRef1": 8618725947,
+                  "customerRef2": 111,
+                  "returnPin": "",
+                  "signatureImageExists": true,
+                  "suppressSignature": false,
+                  "deliveryOptions": [
+                    {
+                      "deliveryOption": "CH_SGN_OPTION",
+                      "deliveryOptionDescription": "Signature Required"
+                    }
+                  ],
+                  "significantEvents": [
+                    {
+                      "eventIdentifier": 1496,
+                      "eventDate": "2023-12-11T00:00:00.000Z",
+                      "eventTime": "11:59:59",
+                      "eventTimeZone": "AST",
+                      "eventDescription": "Delivered",
+                      "eventSite": "OROMOCTO",
+                      "eventProvince": "NB",
+                      "eventRetailLocationId": null,
+                      "eventRetailName": null
+                    },
+                    {
+                      "eventIdentifier": 20,
+                      "eventDate": "2023-12-11T00:00:00.000Z",
+                      "eventTime": "09:50:23",
+                      "eventTimeZone": "AST",
+                      "eventDescription": "Signature available",
+                      "eventSite": "OROMOCTO",
+                      "eventProvince": null,
+                      "eventRetailLocationId": null,
+                      "eventRetailName": null
+                    }
+                  ]
+                }
+              },
+              "Français": {
+                "value": {
+                  "pin": 3167437095800812,
+                  "activeExists": true,
+                  "archiveExists": false,
+                  "changedExpectedDate": "2023-12-11T00:00:00.000Z",
+                  "destinationPostalId": "E2V1C0",
+                  "expectedDeliveryDate": "2023-12-08T00:00:00.000Z",
+                  "changedExpectedDeliveryReason": "Friday",
+                  "originalPin": 7022137378507402,
+                  "serviceName": "Expedited Parcels",
+                  "serviceName2": "Colis accélérés",
+                  "customerRef1": 8618725947,
+                  "customerRef2": 111,
+                  "returnPin": "",
+                  "signatureImageExists": true,
+                  "suppressSignature": false,
+                  "deliveryOptions": [
+                    {
+                      "deliveryOption": "CH_SGN_OPTION",
+                      "deliveryOptionDescription": "Signature requise"
+                    }
+                  ],
+                  "significantEvents": [
+                    {
+                      "eventIdentifier": 1496,
+                      "eventDate": "2023-12-11T00:00:00.000Z",
+                      "eventTime": "11:59:59",
+                      "eventTimeZone": "AST",
+                      "eventDescription": "Livré",
+                      "eventSite": "OROMOCTO",
+                      "eventProvince": "NB",
+                      "eventRetailLocationId": null,
+                      "eventRetailName": null
+                    },
+                    {
+                      "eventIdentifier": 20,
+                      "eventDate": "2023-12-11T00:00:00.000Z",
+                      "eventTime": "09:50:23",
+                      "eventTimeZone": "AST",
+                      "eventDescription": "Signature disponible",
+                      "eventSite": "OROMOCTO",
+                      "eventProvince": null,
+                      "eventRetailLocationId": null,
+                      "eventRetailName": null
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "400-track": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            },
+            "examples": {
+              "English": {
+                "value": {
+                  "title": "Validation failed",
+                  "detail": "Errors occurred while processing the request.",
+                  "errors": [
+                    {
+                      "errorCode": "002",
+                      "message": "Duplicate Pin"
+                    },
+                    {
+                      "errorCode": "008",
+                      "message": "Invalid Date"
+                    }
+                  ]
+                }
+              },
+              "Français": {
+                "value": {
+                  "title": "Validation échouée",
+                  "detail": "Une erreur est survenue lors du traitement de la demande.",
+                  "errors": [
+                    {
+                      "errorCode": "002",
+                      "message": "NIP en double"
+                    },
+                    {
+                      "errorCode": "008",
+                      "message": "Date invalide"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "customerNumber": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 10,
+        "example": "0000000001"
+      },
+      "createCertificateRequest": {
+        "type": "object",
+        "properties": {
+          "pin": {
+            "type": "integer",
+            "description": "A numeric PIN, typically used for authentication or identification"
+          },
+          "language": {
+            "type": "string",
+            "description": "The preferred language for the request (e.g., \"en\" for English)",
+            "enum": ["en", "fr"]
+          }
+        },
+        "required": ["pin", "language"]
+      },
+      "createCertificateResponse": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string"
+          }
+        }
+      },
+      "pinNumber": {
+        "description": "The PIN (Parcel Identification Number) assigned by Canada Post on creation of the shipping label and used for tracking purposes.\n\n(12, 13 or 16 characters)\n\nWhen executing a request by PIN, this is mandatory and is the only parameter necessary.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le numéro d'identification du produit (NIP) est attribué par Postes Canada au cours de la création de l'étiquette d'expédition et utilisé aux fins de repérage.\n\n(12, 13 ou 16 caractères)\n\nLorsque vous exécutez une demande avec le NIP, il est obligatoire et il s'agit du seul paramètre nécessaire."
+          }
+        },
+        "type": "string",
+        "example": 7023210215628702
+      },
+      "dncNumber": {
+        "description": "The Delivery Notice Card (DNC) number – The number on the card left by delivery personnel when no one is home to receive the delivery.\n\n(15 numeric characters)\n\nWhen executing a request by DNC number, this is mandatory and is the only parameter necessary.",
+        "type": "string",
+        "pattern": "^\\d{15}$",
+        "example": 168067817265091
+      },
+      "pin": {
+        "description": "The Parcel Identification Number (PIN) that can be used by the client for calling tracking services.\n\n---\n\nNuméro d'identification du colis (NIP) pouvant être utilisé par le client pour faire appel aux services de repérage.",
+        "type": "string"
+      },
+      "destinationPostalId": {
+        "description": "The first 3 characters of the destination Postal Code for parcels to be delivered in Canada.\n\nFor international parcels this is the postal identifier of the destination country (e.g. ZIP code for parcels with a U.S. destination) or an identifier of the destination country.\n\n---  \n\nTrois premiers caractères du code postal de destination pour les colis qui doivent être livrés au Canada.\n\nPour les colis du régime international, il s'agit de l'identificateur postal du pays de destination (p. ex., le code ZIP pour les colis à destination des É.-U.) ou un identificateur du pays de destination.",
+        "type": "string"
+      },
+      "expectedDeliveryDate": {
+        "description": "The date the item is expected to reach the destination address for addresses in Canada.\n\nIf the item has been mailed from or to an international location this date may be blank.\n\n---\n\nDate à laquelle l'article doit arriver à l'adresse de destination pour les adresses au Canada.\n\nSi l'article a été expédié à destination ou en provenance de l'étranger, cette date peut ne pas être indiquée.",
+        "type": "string",
+        "format": "date"
+      },
+      "serviceName": {
+        "description": "Canada Post service name in the language specified. The service name will default to English if language is not specified.\n\nFor inbound international parcels, service name is empty or contains the service name from its shipper of origin if available.\n\n---\n\nNom du service de Postes Canada dans la langue précisée. Le nom de service sera indiqué par défaut en anglais si la langue n'est pas précisée.\n\nPour les colis d'arrivée du régime international, le champ relatif au nom du service est vide ou il contient le nom du service fourni par l'expéditeur d'origine, le cas échéant.",
+        "type": "string"
+      },
+      "customerRef1": {
+        "description": "The value supplied by the shipper as customer-ref-1 when the shipment was first created with Canada Post. French character set is supported through this interface.\n\n---\n\nValeur fournie par l'expéditeur (customer-ref-1) lorsque l'envoi a d'abord été créé auprès de Postes Canada. L'ensemble de caractères en français est appuyé par cette interface.",
+        "type": "string"
+      },
+      "customerRef2": {
+        "description": "The value supplied by the shipper as customer-ref-2 when the shipment was first created with Canada Post. French character set is supported through this interface.\n\n---\n\nValeur fournie par l'expéditeur (customer-ref-2) lorsque l'envoi a d'abord été créé auprès de Postes Canada. L'ensemble de caractères en français est appuyé par cette interface.",
+        "type": "string"
+      },
+      "returnPin": {
+        "description": "If a return label (PIN) was printed at the same time the shipment was created and the shipment is being returned, the return PIN is displayed.\n\n---\n\nSi une étiquette Service de retour (NIP) a été imprimée en même temps que l'envoi a été créé et que l'envoi est retourné, le NIP de retour est affiché.",
+        "type": "string"
+      },
+      "trackingSummary": {
+        "description": "Get Tracking Summary - Response\n\n---\n\nObtenir un résumé du repérage - Réponse",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "pin": {
+              "$ref": "#/components/schemas/pin"
+            },
+            "originPostalId": {
+              "description": "The first 3 characters of the origin Postal Code for Canadian destinations.\n\nFor an inbound international parcel, this field is blank or contains the postal identifier of the country of origin.  \n\n---\n\nTrois premiers caractères du code postal d'origine pour les destinations canadiennes.\n\nDans le cas d'un colis d'arrivée du régime international, ce champ est vide ou il contient l'identificateur postal du pays d'origine.",
+              "type": "string"
+            },
+            "destinationPostalId": {
+              "$ref": "#/components/schemas/destinationPostalId"
+            },
+            "destinationProvince": {
+              "description": "The 2-character province code for the destination.\n\n\"postal designators\" - abbreviations used by Canada Post  ISO 3166-2  for Canadian bound parcels.\n\nParcels bound for international destinations have the postal identifier of the destination country (e.g. ZIP code for parcels with a U.S. destination).\n\n---\n\nCode de province à deux caractères pour la destination.\n\n« indicateurs postaux » – abréviations utilisées par Postes Canada (ISO 3166-2) pour les colis du régime intérieur.\n\nLes colis à destination des É.-U. et du régime international portent l'identificateur postal du pays de destination (p. ex., le code ZIP pour les colis à destination des É.-U.).",
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 2
+            },
+            "serviceName": {
+              "$ref": "#/components/schemas/serviceName"
+            },
+            "mailedOnDate": {
+              "description": "The date of the first event for the item. If the item has been mailed from an international location this date may be blank.\n\n---\n\nDate de la première activité pour l'article. Si l'article a été expédié à partir d'une destination internationale, cette date peut ne pas être indiquée.",
+              "type": "string",
+              "format": "date"
+            },
+            "expectedDeliveryDate": {
+              "$ref": "#/components/schemas/expectedDeliveryDate"
+            },
+            "actualDeliveryDate": {
+              "description": "The date the item was delivered.\n\nBlank if not delivered or if delivery information from an international organization for an international shipment has not been provided.\n\n---\n\nDate à laquelle l'article a été livré.\n\nN'apparaît pas si l'article n'a pas été livré ou si les données de livraison provenant d'un organisme international n'ont pas été fournies pour un envoi du régime international.",
+              "type": "string",
+              "format": "date"
+            },
+            "deliveryOptionCompletedInd": {
+              "description": "- 0 – at least one option was not satisfied\n- 1 – all options were satisfied\n- 2 – no options were found\n\n---\n\n- 0 – Au moins une option n'a pas été satisfaite\n- 1 – toutes les options ont été satisfaites\n- 2 – aucune option n'a été trouvée",
+              "enum": ["0", "1", "2"]
+            },
+            "eventDateTime": {
+              "description": "yyyymmdd:hhmmss\n\nThe time stamp of the most recent significant event.\n\n---\n\naaaammjj :hhmmss\n\nHorodatage de l'activité la plus récente ou la plus importante.",
+              "type": "string",
+              "pattern": "^\\d{8}:\\d{6}$"
+            },
+            "eventDescription": {
+              "description": "A brief description of the event.\n\n---\n\nBrève description de l'activité.",
+              "type": "string"
+            },
+            "attemptedDate": {
+              "description": "The date that a delivery was attempted.\n\nFor shipments into or within Canada this will indicate that an unsuccessful attempt to deliver the parcel was made on the specified date.\n\n---\n\nDate à laquelle une tentative de livraison à été effectuée.\n\nPour les articles envoyés au Canada ou les articles du régime intérieur, il sera indiqué qu'une tentative infructueuse de livraison a été effectuée à la date précisée.",
+              "type": "string",
+              "format": "date"
+            },
+            "customerRef1": {
+              "$ref": "#/components/schemas/customerRef1"
+            },
+            "customerRef2": {
+              "$ref": "#/components/schemas/customerRef2"
+            },
+            "returnPin": {
+              "$ref": "#/components/schemas/returnPin"
+            },
+            "eventType": {
+              "description": "The value in this field will indicate what type of event is represented for this item.\n\n---\n\n\nValeur dans ce champ qui montre quel type d'activité est indiqué pour cet article.",
+              "type": "string"
+            },
+            "eventLocation": {
+              "description": "For an event representing a scan or delivery, this value will indicate the location where the event took place.\n\n---\n\nPour une activité correspondant à un balayage ou à une livraison, cette valeur indiquera l'emplacement où l'activité a eu lieu.",
+              "type": "string"
+            },
+            "error": {
+              "description": "",
+              "type": "object",
+              "properties": {
+                "code": {
+                  "description": "",
+                  "type": "string"
+                },
+                "descEn": {
+                  "description": "",
+                  "type": "string"
+                },
+                "descFr": {
+                  "description": "",
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["code", "descEn", "descFr"]
+            }
+          },
+          "additionalProperties": false,
+          "required": ["pin"]
+        }
+      },
+      "trackingDetail": {
+        "description": "Get Tracking Details - Response\n\n---\n\nObtenir les détails du suivi - Réponse",
+        "type": "object",
+        "properties": {
+          "pin": {
+            "$ref": "#/components/schemas/pin"
+          },
+          "activeExists": {
+            "description": "\"true\" Indicates that the tracking information is contained in the active data repository.\n\n---\n\nLa mention \"true\" signifie que les données de repérage figurent dans la base de données actives.",
+            "type": "boolean"
+          },
+          "archiveExists": {
+            "description": "\"true\" Indicates that the tracking information is contained in the archive data repository.\n\n---\n\nLa mention \"true\" signifie que les données de repérage figurent dans la base de données archivées.",
+            "type": "boolean"
+          },
+          "changedExpectedDate": {
+            "description": "Indicates a new expected delivery date.\n\n---\n\nIl s'agit de la nouvelle date de livraison prévue.",
+            "type": "string",
+            "format": "date"
+          },
+          "destinationPostalId": {
+            "$ref": "#/components/schemas/destinationPostalId"
+          },
+          "expectedDeliveryDate": {
+            "$ref": "#/components/schemas/expectedDeliveryDate"
+          },
+          "changedExpectedDeliveryReason": {
+            "description": "Text description of reason for change to expected delivery date.\n\n---\n\nDescription du texte pour la raison du changement de la date de livraison prévue.",
+            "type": "string"
+          },
+          "originalPin": {
+            "description": "In the situation where a parcel is being returned and the original parcel was created with an anticipated return, this field will contain the original PIN when the return PIN is queried.\n\n---\n\nSi un colis est retourné et que le colis initial a été créé avec une étiquette Service de retour prévu, ce champ contiendra le NIP initial lorsque le NIP de retour est demandé.",
+            "type": "string"
+          },
+          "serviceName": {
+            "$ref": "#/components/schemas/serviceName"
+          },
+          "serviceName2": {
+            "description": "Canada Post service name in the other Canadian official language. For inbound international parcels, service name is empty or contains the service name from its shipper of origin.  \n\n---\n\nNom du service de Postes Canada dans l'autre langue officielle du Canada. Pour les colis d'arrivée du régime international, le champ relatif au nom du service est vide ou il contient le nom du service fourni par l'expéditeur d'origine.",
+            "type": "string"
+          },
+          "customerRef1": {
+            "$ref": "#/components/schemas/customerRef1"
+          },
+          "customerRef2": {
+            "$ref": "#/components/schemas/customerRef2"
+          },
+          "returnPin": {
+            "$ref": "#/components/schemas/returnPin"
+          },
+          "signatureImageExists": {
+            "description": "True indicates that Get Signature Image will return a signature image. If false, there is no need to call Get Signature Image because it will return \"not found\".  \n\n---\n\nVrai : L'option « Obtenir l'image de la signature » affichera l'image de la signature. Faux : Il n'est pas nécessaire de sélectionner l'option « Obtenir l'image de la signature » puisque le système indiquera qu'aucune image n'est trouvée.",
+            "type": "boolean"
+          },
+          "suppressSignature": {
+            "description": "Indicates whether a signature image collected by Canada Post for domestic parcels has been requested to be suppressed for viewing by the recipient of a parcel.  \n\n---\n\nIndique si le destinataire du colis a demandé de supprimer l'image de sa signature recueillie par Postes Canada pour les colis du régime intérieur afin qu'elle ne puisse pas être visualisée par d'autres.",
+            "type": "boolean"
+          },
+          "deliveryOptions": {
+            "description": "The set of delivery options requested for this parcel.\n\n---\n\nSérie d'options de livraison demandées pour ce colis.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "deliveryOption": {
+                  "description": "The code representing the delivery option.\n\n---\n\nLa chaîne représente l'option de livraison.",
+                  "type": "string"
+                },
+                "deliveryOptionDescription": {
+                  "description": "The description of the delivery option.\n\n---\n\nDescription de l'option de livraison.",
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["deliveryOption", "deliveryOptionDescription"]
+            }
+          },
+          "codRemitInfo": {
+            "description": "Information associating a COD parcel with the remittance tracking event or vice versa.\n\n---\n\nRenseignements associant un colis CR à une activité de repérage du paiement ou vice versa.",
+            "type": "object",
+            "properties": {
+              "pin": {
+                "description": "This instance of the PIN specifies the PIN of the COD remittance or the original parcel depending on the value of type.\n\n---\n\nDans ce cas, il s'agit du NIP d'un paiement CR ou du colis initial selon la valeur du type.",
+                "type": "string"
+              },
+              "type": {
+                "description": "Has the value COD_PIN or REMIT_PIN and indicates what PIN is contained in the PIN value immediately above.\n\n---\n\nValeur de « COD_PIN » ou de « REMIT_PIN ». Il indique le NIP correspondant à la valeur susmentionnée.",
+                "enum": ["COD_PIN", "REMIT_PIN"]
+              }
+            },
+            "additionalProperties": false,
+            "required": ["pin", "type"]
+          },
+          "significantEvents": {
+            "description": "The list of events associated with this parcel.\n\n---\n\nDétails du suivi (Dnc)La liste des événements associés à ce colis.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "eventIdentifier": {
+                  "description": "Event identifier used to identify event types.\n\n---\n\nListe d'activités associées au colis.",
+                  "type": "string"
+                },
+                "eventDate": {
+                  "description": "Date of a tracking event.\n\n---\n\nDate de l'activité de repérage.",
+                  "type": "string",
+                  "format": "date"
+                },
+                "eventTime": {
+                  "description": "Time of a tracking event (hh:mm:ss).\n\n---\n\nHeure de l'activité de repérage (hh:mm:ss).",
+                  "type": "string"
+                },
+                "eventTimeZone": {
+                  "description": "Time zone associated with an event. May not be populated for international tracking events.\n\n---\n\nFuseau horaire associé à l'activité. Il pourrait ne pas être défini pour les activités de repérage à l'échelle internationale.",
+                  "type": "string"
+                },
+                "eventDescription": {
+                  "description": "A brief description of the event.\n\n---\n\nBrève description de l'activité.",
+                  "type": "string"
+                },
+                "eventSite": {
+                  "description": "Site information provided by the parcel handler.\n\n---\n\nRenseignements sur l'emplacement fournis par le préposé au service de colis.",
+                  "type": "string"
+                },
+                "eventProvince": {
+                  "description": "For domestic events, this contains the province that the event occurred in.\n\n---\n\nPour les activités du régime intérieur, il contient la province où l'activité a eu lieu.",
+                  "type": "string"
+                },
+                "eventRetailLocationId": {
+                  "description": "Contains the office id where a parcel is being/was retained.\n\n---\n\nContient l'office-id lorsqu'un colis est retenu ou qu'il a été retenu.",
+                  "type": "string"
+                },
+                "eventRetailName": {
+                  "description": "Retail name of the location where a parcel is/was held.\n\n---\n\nNom du comptoir postal où le colis est retenu.",
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": ["eventDate", "eventTime"]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "pin",
+          "activeExists",
+          "archiveExists",
+          "signatureImageExists",
+          "suppressSignature"
+        ]
+      },
+      "messages": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Type of error.\n\n---\n\nType d'erreur."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Detailed description of type of error.\n\n---\n\nDescription détaillée du type d'erreur."
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors.\n\n---\n\nListe des erreurs.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errorCode": {
+                  "type": "string",
+                  "description": "Error code related to error.\n\n---\n\nCode d'erreur lié à l'erreur."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Detailed message for the error that occured.\n\n---\n\nMessage détaillé concernant l'erreur survenue."
+                }
+              },
+              "required": ["message", "errorCode"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["title", "detail", "errors"],
+        "additionalProperties": false,
+        "example": {
+          "title": "Validation failed",
+          "detail": "Errors occurred while processing the request.",
+          "errors": [
+            {
+              "errorCode": "002",
+              "message": "Duplicate Pin"
+            }
+          ]
+        }
+      },
+      "unauthorizedError": {
+        "type": "object",
+        "properties": {
+          "httpCode": {
+            "type": "string",
+            "description": "Code associated with the unauthorized error.\n  ---\n\nCode associé à l'erreur d'autorisation."
+          },
+          "httpMessage": {
+            "type": "string",
+            "description": "Error message.\n  ---\n\nmessage d'erreur."
+          },
+          "moreInformation": {
+            "type": "string",
+            "description": "Detailed error message.\n  ---\n\nMessage d'erreur détaillé."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "type": "oauth2",
+        "x-ibm-oauth-provider": "cpc-api-native-oauth-provider",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token",
+            "scopes": {
+              "merchant": "default description",
+              "platform": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ibm-configuration": {
+    "cors": {
+      "enabled": true
+    },
+    "type": "rest",
+    "phase": "realized",
+    "enforced": true,
+    "testable": true,
+    "oauth-servers": {
+      "Oauth2": {
+        "clientCredentials": {
+          "tokenUrls": [
+            "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token"
+          ],
+          "authorizationUrls": [],
+          "refreshUrls": []
+        }
+      }
+    }
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/tracking/v1"
+    }
+  ],
+  "security": [
+    {
+      "Oauth2": ["merchant"]
+    }
+  ]
+}

@@ -1,0 +1,381 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ServiceInformation",
+    "description": "ServiceInformation",
+    "version": "1.0.0",
+    "x-ibm-languages": {
+      "title": {
+        "fr": "Renseignements sur le service"
+      },
+      "description": {
+        "fr": "Renseignements sur le service"
+      }
+    },
+    "x-ibm-name": "service-info-service",
+    "x-pathalias": "service-info-api-1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/serviceinfo/v1"
+    }
+  ],
+  "paths": {
+    "/shipments-service": {
+      "get": {
+        "tags": ["service info"],
+        "summary": "Get Service Info",
+        "description": "Retrieves and displays informational messages to ecommerce platform customers informing them about upcoming outages to Canada Post web services.",
+        "operationId": "serviceInfo",
+        "x-ibm-languages": {
+          "summary": {
+            "fr": "Obtenir des renseignements sur le service"
+          },
+          "description": {
+            "fr": "Récupère et affiche des messages d'information à l'intention de la clientèle de la plateforme de cybercommerce pour les informer des pannes à venir des services Web de Postes Canada."
+          }
+        },
+        "parameters": [
+          {
+            "name": "message-type",
+            "in": "query",
+            "required": true,
+            "description": "Type of message. Always SO (scheduled outage).",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Type de message Toujours « SO » (interruption planifiée)."
+              }
+            },
+            "schema": {
+              "type": "string",
+              "enum": ["SO"]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/language"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The 200 (OK) status code indicates that the request has succeeded. The response payload is returned.",
+            "x-ibm-languages": {
+              "description": {
+                "fr": "Le code d’état 200 (OK) indique que la demande a été traitée avec succès. La charge utile de réponse est retournée."
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/service-info"
+                },
+                "examples": {
+                  "English": {
+                    "value": [
+                      {
+                        "messageType": "SO",
+                        "messageText": "Please note that we will be performing scheduled maintenance from Saturday, Oct. 12 at 9 p.m. to Sunday, Oct. 13 at 4 a.m. EDT. During this time, Canada Post web services will not be available.",
+                        "fromDatetime": "2020-02-15T17:17:00.000Z",
+                        "toDatetime": "2020-02-15T17:47:00.000Z"
+                      }
+                    ]
+                  },
+                  "Français": {
+                    "value": [
+                      {
+                        "messageType": "SO",
+                        "messageText": "Veuillez noter que nous effectuerons un entretien planifié du samedi 12 octobre, à 21 h, au dimanche 13 octobre, à 16 h (HAE). Durant ce temps, les services Web de Postes Canada ne seront pas accessibles.",
+                        "fromDatetime": "2020-02-15T17:17:00.000Z",
+                        "toDatetime": "2020-02-15T17:47:00.000Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400-9182"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          },
+          "503": {
+            "$ref": "#/components/responses/503"
+          },
+          "504": {
+            "$ref": "#/components/responses/504"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "description": "Indicates your language preference for receiving error messages.\n\n- en-CA = English\n- fr-CA = French",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Indique votre langue de préférence pour recevoir les messages d'erreur.\n- en-CA = Anglais - fr-CA = Français"
+          }
+        },
+        "schema": {
+          "type": "string",
+          "enum": ["en-CA", "fr-CA"],
+          "example": "en-CA",
+          "default": "en-CA"
+        }
+      }
+    },
+    "responses": {
+      "401": {
+        "description": "The 401 (Unauthorized) status code indicates that the server understood the request but refuses to fulfill it.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 401 (Non autorisé) indique que le serveur a compris la requête mais refuse de la satisfaire."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorizedError"
+            },
+            "example": [
+              {
+                "httpCode": 401,
+                "httpMessage": "Unauthorized",
+                "moreInformation": "Cannot pass the security checks that are required by the target API or operation, Enable debug headers for more details."
+              }
+            ]
+          }
+        }
+      },
+      "404": {
+        "description": "The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 404 (Introuvable) indique que le serveur d'origine n'a pas trouvé de représentation actuelle pour la ressource cible ou ne souhaite pas divulguer son existence."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "The 500 (Internal Server Error) status code indicates that the server encountered an unexpected condition that prevented it from fulfilling the request. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 500 (Erreur interne du serveur) indique que le serveur a rencontré une condition inattendue l'empêchant de traiter la requête. Transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "503": {
+        "description": "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay. Passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 503 (Service indisponible) indique que le serveur est actuellement indisponible en raison d'une surcharge temporaire ou d'une maintenance planifiée, qui devrait être résolue après un certain délai. Message transmis par le serveur d'arrière-plan."
+          }
+        }
+      },
+      "504": {
+        "description": "The 504 (Gateway Timeout) status code indicates that the server, while acting as a gateway or proxy, did not receive a timely response from an upstream server it needed to access in order to complete the request. May be passed through from backend.",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d'état 504 (Délai d'attente de la passerelle) indique que le serveur, agissant comme passerelle ou proxy, n'a pas reçu de réponse dans un délai raisonnable d'un serveur en amont auquel il devait accéder pour traiter la requête. Ce code peut provenir du serveur principal.    "
+          }
+        }
+      },
+      "400-9182": {
+        "description": "The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (for example, malformed request syntax). There will be diagnostic message text in the preferred language (English or French).",
+        "x-ibm-languages": {
+          "description": {
+            "fr": "Le code d’état 400 (Mauvaise demande) indique que le serveur ne peut pas ou ne veut pas traiter la demande en raison d’une erreur de la clientèle (p. ex., syntaxe de demande mal formée). Il y aura un message de diagnostic dans la langue de préférence (français ou anglais)."
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/messages"
+            },
+            "examples": {
+              "English": {
+                "value": {
+                  "title": "Validation failed",
+                  "detail": "Errors occurred while processing the request.",
+                  "errors": [
+                    {
+                      "errorCode": "9182",
+                      "message": "The Message Type is invalid."
+                    }
+                  ]
+                }
+              },
+              "Français": {
+                "value": {
+                  "title": "Validation échouée",
+                  "detail": "Une erreur est survenue lors du traitement de la demande.",
+                  "errors": [
+                    {
+                      "errorCode": "9182",
+                      "message": "Le type de message est invalide."
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "service-info": {
+        "description": "Service info messages\n\n---\n\nmessages d'informations sur le service",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "messageType": {
+              "description": "Type of message. Always SO (scheduled outage).\n\n---\n\nType de message Toujours « SO » (interruption planifiée)",
+              "type": "string",
+              "enum": ["SO"]
+            },
+            "messageText": {
+              "description": "Text of the message in the language you specified in the header.\n\n---\n\nTexte du message dans la langue indiquée dans l'en-tête",
+              "type": "string"
+            },
+            "fromDatetime": {
+              "description": "Start date and time of the outage in dateTime format (2013-06-07T21:00:00-05:00).\n\nNote: The message will be returned ahead of this time for advance notice.\n\n---\n\nDate et heure de début de l'interruption en format dateHeure (2013-06-07T21:00:00-05:00).\n\nNota : Le message sera envoyé à l'avance aux fins d'avertissement précoce.",
+              "type": "string",
+              "format": "date-time"
+            },
+            "toDatetime": {
+              "description": "The expected end date and time for the scheduled outage in dateTime format (2013-06-08T03:00:00-05:00).\n\nNote: The message will continue to be returned beyond this time in the event that the outage extends beyond the expected end time.\n\n---\n\nLa date et l'heure de fin prévues pour l'interruption planifiée en format dateHeure (2013-06-08T03:00:00-05:00).\n\nNota : Le message continuera d'être renvoyé après l'envoi initial au cas où l'interruption s'étendrait au-delà du moment de fin prévu.",
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "additionalProperties": false,
+          "required": ["messageType", "messageText", "fromDatetime", "toDatetime"]
+        }
+      },
+      "messages": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Type of error.\n\n---\n\nType d'erreur."
+          },
+          "detail": {
+            "type": "string",
+            "example": "Errors occurred while processing the request.",
+            "description": "Detailed description of type of error.\n\n---\n\nDescription détaillée du type d'erreur."
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of errors.\n\n---\n\nListe des erreurs.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errorCode": {
+                  "type": "string",
+                  "description": "Error code related to error.\n\n---\n\nCode d'erreur lié à l'erreur."
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Detailed message for the error that occured.\n\n---\n\nMessage détaillé concernant l'erreur survenue."
+                }
+              },
+              "required": ["message", "errorCode"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["title", "detail", "errors"],
+        "additionalProperties": false,
+        "example": {
+          "title": "Validation failed",
+          "detail": "Errors occurred while processing the request.",
+          "errors": [
+            {
+              "errorCode": "002",
+              "message": "Duplicate Pin."
+            }
+          ]
+        }
+      },
+      "unauthorizedError": {
+        "type": "object",
+        "properties": {
+          "httpCode": {
+            "type": "string",
+            "description": "Code associated with the unauthorized error.\n  ---\n\nCode associé à l'erreur d'autorisation."
+          },
+          "httpMessage": {
+            "type": "string",
+            "description": "Error message.\n  ---\n\nmessage d'erreur."
+          },
+          "moreInformation": {
+            "type": "string",
+            "description": "Detailed error message.\n  ---\n\nMessage d'erreur détaillé."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "type": "oauth2",
+        "x-ibm-oauth-provider": "cpc-api-native-oauth-provider",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token",
+            "scopes": {
+              "merchant": "default description",
+              "platform": ""
+            }
+          }
+        }
+      }
+    }
+  },
+  "x-ibm-configuration": {
+    "cors": {
+      "enabled": true
+    },
+    "type": "rest",
+    "phase": "realized",
+    "enforced": true,
+    "testable": true,
+    "oauth-servers": {
+      "Oauth2": {
+        "clientCredentials": {
+          "tokenUrls": [
+            "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/cpc-api-native-oauth-provider/oauth2/token"
+          ],
+          "authorizationUrls": [],
+          "refreshUrls": []
+        }
+      }
+    }
+  },
+  "x-ibm-endpoints": [
+    {
+      "url": "https://api.canadapost-postescanada.ca/prod/devportal-portaildesdeveloppeurs/serviceinfo/v1"
+    }
+  ],
+  "security": [
+    {
+      "Oauth2": ["merchant"]
+    }
+  ]
+}
