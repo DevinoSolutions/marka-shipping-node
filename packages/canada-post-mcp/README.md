@@ -109,9 +109,9 @@ Read tools (always registered):
 | `canadapost_shipment_price`             | What a shipment cost                                            |
 | `canadapost_shipment_receipt`           | Payment receipt of a shipment (never a card number)             |
 | `canadapost_shipment_label`             | Saves the label to a file and returns the path, never the bytes |
-| `canadapost_shipments_list`             | Find shipments by request id, PIN, group, manifest or date      |
+| `canadapost_shipments_list`             | Find shipments by request id, PIN, group or manifest            |
 | `canadapost_groups_list`                | Shipment groups                                                 |
-| `canadapost_manifests_list`             | Manifests of a date range                                       |
+| `canadapost_manifests_list`             | Manifests from a start date (`from` required, `to` optional)    |
 | `canadapost_manifest_get`               | One manifest, optionally with its details                       |
 | `canadapost_customer_payment_readiness` | Can the account pay for labels: a summary, never card data      |
 | `canadapost_post_offices_find`          | Post offices near a postal code                                 |

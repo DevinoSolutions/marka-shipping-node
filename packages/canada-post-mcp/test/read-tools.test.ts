@@ -254,6 +254,10 @@ describe("shipment lookups", () => {
     const none = await h.call("canadapost_shipments_list", {});
     expect(none.isError).toBe(true);
     expect(none.data.errorCode).toBe("validation");
+    // date and limit only narrow another filter (production errorCode 9156)
+    const dateOnly = await h.call("canadapost_shipments_list", { date: "2026-11-15", limit: 5 });
+    expect(dateOnly.isError).toBe(true);
+    expect(dateOnly.data.errorCode).toBe("validation");
   });
 
   it("lists groups and manifests, and gets a manifest with details", async () => {
@@ -284,6 +288,9 @@ describe("shipment lookups", () => {
       to: "2026-11-15",
     });
     expect(manifests.isError).toBe(false);
+    // `from` is required (production errorCode 9105): rejected before any request.
+    const noFrom = await h.call("canadapost_manifests_list", { to: "2026-11-15" });
+    expect(noFrom.isError).toBe(true);
     const one = await h.call("canadapost_manifest_get", {
       manifestId: "PO00000001",
       details: true,
