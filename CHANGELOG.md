@@ -60,6 +60,23 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 
 ### Fixed
 
+- REST client, matched to the Production app (read-only probe, 2026-11-16; contracts doc section
+  10.8; the Test app only returns static stubs):
+  - `rating.getPrices` with `quoteType: "counter"` sends neither `customerNumber` nor
+    `contractId` (Production answers HTTP 400, errorCode 9114, otherwise); passing either
+    explicitly with a counter quote throws `CanadaPostValidationError` before any request.
+    Commercial quotes are unchanged.
+  - `shipments.getGroups` returns `[]` when Production answers HTTP 200 with a `null` body.
+  - `shipments.list` requires one of `requestId`, `trackingPin`, `groupId`, `manifestId` or
+    `noManifest`; `date` and `limit` only narrow another filter (Production answers HTTP 400,
+    errorCode 9156, to `date` alone), so a call with only those throws `CanadaPostValidationError`.
+  - `manifests.list` now requires `from` (Production answers HTTP 400, errorCode 9105, without it);
+    `to` stays optional. **Breaking for callers of `manifests.list()` / `list({ to })`**, which
+    could never succeed in Production.
+  - `pickup.list`: documented only. Production answers HTTP 400 for an account with no open
+    pickups (**ASSUMPTION**, cause unconfirmed); it still surfaces as `CanadaPostApiError`.
+- MCP server (`@joinmarka/canada-post-mcp`, unreleased): `canadapost_manifests_list` requires
+  `from`; `canadapost_shipments_list` documents that `date` and `limit` need another filter.
 - `ncShipments.create` no longer sends `country-code` in the sender address: the ncshipment-v4 schema types the sender as a domestic address, and the sandbox rejected it with HTTP 400. Every address type was re-checked against the XSDs (see the contracts doc).
 
 ### Changed
